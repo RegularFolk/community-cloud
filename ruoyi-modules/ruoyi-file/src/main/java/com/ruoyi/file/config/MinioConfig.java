@@ -20,6 +20,11 @@ public class MinioConfig
     private String url;
 
     /**
+     * 访问地址
+     */
+    private String accessUrl;
+
+    /**
      * 用户名
      */
     private String accessKey;
@@ -78,5 +83,13 @@ public class MinioConfig
     public MinioClient getMinioClient()
     {
         return MinioClient.builder().endpoint(url).credentials(accessKey, secretKey).build();
+    }
+
+    public String getAccessUrl() {
+        return accessUrl;
+    }
+
+    public void setAccessUrl(String accessUrl) {
+        this.accessUrl = accessUrl;
     }
 }
