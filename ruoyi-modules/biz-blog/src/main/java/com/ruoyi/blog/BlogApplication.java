@@ -15,7 +15,7 @@ public class BlogApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(BlogApplication.class, args);
-        System.out.println("(♥◠‿◠)ﾉﾞ  博客服务模块启动成功   ლ(´ڡ`ლ)ﾞ  \n");
+        System.out.println("(♥◠‿◠)ﾉﾞ  博客服务模块启动成功   ლ(´ڡ`ლ)ﾞ");
     }
 
 }

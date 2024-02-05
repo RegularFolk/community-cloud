@@ -9,6 +9,8 @@ import com.ruoyi.system.api.RemoteUserService;
 import com.ruoyi.system.api.domain.SysUser;
 import com.ruoyi.system.api.model.LoginUser;
 
+import java.util.List;
+
 /**
  * 用户服务降级处理
  * 
@@ -36,6 +38,13 @@ public class RemoteUserFallbackFactory implements FallbackFactory<RemoteUserServ
             {
                 return R.fail("注册用户失败:" + throwable.getMessage());
             }
+
+            @Override
+            public R<List<SysUser>> getInfoByIds(List<Long> ids, String source) {
+                return R.fail("获取用户列表失败:" + throwable.getMessage());
+            }
+
+
         };
     }
 }

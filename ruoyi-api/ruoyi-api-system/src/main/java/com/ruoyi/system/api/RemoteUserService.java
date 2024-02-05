@@ -13,6 +13,8 @@ import com.ruoyi.system.api.domain.SysUser;
 import com.ruoyi.system.api.factory.RemoteUserFallbackFactory;
 import com.ruoyi.system.api.model.LoginUser;
 
+import java.util.List;
+
 /**
  * 用户服务
  * 
@@ -40,4 +42,13 @@ public interface RemoteUserService
      */
     @PostMapping("/user/register")
     public R<Boolean> registerUserInfo(@RequestBody SysUser sysUser, @RequestHeader(SecurityConstants.FROM_SOURCE) String source);
+
+    /**
+     * 批量获取用户信息
+     * @param ids id集合
+     * @param source 请求来源
+     * @return 结果
+     */
+    @PostMapping("/user/getInfoByIds")
+    public R<List<SysUser>> getInfoByIds(@RequestBody List<Long> ids, @RequestHeader(SecurityConstants.FROM_SOURCE) String source);
 }

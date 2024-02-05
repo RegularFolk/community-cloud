@@ -108,6 +108,18 @@ public class SysUserController extends BaseController
     }
 
     /**
+     * 内部接口，查询用户信息
+     * @param ids id集合
+     * @return 结果
+     */
+    @InnerAuth
+    @PostMapping("/getInfoByIds")
+    public R<List<SysUser>> getInfoByIds(@RequestBody List<Long> ids) {
+        List<SysUser> userList = userService.selectUserByIds(ids);
+        return R.ok(userList);
+    }
+
+    /**
      * 获取当前用户信息
      */
     @InnerAuth

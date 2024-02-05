@@ -2,7 +2,7 @@
   <div style="background-color: #EEF1F6FF">
     <div class="fixed-box-left">
       <el-menu default-active="1">
-        <el-menu-item index="1">
+        <el-menu-item index="1" @click="getTestBlogList()">
           <i class="el-icon-message"/>
           <span slot="title">猜你想看</span>
         </el-menu-item>
@@ -35,21 +35,21 @@
 
     <div class="recommended-post">
       <el-main>
-        <el-card v-for="blog in this.testBlogs" :key="blog.id" shadow="hover" style="margin-bottom: 20px">
+        <el-card v-for="blog in this.blogs" :key="blog.blogId" shadow="hover" style="margin-bottom: 20px">
           <div slot="header" class="clearfix">
             <div style="width: 60px; float: left">
-              <el-avatar :size="50" src="http://121.43.39.16:8082/ruoyi-test/2024/02/02/2b_20240202165949A006.jpg"/>
+              <el-avatar :size="50" :src="blog.avatar"/>
             </div>
             <div style="float: left;margin-left: 10px">
-              <div>{{ blog.username }}</div>
-              <div style="margin-top: 10px">{{ blog.postTime }}</div>
+              <div>{{ blog.senderName }}</div>
+              <div style="margin-top: 10px">{{ blog.releaseTime }}</div>
             </div>
             <el-button style="float: right; padding: 10px" type="primary" @click="testMethod()">关注</el-button>
           </div>
-          <div class="card-content">{{ blog.content }}</div>
+          <div class="card-content">{{ blog.preview }}</div>
           <div class="card-button">
-            <el-badge :value="666" type="primary">
-              <el-button icon="el-icon-search" type="primary" @click="showPost(blog.id)">查看</el-button>
+            <el-badge :value="blog.viewCnt" type="primary">
+              <el-button icon="el-icon-search" type="primary" @click="showPost(blog.blogId)">查看</el-button>
             </el-badge>
           </div>
           <!--          <div class="card-button">
@@ -58,7 +58,7 @@
                       </el-badge>
                     </div>-->
           <div class="card-button" @click="testMethod()">
-            <el-badge :value="666" type="danger">
+            <el-badge :value="blog.likeCnt" type="danger">
               <el-button icon="el-icon-thumb" type="danger">点赞</el-button>
             </el-badge>
           </div>
@@ -72,24 +72,25 @@
       <!--   标题下灰色副标题区域   -->
       <div class="post-sub-title">
         <div class="post-sub-title-unit">
-          <i class="el-icon-user" style="padding-left: 10px"> {{ this.showUser.username }}</i>
+          <i class="el-icon-user" style="padding-left: 10px"> {{ this.showBlog.senderName }}</i>
         </div>
-        <div class="post-sub-title-unit"><i class="el-icon-timer"> 于 {{ this.showUser.postTime }} 发布</i></div>
-        <div class="post-sub-title-unit"><i class="el-icon-view"> 浏览量:1010</i></div>
-        <div class="post-sub-title-unit"><i class="el-icon-thumb"> 点赞:999</i></div>
-        <div class="post-sub-title-unit"><i class="el-icon-chat-line-round"> 评论数:699</i></div>
+        <div class="post-sub-title-unit"><i class="el-icon-timer"> 于 {{ this.showBlog.releaseTime }} 发布</i></div>
+        <div class="post-sub-title-unit"><i class="el-icon-view"> 浏览量:{{this.showBlog.viewCnt}}</i></div>
+        <div class="post-sub-title-unit"><i class="el-icon-thumb"> 点赞:{{ this.showBlog.likeCnt }}</i></div>
+        <div class="post-sub-title-unit"><i class="el-icon-chat-line-round"> 评论数:{{this.showBlog.commentCnt}}</i></div>
       </div>
 
       <!--   对话框内容部分   -->
       <div class="comment-container">
 
+        <!-- 测试代码，暂时使用preview -->
         <div style="padding-bottom: 30px">
-          {{ this.showUser.content }}
+          {{ this.showBlog.preview}}
         </div>
 
         <!--   评论标题     -->
         <div style="width: 100%;border-top: 1px solid #EEF1F6FF">
-          <h1>评论 {{ this.testComment.cnt }}</h1>
+          <h1>评论 {{ this.showBlog.commentCnt }}</h1>
         </div>
 
         <!--   评论输入区域   -->
@@ -205,17 +206,22 @@
 <script>
 
 
+import {getTestBlogs} from "@/api/biz/blog";
+
 export default {
   name: "blog",
   data() {
     return {
-      tableData: Array(20).fill({
-        date: '2016-05-02',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1518 弄'
-      }),
+      blogs: [],
       testBlogs: [
         {
+          blogId:'',
+          likeCnt: 0,
+          preview: '',
+          releaseTime: '',
+          senderName: '',
+          viewCnt: 0,
+          avatar: '',
           id: 1,
           username: 'name1',
           postTime: '2024年2月2日20:41:37',
@@ -357,7 +363,7 @@ export default {
         ]
       },
       showPostDetail: false,
-      showUser: {},
+      showBlog: {},
       commentInput: '',
       showCommentReplyId: '',
       commentReplyHolder: '评论的回复:',
@@ -365,6 +371,7 @@ export default {
     }
   },
   created() {
+    this.getTestBlogList()
   },
   methods: {
     replySubComment(pCommentId, subCommentId, isParent) {
@@ -384,14 +391,22 @@ export default {
         type: 'success'
       })
     },
-    showPost(userId) {
-      this.showUser = this.testBlogs.find(u => u.id === userId)
+    showPost(blogId) {
+      this.showBlog = this.blogs.find(u => u.blogId === blogId)
       this.showPostDetail = true
     },
     handleClose() {
       this.showPostDetail = false
       this.commentInput = ''
       this.showCommentReplyId = ''
+    },
+
+    getTestBlogList() {
+      getTestBlogs().then(resp => {
+        console.log("resp:", resp)
+        this.blogs = resp.data
+      })
+
     }
 
   }
