@@ -8,3 +8,11 @@ export function getTestBlogs() {
     method: 'get'
   })
 }
+
+// 获取评论
+export function getComment(blogId, start) {
+  return request({
+    url: '/blog/blogController/getComment/' + blogId + '/' + start,
+    method: 'get'
+  })
+}

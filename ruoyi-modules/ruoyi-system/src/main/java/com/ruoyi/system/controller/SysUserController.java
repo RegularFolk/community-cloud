@@ -115,6 +115,7 @@ public class SysUserController extends BaseController
     @InnerAuth
     @PostMapping("/getInfoByIds")
     public R<List<SysUser>> getInfoByIds(@RequestBody List<Long> ids) {
+        //TODO 没有走缓存
         List<SysUser> userList = userService.selectUserByIds(ids);
         return R.ok(userList);
     }

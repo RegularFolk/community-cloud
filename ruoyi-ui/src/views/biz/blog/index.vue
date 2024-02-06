@@ -2,7 +2,7 @@
   <div style="background-color: #EEF1F6FF">
     <div class="fixed-box-left">
       <el-menu default-active="1">
-        <el-menu-item index="1" @click="getTestBlogList()">
+        <el-menu-item index="1" @click="testInterface()">
           <i class="el-icon-message"/>
           <span slot="title">猜你想看</span>
         </el-menu-item>
@@ -68,6 +68,7 @@
 
 
     <el-dialog :before-close="handleClose" :close-on-click-modal="false" :visible.sync="this.showPostDetail"
+               v-if="this.showPostDetail"
                title="推文详情">
       <!--   标题下灰色副标题区域   -->
       <div class="post-sub-title">
@@ -75,9 +76,10 @@
           <i class="el-icon-user" style="padding-left: 10px"> {{ this.showBlog.senderName }}</i>
         </div>
         <div class="post-sub-title-unit"><i class="el-icon-timer"> 于 {{ this.showBlog.releaseTime }} 发布</i></div>
-        <div class="post-sub-title-unit"><i class="el-icon-view"> 浏览量:{{this.showBlog.viewCnt}}</i></div>
+        <div class="post-sub-title-unit"><i class="el-icon-view"> 浏览量:{{ this.showBlog.viewCnt }}</i></div>
         <div class="post-sub-title-unit"><i class="el-icon-thumb"> 点赞:{{ this.showBlog.likeCnt }}</i></div>
-        <div class="post-sub-title-unit"><i class="el-icon-chat-line-round"> 评论数:{{this.showBlog.commentCnt}}</i></div>
+        <div class="post-sub-title-unit"><i class="el-icon-chat-line-round"> 评论数:{{ this.showBlog.commentCnt }}</i>
+        </div>
       </div>
 
       <!--   对话框内容部分   -->
@@ -192,6 +194,14 @@
           </div>
 
 
+          <!-- 加载更多评论按钮,三种状态:加载更多，加载中，已经到底 -->
+          <div>
+            <el-button plain style="margin-left: 45%;margin-top: 15px" type="primary" @click="testMethod('加载更多')">加载更多
+            </el-button>
+            <el-button :loading="true" style="margin-left: 45%;margin-top: 15px" type="primary">加载中</el-button>
+            <h3 style="margin-left: 45%">已经到底啦~~~~~</h3>
+          </div>
+
         </div>
 
 
@@ -206,13 +216,39 @@
 <script>
 
 
-import {getTestBlogs} from "@/api/biz/blog";
+import {getComment, getTestBlogs} from "@/api/biz/blog";
 
 export default {
   name: "blog",
   data() {
     return {
-      blogs: [],
+      blogs: [
+        {
+          authorFollowed: '',
+          avatar: '',
+          blogId: '',
+          commentCnt: '',
+          likeCnt: '',
+          preview: '',
+          releaseTime: '',
+          senderName: '',
+          viewCnt: ''
+        }
+      ],
+      blogComment:[
+        {
+          content: '',
+          id: '',
+          likeCnt: '',
+          parentId: '',
+          receiverName: '',
+          sendTime: '',
+          senderAvatar: '',
+          senderName: '',
+          subComments: []
+        }
+      ],
+
       testBlogs: [
         {
           blogId:'',
@@ -362,6 +398,7 @@ export default {
           },
         ]
       },
+
       showPostDetail: false,
       showBlog: {},
       commentInput: '',
@@ -385,9 +422,9 @@ export default {
       }
       this.commentReplyHolder = '回复 @' + commentName + ':'
     },
-    testMethod() {
+    testMethod(msg) {
       this.$message({
-        message: '获得响应！',
+        message: '获得响应！\n' + msg,
         type: 'success'
       })
     },
@@ -407,6 +444,18 @@ export default {
         this.blogs = resp.data
       })
 
+    },
+
+    getBlogComment(blogId, start) {
+      getComment(blogId, start).then(resp => {
+        this.blogComment = resp.data
+      })
+    },
+
+    testInterface() {
+      getComment(1, 0).then(resp => {
+        console.log('getComment:', resp)
+      })
     }
 
   }
