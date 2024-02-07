@@ -3,6 +3,7 @@ package com.ruoyi.blog.service.impl;
 import com.ruoyi.blog.config.BlogConstants;
 import com.ruoyi.blog.domain.Blog;
 import com.ruoyi.blog.domain.BlogComment;
+import com.ruoyi.blog.domain.dto.PostCommentDto;
 import com.ruoyi.blog.domain.vo.BlogCommentVo;
 import com.ruoyi.blog.domain.vo.IndexBlogVo;
 import com.ruoyi.blog.mapper.BlogCommentMapper;
@@ -69,18 +70,23 @@ public class BlogServiceImpl implements BlogService {
     }
 
     @Override
-    public BlogCommentVo getComments(Long blogId, Long start) {
+    public BlogCommentVo getComments(Long blogId, Long start, Boolean refreshFlag) {
         int parentCnt = blogCommentMapper.getParentCommentCnt(blogId);
         BlogCommentVo blogCommentVo = new BlogCommentVo();
 
-        if (parentCnt < start) {
+        if (parentCnt == 0 || (!refreshFlag && parentCnt < start)) {
             blogCommentVo.setHasMore(false);
             blogCommentVo.setCommentCnt(0L);
             blogCommentVo.setComments(new ArrayList<>());
             return blogCommentVo;
         }
 
-        List<BlogComment> parentCommentList = blogCommentMapper.getParentCommentPartly(blogId, start, BlogConstants.COMMENT_STEP);
+        List<BlogComment> parentCommentList;
+        if (refreshFlag == null || !refreshFlag) {
+            parentCommentList = blogCommentMapper.getParentCommentPartly(blogId, start, (long) BlogConstants.COMMENT_STEP);
+        } else {
+            parentCommentList = blogCommentMapper.getParentCommentPartly(blogId, 0L, start + BlogConstants.COMMENT_STEP);
+        }
         List<Long> parentCommentIds = parentCommentList.stream().map(BlogComment::getId).collect(Collectors.toList());
         List<BlogComment> subCommentList = blogCommentMapper.getSubComment(blogId, parentCommentIds);
         Map<Long, List<BlogComment>> subCommentMap = subCommentList.stream().collect(Collectors.groupingBy(BlogComment::getParentId));
@@ -112,17 +118,19 @@ public class BlogServiceImpl implements BlogService {
 
             // 获取 subCommentUnit
             List<BlogComment> subComments = subCommentMap.get(pc.getId());
-            List<BlogCommentVo.CommentUnit> subCommentUnitList = subComments.stream().map(sc -> {
-                BlogCommentVo.CommentUnit subCommentUnit = new BlogCommentVo.CommentUnit();
+            if (!CollectionUtils.isEmpty(subComments)) {
+                List<BlogCommentVo.CommentUnit> subCommentUnitList = subComments.stream().map(sc -> {
+                    BlogCommentVo.CommentUnit subCommentUnit = new BlogCommentVo.CommentUnit();
 
-                SysUser subSender = userInfoMap.get(sc.getSenderId()).get(0);
-                SysUser subReceiver = userInfoMap.get(sc.getReceiverId()).get(0);
-                subCommentUnit.packFromBlogComment(sc, subSender, subReceiver);
+                    SysUser subSender = userInfoMap.get(sc.getSenderId()).get(0);
+                    SysUser subReceiver = userInfoMap.get(sc.getReceiverId()).get(0);
+                    subCommentUnit.packFromBlogComment(sc, subSender, subReceiver);
 
-                return subCommentUnit;
-            }).sorted(Comparator.comparing(BlogCommentVo.CommentUnit::getSendTime)).collect(Collectors.toList());
+                    return subCommentUnit;
+                }).sorted(Comparator.comparing(BlogCommentVo.CommentUnit::getSendTime)).collect(Collectors.toList());
 
-            commentUnit.setSubComments(subCommentUnitList);
+                commentUnit.setSubComments(subCommentUnitList);
+            }
 
             return commentUnit;
         }).sorted(Comparator.comparing(BlogCommentVo.CommentUnit::getSendTime)).collect(Collectors.toList());
@@ -130,5 +138,23 @@ public class BlogServiceImpl implements BlogService {
         blogCommentVo.setComments(parentCommentUnitList);
 
         return blogCommentVo;
+    }
+
+    @Override
+    public boolean postComment(PostCommentDto dto) {
+        BlogComment comment = new BlogComment();
+        comment.setBlogId(dto.getBlogId());
+        comment.setContent(dto.getContent());
+        comment.setSenderId(dto.getSenderId());
+        if (dto.getReceiverId() != null) {
+            comment.setReceiverId(dto.getReceiverId());
+        }
+        if (dto.getParentId() != null) {
+            comment.setParentId(dto.getParentId());
+        }
+
+        int flag = blogCommentMapper.putComment(comment);
+
+        return flag > 0;
     }
 }

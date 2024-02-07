@@ -2,6 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--suppress ALL -->
 <mapper namespace="com.ruoyi.blog.mapper.BlogCommentMapper">
 
     <resultMap id="BlogComment" type="com.ruoyi.blog.domain.BlogComment">
@@ -15,6 +16,21 @@
         <result property="content"      column="content"/>
         <result property="likeCnt"      column="like_cnt"/>
     </resultMap>
+
+
+    <insert id="putComment">
+        insert into blog_comment(
+            blog_id, sender_id,
+            <if test="receiverId != null">receiver_id, </if>
+            <if test="parentId != null">parent_id, </if>
+            content
+        ) values(
+            #{blogId}, #{senderId},
+            <if test="receiverId != null">#{receiverId}, </if>
+            <if test="parentId != null">#{parentId}, </if>
+            #{content}
+        )
+    </insert>
 
     <select id="getParentCommentCnt" resultType="java.lang.Integer">
         select count(id)

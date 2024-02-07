@@ -4,6 +4,7 @@ import com.ruoyi.blog.domain.BlogComment;
 import com.ruoyi.common.core.utils.DateUtils;
 import com.ruoyi.system.api.domain.SysUser;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -14,7 +15,7 @@ public class BlogCommentVo {
     // 父子评论的总数
     private Long commentCnt;
 
-    private Boolean hasMore;
+    private Boolean hasMore = true;
 
     private List<CommentUnit> comments;
 
@@ -35,7 +36,11 @@ public class BlogCommentVo {
 
         private String content;
 
-        private List<CommentUnit> subComments;
+        private Long senderId;
+
+        private Long receiverId;
+
+        private List<CommentUnit> subComments = new ArrayList<>();
 
         public void packFromBlogComment(BlogComment blogComment, SysUser sender, SysUser receiver) {
             this.setId(blogComment.getId());
@@ -46,8 +51,10 @@ public class BlogCommentVo {
             if (sender != null) {
                 this.setSenderAvatar(sender.getAvatar());
                 this.setSenderName(sender.getNickName());
+                this.setSenderId(sender.getUserId());
             }
             if (receiver != null) {
+                this.setReceiverId(receiver.getUserId());
                 this.setReceiverName(receiver.getNickName());
             }
         }
@@ -124,6 +131,22 @@ public class BlogCommentVo {
             this.content = content;
         }
 
+        public Long getSenderId() {
+            return senderId;
+        }
+
+        public void setSenderId(Long senderId) {
+            this.senderId = senderId;
+        }
+
+        public Long getReceiverId() {
+            return receiverId;
+        }
+
+        public void setReceiverId(Long receiverId) {
+            this.receiverId = receiverId;
+        }
+
         @Override
         public String toString() {
             return "CommentUnit{" +
@@ -135,6 +158,8 @@ public class BlogCommentVo {
                     ", sendTime='" + sendTime + '\'' +
                     ", likeCnt=" + likeCnt +
                     ", content='" + content + '\'' +
+                    ", senderId=" + senderId +
+                    ", receiverId=" + receiverId +
                     ", subComments=" + subComments +
                     '}';
         }

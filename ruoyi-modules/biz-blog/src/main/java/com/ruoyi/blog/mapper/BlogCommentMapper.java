@@ -9,9 +9,10 @@ public interface BlogCommentMapper {
 
     int getParentCommentCnt(@Param("blogId") Long blogId);
 
-    List<BlogComment> getParentCommentPartly(@Param("blogId") Long blogId, @Param("start") Long start, @Param("commentStep") Integer commentStep);
+    List<BlogComment> getParentCommentPartly(@Param("blogId") Long blogId, @Param("start") Long start, @Param("commentStep") Long commentStep);
 
     List<BlogComment> getSubComment(@Param("blogId") Long blogId, @Param("parentCommentIds") List<Long> parentCommentIds);
 
 
+    int putComment(BlogComment comment);
 }

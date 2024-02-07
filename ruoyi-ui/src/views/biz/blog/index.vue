@@ -33,7 +33,7 @@
       </el-menu>
     </div>
 
-    <div class="recommended-post">
+    <div v-loading="loadingPost" class="recommended-post" style="width: 100%;height: 100%;z-index: 90">
       <el-main>
         <el-card v-for="blog in this.blogs" :key="blog.blogId" shadow="hover" style="margin-bottom: 20px">
           <div slot="header" class="clearfix">
@@ -52,11 +52,6 @@
               <el-button icon="el-icon-search" type="primary" @click="showPost(blog.blogId)">查看</el-button>
             </el-badge>
           </div>
-          <!--          <div class="card-button">
-                      <el-badge :value="666" type="warning">
-                        <el-button icon="el-icon-edit" type="warning">评论</el-button>
-                      </el-badge>
-                    </div>-->
           <div class="card-button" @click="testMethod()">
             <el-badge :value="blog.likeCnt" type="danger">
               <el-button icon="el-icon-thumb" type="danger">点赞</el-button>
@@ -110,16 +105,16 @@
         </div>
 
         <div style="width: 30%;padding-left: 20%">
-          <el-button round type="primary" @click="testMethod()">回复</el-button>
+          <el-button round type="primary" @click="addComment(null, null)">回复</el-button>
         </div>
 
         <div style="width: 100%">
           <!--   母评论列表     -->
-          <div v-for="pComment in this.testComment.content"
+          <div v-for="pComment in this.blogComments"
                style="display: flex;flex-wrap: wrap;padding-top: 20px;border-bottom: 1px solid #EEF1F6FF">
             <!-- 左部头像框 -->
             <div style="margin-right: 10px">
-              <el-avatar :size="35" src="http://121.43.39.16:8082/ruoyi-test/2024/02/02/2b_20240202165949A006.jpg"/>
+              <el-avatar :size="35" :src="pComment.senderAvatar"/>
             </div>
 
             <!-- 右部框,分为两部分，上部分的回复者、时间信息、点赞按钮等，下部分的回复内容 -->
@@ -128,7 +123,7 @@
                 <div style="margin-right: 10px">{{ pComment.senderName }}</div>
                 <div>{{ pComment.sendTime }}</div>
                 <div class="hover-pointer" style="margin-left: 60%"
-                     @click="replySubComment(pComment.commentId, '',true)">
+                     @click="showSubCommentInput(pComment.id, '',true)">
                   <i class="el-icon-chat-line-square"/>
                   <span style="margin-left: 5px">回复</span>
                 </div>
@@ -143,10 +138,10 @@
             </div>
 
             <!--   每个母评论下的子评论列表       -->
-            <div v-for="subComment in pComment.subContents"
+            <div v-for="subComment in pComment.subComments"
                  style="width: 95%;margin-left: 5%;display: flex;flex-wrap: wrap">
               <div style="margin-right: 10px">
-                <el-avatar :size="35" src="http://121.43.39.16:8082/ruoyi-test/2024/02/02/2b_20240202165949A006.jpg"/>
+                <el-avatar :size="35" :src="subComment.senderAvatar"/>
               </div>
 
               <div style="margin-bottom: 10px;display: flex;flex-wrap: wrap">
@@ -156,7 +151,7 @@
                   <div style="margin-right: 10px">{{ subComment.receiverName }}</div>
                   <div style="margin-right: 10px">{{ subComment.sendTime }}</div>
 
-                  <div class="hover-pointer" @click="replySubComment(pComment.commentId, subComment.commentId, false)">
+                  <div class="hover-pointer" @click="showSubCommentInput(pComment.id, subComment.id, false)">
                     <i class="el-icon-chat-line-square"/>
                     <span style="margin-left: 5px">回复</span>
                   </div>
@@ -173,7 +168,7 @@
             </div>
 
             <!-- 回复评论的输入区域 -->
-            <div v-if="pComment.commentId === showCommentReplyId" style="width: 100%;display: flex;flex-wrap: wrap">
+            <div v-if="showCommentReplyId !== '' && pComment.id === showCommentReplyId" style="width: 100%;display: flex;flex-wrap: wrap">
               <div style="width: 70%">
                 <el-input
                   v-model="commentReplyInput"
@@ -188,18 +183,36 @@
               </div>
 
               <div style="width: 30%;padding-left: 20%">
-                <el-button round type="primary" @click="testMethod()">回复</el-button>
+                <el-button round type="primary" @click="sendComment(pComment.id)">回复</el-button>
               </div>
             </div>
+
           </div>
 
 
           <!-- 加载更多评论按钮,三种状态:加载更多，加载中，已经到底 -->
           <div>
-            <el-button plain style="margin-left: 45%;margin-top: 15px" type="primary" @click="testMethod('加载更多')">加载更多
+            <el-button
+              :loading="true"
+              style="margin-left: 45%; margin-top: 15px"
+              type="primary"
+              v-if="commentStatus === '1'"
+            >
+              加载中
             </el-button>
-            <el-button :loading="true" style="margin-left: 45%;margin-top: 15px" type="primary">加载中</el-button>
-            <h3 style="margin-left: 45%">已经到底啦~~~~~</h3>
+            <el-button
+              v-if="commentStatus === '2'"
+              plain
+              style="margin-left: 45%; margin-top: 15px"
+              type="primary"
+              @click="getBlogComment(showBlog.blogId, commentStart, false)"
+            >
+              加载更多
+            </el-button>
+
+            <h3 style="margin-left: 45%" v-if="commentStatus === '3'">
+              已经到底啦~~~~~
+            </h3>
           </div>
 
         </div>
@@ -216,12 +229,22 @@
 <script>
 
 
-import {getComment, getTestBlogs} from "@/api/biz/blog";
+import {getComment, getTestBlogs, postComment} from "@/api/biz/blog";
+import {getUserProfile} from "@/api/system/user"
 
 export default {
   name: "blog",
   data() {
     return {
+      currentUser:{
+        userId: '',
+        userName: '',
+        nickName: '',
+        email: '',
+        phoneNumber: '',
+        sex: '',
+        avatar: ''
+      },
       blogs: [
         {
           authorFollowed: '',
@@ -235,190 +258,111 @@ export default {
           viewCnt: ''
         }
       ],
-      blogComment:[
-        {
-          content: '',
-          id: '',
-          likeCnt: '',
-          parentId: '',
-          receiverName: '',
-          sendTime: '',
-          senderAvatar: '',
-          senderName: '',
-          subComments: []
-        }
+      commentStatus: '1', // 1：加载中，2：加载更多，3：已经到底
+      commentStart: 0,
+      blogComments: [
+        // {
+        //   content: '',
+        //   id: '',
+        //   likeCnt: '',
+        //   parentId: '',
+        //   receiverName: '',
+        //   sendTime: '',
+        //   senderAvatar: '',
+        //   senderName: '',
+        //   senderId: '',
+        //   receiverId: '',
+        //   subComments: []
+        // }
       ],
-
-      testBlogs: [
-        {
-          blogId:'',
-          likeCnt: 0,
-          preview: '',
-          releaseTime: '',
-          senderName: '',
-          viewCnt: 0,
-          avatar: '',
-          id: 1,
-          username: 'name1',
-          postTime: '2024年2月2日20:41:37',
-          content: 'Tip: 使用 CSS 最大的好处是，如果把 CSS 代码存放到外部样式表中，那么站点会更易于维护。通过编辑单一的文件，就可以改变所有页面的布局。如需学习更多有关 CSS 的知识，请访问我们的CSS 教程。\n' +
-            '\n' +
-            'Tip: 由于创建高级的布局非常耗时，使用模板是一个快速的选项。通过搜索引擎可以找到很多免费的网站模板（您可以使用这些预先构建好的网站布局，并优化它们）。Tip: 使用 CSS 最大的好处是，如果把 CSS 代码存放到外部样式表中，那么站点会更易于维护。通过编辑单一的文件，就可以改变所有页面的布局。如需学习更多有关 CSS 的知识，请访问我们的CSS 教程。\n' +
-            '\n' +
-            'Tip: 由于创建高级的布局非常耗时，使用模板是一个快速的选项。通过搜索引擎可以找到很多免费的网站模板（您可以使用这些预先构建好的网站布局，并优化它们）。Tip: 使用 CSS 最大的好处是，如果把 CSS 代码存放到外部样式表中，那么站点会更易于维护。通过编辑单一的文件，就可以改变所有页面的布局。如需学习更多有关 CSS 的知识，请访问我们的CSS 教程。\n' +
-            '\n' +
-            'Tip: 由于创建高级的布局非常耗时，使用模板是一个快速的选项。通过搜索引擎可以找到很多免费的网站模板（您可以使用这些预先构建好的网站布局，并优化它们）。Tip: 使用 CSS 最大的好处是，如果把 CSS 代码存放到外部样式表中，那么站点会更易于维护。通过编辑单一的文件，就可以改变所有页面的布局。如需学习更多有关 CSS 的知识，请访问我们的CSS 教程。\n' +
-            '\n' +
-            'Tip: 由于创建高级的布局非常耗时，使用模板是一个快速的选项。通过搜索引擎可以找到很多免费的网站模板（您可以使用这些预先构建好的网站布局，并优化它们）。Tip: 使用 CSS 最大的好处是，如果把 CSS 代码存放到外部样式表中，那么站点会更易于维护。通过编辑单一的文件，就可以改变所有页面的布局。如需学习更多有关 CSS 的知识，请访问我们的CSS 教程。\n' +
-            '\n' +
-            'Tip: 由于创建高级的布局非常耗时，使用模板是一个快速的选项。通过搜索引擎可以找到很多免费的网站模板（您可以使用这些预先构建好的网站布局，并优化它们）。Tip: 使用 CSS 最大的好处是，如果把 CSS 代码存放到外部样式表中，那么站点会更易于维护。通过编辑单一的文件，就可以改变所有页面的布局。如需学习更多有关 CSS 的知识，请访问我们的CSS 教程。\n' +
-            '\n' +
-            'Tip: 由于创建高级的布局非常耗时，使用模板是一个快速的选项。通过搜索引擎可以找到很多免费的网站模板（您可以使用这些预先构建好的网站布局，并优化它们）。Tip: 使用 CSS 最大的好处是，如果把 CSS 代码存放到外部样式表中，那么站点会更易于维护。通过编辑单一的文件，就可以改变所有页面的布局。如需学习更多有关 CSS 的知识，请访问我们的CSS 教程。\n' +
-            '\n' +
-            'Tip: 由于创建高级的布局非常耗时，使用模板是一个快速的选项。通过搜索引擎可以找到很多免费的网站模板（您可以使用这些预先构建好的网站布局，并优化它们）。Tip: 使用 CSS 最大的好处是，如果把 CSS 代码存放到外部样式表中，那么站点会更易于维护。通过编辑单一的文件，就可以改变所有页面的布局。如需学习更多有关 CSS 的知识，请访问我们的CSS 教程。\n' +
-            '\n' +
-            'Tip: 由于创建高级的布局非常耗时，使用模板是一个快速的选项。通过搜索引擎可以找到很多免费的网站模板（您可以使用这些预先构建好的网站布局，并优化它们）。Tip: 使用 CSS 最大的好处是，如果把 CSS 代码存放到外部样式表中，那么站点会更易于维护。通过编辑单一的文件，就可以改变所有页面的布局。如需学习更多有关 CSS 的知识，请访问我们的CSS 教程。\n' +
-            '\n' +
-            'Tip: 由于创建高级的布局非常耗时，使用模板是一个快速的选项。通过搜索引擎可以找到很多免费的网站模板（您可以使用这些预先构建好的网站布局，并优化它们）。'
-        }, {
-          id: 2,
-          username: 'name2',
-          postTime: '2024年2月2日20:41:37',
-          content: 'hhhhhhhhhhh'
-        }, {
-          id: 3,
-          username: 'name3',
-          postTime: '2024年2月2日20:41:37',
-          content: 'hhhhhhhhhhh'
-        }, {
-          id: 4,
-          username: 'name4',
-          postTime: '2024年2月2日20:41:37',
-          content: 'hhhhhhhhhhh'
-        }, {
-          id: 5,
-          username: 'name5',
-          postTime: '2024年2月2日20:41:37',
-          content: 'hhhhhhhhhhh'
-        }, {
-          id: 6,
-          username: 'name6',
-          postTime: '2024年2月2日20:41:37',
-          content: 'hhhhhhhhhhh'
-        }, {
-          id: 7,
-          username: 'name7',
-          postTime: '2024年2月2日20:41:37',
-          content: 'hhhhhhhhhhh'
-        }
-      ],
-      testComment: {
-        cnt: 7,
-        content: [
-          {
-            commentId: 1,
-            parentId: -1,
-            senderId: '1',
-            senderName: '用户一',
-            receiverId: '-1',
-            receiverName: '',
-            sendTime: '2024年2月3日22:33:08',
-            likeCnt: 999,
-            content: '真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼真牛逼',
-            subContents: [
-              {
-                commentId: 2,
-                parentId: 1,
-                senderId: '2',
-                senderName: '用户二',
-                receiverId: '1',
-                receiverName: '用户一',
-                sendTime: '2024年2月3日22:33:08',
-                likeCnt: 999,
-                content: '真牛逼'
-
-              }, {
-                commentId: 3,
-                parentId: 1,
-                senderId: '3',
-                senderName: '用户三',
-                receiverId: '1',
-                receiverName: '用户一',
-                sendTime: '2024年2月3日22:33:08',
-                likeCnt: 999,
-                content: '真牛逼'
-              }
-            ]
-          }, {
-            commentId: 4,
-            parentId: -1,
-            senderId: '4',
-            senderName: '用户四',
-            receiverId: '-1',
-            receiverName: '',
-            sendTime: '2024年2月3日22:33:08',
-            likeCnt: 999,
-            content: '真牛逼',
-            subContents: [
-              {
-                commentId: 5,
-                parentId: 4,
-                senderId: '5',
-                senderName: '用户五',
-                receiverId: '4',
-                receiverName: '用户四',
-                sendTime: '2024年2月3日22:33:08',
-                likeCnt: 999,
-                content: '真牛逼'
-
-              }, {
-                commentId: 6,
-                parentId: 4,
-                senderId: '6',
-                senderName: '用户六',
-                receiverId: '4',
-                receiverName: '用户四',
-                sendTime: '2024年2月3日22:33:08',
-                likeCnt: 999,
-                content: '真牛逼'
-
-              }
-            ]
-          }, {
-            commentId: 7,
-            parentId: -1,
-            senderId: '7',
-            senderName: '用户七',
-            receiverId: '-1',
-            receiverName: '',
-            sendTime: '2024年2月3日22:33:08',
-            likeCnt: 999,
-            content: '真牛逼',
-            subContents: []
-          },
-        ]
-      },
+      loadingPost: true,
 
       showPostDetail: false,
       showBlog: {},
       commentInput: '',
       showCommentReplyId: '',
+      showSubCommentReplyId: '',
       commentReplyHolder: '评论的回复:',
       commentReplyInput: ''
     }
   },
   created() {
     this.getTestBlogList()
+    this.initCurUser()
   },
   methods: {
-    replySubComment(pCommentId, subCommentId, isParent) {
+    initCurUser() {
+      getUserProfile().then(resp => {
+        if (resp.code !== 200) {
+          this.$message({
+            message: '初始化用户信息失败!',
+            type: 'error'
+          })
+          return
+        }
+
+        let userData = resp.data;
+        this.currentUser.avatar = userData.avatar
+        this.currentUser.userId = userData.userId
+        this.currentUser.userName = userData.userName
+        this.currentUser.nickName = userData.nickName
+        this.currentUser.email = userData.email
+        this.currentUser.phoneNumber = userData.phoneNumber
+        this.currentUser.sex = userData.sex
+      })
+    },
+
+    // 发送评论
+    sendComment(pCommentId) {
+      if (this.commentReplyInput === '' || this.commentReplyInput.trim().length === 0) {
+        this.$message({
+          message: '无法回复空内容!',
+          type: 'warning'
+        })
+        return
+      }
+
+      let putCommentDto = {
+        blogId: this.showBlog.blogId,
+        senderId: this.currentUser.userId,
+        content: this.commentReplyInput
+      }
+
+      // 如果不传入 pCommentId, 说明是一级评论
+      if (pCommentId != null) {
+        putCommentDto.parentId = pCommentId
+
+        let receiverId;
+        if (this.showSubCommentReplyId === '') {
+          // 回复一级评论，从父评论中寻找 receiverId
+          receiverId = this.blogComments.find(u => u.id === this.showCommentReplyId).senderId
+        } else {
+          let pComment = this.blogComments.find(u => u.id === this.showCommentReplyId);
+          receiverId = pComment.subComments.find(u => u.id === this.showSubCommentReplyId).senderId
+        }
+
+        putCommentDto.receiverId = receiverId;
+      }
+
+      postComment(putCommentDto)
+
+      // 发送评论后刷新当前评论
+      this.getBlogComment(this.showBlog.blogId, this.commentStart, true)
+
+    },
+
+    // 展示子评论输入框
+    showSubCommentInput(pCommentId, subCommentId, isParent) {
+      this.showSubCommentReplyId = ''
+      this.commentReplyInput = ''
       this.showCommentReplyId = pCommentId
       let commentName = ''
-      let pComment = this.testComment.content.find(u => u.commentId === pCommentId);
+      let pComment = this.blogComments.find(u => u.id === pCommentId);
       if (isParent) {
         commentName = pComment.senderName
       } else {
-        commentName = pComment.subContents.find(u => u.commentId === subCommentId).senderName
+        commentName = pComment.subComments.find(u => u.id === subCommentId).senderName
+        this.showSubCommentReplyId = subCommentId
       }
       this.commentReplyHolder = '回复 @' + commentName + ':'
     },
@@ -431,30 +375,53 @@ export default {
     showPost(blogId) {
       this.showBlog = this.blogs.find(u => u.blogId === blogId)
       this.showPostDetail = true
+      this.getBlogComment(blogId, this.commentStart, false)
     },
+
     handleClose() {
       this.showPostDetail = false
       this.commentInput = ''
+      this.commentReplyInput = ''
       this.showCommentReplyId = ''
+      this.showSubCommentReplyId = ''
+
+      // 初始化评论状态
+      this.blogComments = []
+      this.commentStart = 0
+      this.commentStatus = '1'
     },
 
     getTestBlogList() {
+      this.loadingPost = true
       getTestBlogs().then(resp => {
-        console.log("resp:", resp)
         this.blogs = resp.data
+        this.loadingPost = false
       })
 
     },
 
-    getBlogComment(blogId, start) {
-      getComment(blogId, start).then(resp => {
-        this.blogComment = resp.data
+    getBlogComment(blogId, start, refreshFlag) {
+      this.showCommentReplyId = ''
+      this.showSubCommentReplyId = ''
+      this.commentStatus = '1'
+      getComment(blogId, start, refreshFlag).then(resp => {
+        if (this.commentStart === 0 || refreshFlag) {
+          this.blogComments = resp.data.comments
+        } else {
+          this.blogComments = this.blogComments.concat(resp.data.comments)
+        }
+        this.commentStart += 3
+        if (resp.data.hasMore) {
+          this.commentStatus = '2'
+        } else {
+          this.commentStatus = '3'
+        }
       })
     },
 
     testInterface() {
-      getComment(1, 0).then(resp => {
-        console.log('getComment:', resp)
+      getUserProfile().then(resp => {
+        console.log('resp:', resp)
       })
     }
 
@@ -495,7 +462,8 @@ export default {
   padding-left: 30px;
   padding-right: 0;
   width: 215px;
-  position: fixed
+  position: fixed;
+  z-index: 100;
 }
 
 .fixed-box-right {
