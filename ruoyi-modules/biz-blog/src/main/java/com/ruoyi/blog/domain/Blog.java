@@ -16,20 +16,27 @@ public class Blog extends BaseEntity {
 
     private Long authorId;
 
+    private String title;
+
     private String preview;
 
     private Integer status;
 
     private Integer deleted;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private Date releaseTime;
+    private String releaseTime;
 
     private Long likeCnt;
 
     private Long viewCnt;
 
     private Long commentCnt;
+
+    private Integer articleClassify;
+
+    private Integer personClassify;
+
+    private Integer type;
 
     public Long getId() {
         return id;
@@ -71,11 +78,11 @@ public class Blog extends BaseEntity {
         this.deleted = deleted;
     }
 
-    public Date getReleaseTime() {
+    public String getReleaseTime() {
         return releaseTime;
     }
 
-    public void setReleaseTime(Date releaseTime) {
+    public void setReleaseTime(String releaseTime) {
         this.releaseTime = releaseTime;
     }
 
@@ -103,11 +110,44 @@ public class Blog extends BaseEntity {
         this.commentCnt = commentCnt;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public Integer getArticleClassify() {
+        return articleClassify;
+    }
+
+    public void setArticleClassify(Integer articleClassify) {
+        this.articleClassify = articleClassify;
+    }
+
+    public Integer getPersonClassify() {
+        return personClassify;
+    }
+
+    public void setPersonClassify(Integer personClassify) {
+        this.personClassify = personClassify;
+    }
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
+    }
+
     @Override
     public String toString() {
         return "Blog{" +
                 "id=" + id +
                 ", authorId=" + authorId +
+                ", title='" + title + '\'' +
                 ", preview='" + preview + '\'' +
                 ", status=" + status +
                 ", deleted=" + deleted +
@@ -115,6 +155,9 @@ public class Blog extends BaseEntity {
                 ", likeCnt=" + likeCnt +
                 ", viewCnt=" + viewCnt +
                 ", commentCnt=" + commentCnt +
+                ", articleClassify=" + articleClassify +
+                ", personClassify=" + personClassify +
+                ", type=" + type +
                 '}';
     }
 }

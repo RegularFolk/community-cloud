@@ -12,7 +12,7 @@ export function getTestBlogs() {
 // 获取评论
 export function getComment(blogId, start, refreshFlag) {
   return request({
-    url: '/blog/blogController/getComment/' + blogId + '/' + start + '/' + refreshFlag,
+    url: '/blog/comment/getComment/' + blogId + '/' + start + '/' + refreshFlag,
     method: 'get'
   })
 }
@@ -20,7 +20,16 @@ export function getComment(blogId, start, refreshFlag) {
 // 添加评论
 export function postComment(data) {
   return request({
-    url: '/blog/blogController/postComment',
+    url: '/blog/comment/postComment',
+    method: 'post',
+    data: data
+  })
+}
+
+// 上传文章
+export function postArticle(data) {
+  return request({
+    url: '/blog/blogController/postArticle',
     method: 'post',
     data: data
   })

@@ -2,6 +2,7 @@ package com.ruoyi.blog.mapper;
 
 
 import com.ruoyi.blog.domain.Blog;
+import com.ruoyi.blog.domain.BlogContent;
 
 import java.util.List;
 
@@ -15,4 +16,7 @@ public interface BlogMapper {
     List<Blog> getTempBlogList();
 
 
+    void insertBlog(Blog blog);
+
+    void insertBlogContent(BlogContent blogContent);
 }

@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- 这个upload是隐藏的，用于给输入框调用上传服务 -->
     <el-upload
       :action="uploadUrl"
       :before-upload="handleBeforeUpload"
@@ -56,6 +57,26 @@ export default {
     type: {
       type: String,
       default: "url",
+    },
+    /* 该编辑器是否只用于展示 */
+    forPresent: {
+      type: Boolean,
+      default: false
+    },
+    /* placeholder */
+    placeHolder: {
+      type: String,
+      default: '请输入内容'
+    },
+    /* 开启字数限制 */
+    enableLimit: {
+      type: Boolean,
+      default: false
+    },
+    /* 字数限制 */
+    limitCount: {
+      type: Number,
+      default: 0
     }
   },
   data() {
@@ -85,7 +106,7 @@ export default {
             ["link", "image", "video"]                       // 链接、图片、视频
           ],
         },
-        placeholder: "请输入内容",
+        placeholder: this.placeHolder,
         readOnly: this.readOnly,
       },
     };
@@ -113,7 +134,7 @@ export default {
         }
       },
       immediate: true,
-    },
+    }
   },
   mounted() {
     this.init();
@@ -124,6 +145,10 @@ export default {
   methods: {
     init() {
       const editor = this.$refs.editor;
+      if (this.forPresent) {
+        // 仅用于展示，去掉toolBar
+        this.options.modules.toolbar = []
+      }
       this.Quill = new Quill(editor, this.options);
       // 如果设置了上传地址则自定义图片上传事件
       if (this.type == 'url') {
@@ -145,6 +170,24 @@ export default {
         this.$emit("input", html);
         this.$emit("on-change", { html, text, quill });
       });
+
+      // 设置字数限制，每当内容改变时判断是否超过限制，如果超过则回滚本次内容改变
+      if (this.enableLimit) {
+        this.Quill.on("text-change", (delta, oldDelta, source) => {
+          if (this.Quill.getLength() > this.limitCount + 1) {
+            this.Quill.setContents(oldDelta)
+
+            this.$message({
+              message: '您的字数超过了 ' + this.limitCount + ' 字！\n 请缩短文本或者分次发布!',
+              type: 'error'
+            })
+
+          }
+        })
+      }
+
+
+
       this.Quill.on("text-change", (delta, oldDelta, source) => {
         this.$emit("on-text-change", delta, oldDelta, source);
       });

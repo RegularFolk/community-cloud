@@ -105,7 +105,7 @@
         </div>
 
         <div style="width: 30%;padding-left: 20%">
-          <el-button round type="primary" @click="addComment(null, null)">回复</el-button>
+          <el-button round type="primary" @click="sendComment(null)">回复</el-button>
         </div>
 
         <div style="width: 100%">
@@ -113,23 +113,27 @@
           <div v-for="pComment in this.blogComments"
                style="display: flex;flex-wrap: wrap;padding-top: 20px;border-bottom: 1px solid #EEF1F6FF">
             <!-- 左部头像框 -->
-            <div style="margin-right: 10px">
+            <div style="padding-right: 10px;width: 5%">
               <el-avatar :size="35" :src="pComment.senderAvatar"/>
             </div>
 
             <!-- 右部框,分为两部分，上部分的回复者、时间信息、点赞按钮等，下部分的回复内容 -->
             <div style="width: 95%">
-              <div style="margin-bottom: 10px;display: flex;flex-wrap: wrap">
-                <div style="margin-right: 10px">{{ pComment.senderName }}</div>
-                <div>{{ pComment.sendTime }}</div>
-                <div class="hover-pointer" style="margin-left: 60%"
-                     @click="showSubCommentInput(pComment.id, '',true)">
-                  <i class="el-icon-chat-line-square"/>
-                  <span style="margin-left: 5px">回复</span>
+              <div style="margin-bottom: 10px;display: flex;flex-wrap: wrap;justify-content: space-between">
+                <div style="display: flex;flex-wrap: wrap">
+                  <div style="margin-right: 10px">{{ pComment.senderName }}</div>
+                  <div>{{ pComment.sendTime }}</div>
                 </div>
-                <div class="hover-pointer" style="margin-left: 20px" @click="testMethod()">
-                  <i class="el-icon-thumb"/>
-                  <span style="margin-left: 5px">{{ pComment.likeCnt }}</span>
+                <div style="display: flex;flex-wrap: wrap">
+                  <div class="hover-pointer"
+                       @click="showSubCommentInput(pComment.id, '',true)">
+                    <i class="el-icon-chat-line-square"/>
+                    <span style="margin-left: 5px">回复</span>
+                  </div>
+                  <div class="hover-pointer" style="margin-left: 20px" @click="testMethod()">
+                    <i class="el-icon-thumb"/>
+                    <span style="margin-left: 5px">{{ pComment.likeCnt }}</span>
+                  </div>
                 </div>
               </div>
               <div style="margin-bottom: 10px">
@@ -314,7 +318,9 @@ export default {
 
     // 发送评论
     sendComment(pCommentId) {
-      if (this.commentReplyInput === '' || this.commentReplyInput.trim().length === 0) {
+      let subCommentEmpty = this.commentReplyInput === '' || this.commentReplyInput.trim().length === 0;
+      let commentEmpty = this.commentInput === '' || this.commentInput.trim().length === 0;
+      if ((pCommentId == null && commentEmpty) || (pCommentId != null && subCommentEmpty)) {
         this.$message({
           message: '无法回复空内容!',
           type: 'warning'
@@ -324,12 +330,12 @@ export default {
 
       let putCommentDto = {
         blogId: this.showBlog.blogId,
-        senderId: this.currentUser.userId,
-        content: this.commentReplyInput
+        senderId: this.currentUser.userId
       }
 
       // 如果不传入 pCommentId, 说明是一级评论
       if (pCommentId != null) {
+        putCommentDto.content = this.commentReplyInput
         putCommentDto.parentId = pCommentId
 
         let receiverId;
@@ -342,6 +348,9 @@ export default {
         }
 
         putCommentDto.receiverId = receiverId;
+      } else {
+        putCommentDto.content = this.commentInput
+        this.commentInput = ''
       }
 
       postComment(putCommentDto)
@@ -349,6 +358,11 @@ export default {
       // 发送评论后刷新当前评论
       this.getBlogComment(this.showBlog.blogId, this.commentStart, true)
 
+      // 回复成功提醒
+      this.$message({
+        message: '回复成功!',
+        type: 'success'
+      })
     },
 
     // 展示子评论输入框
