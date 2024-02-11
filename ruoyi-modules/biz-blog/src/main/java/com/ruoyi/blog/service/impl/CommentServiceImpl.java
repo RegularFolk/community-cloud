@@ -9,6 +9,7 @@ import com.ruoyi.blog.service.CommentService;
 import com.ruoyi.common.core.constant.SecurityConstants;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.exception.ServiceException;
+import com.ruoyi.common.security.utils.SecurityUtils;
 import com.ruoyi.system.api.RemoteUserService;
 import com.ruoyi.system.api.domain.SysUser;
 import org.springframework.stereotype.Service;
@@ -105,9 +106,10 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public boolean postComment(PostCommentDto dto) {
         BlogComment comment = new BlogComment();
+        Long senderId = SecurityUtils.getUserId();
         comment.setBlogId(dto.getBlogId());
         comment.setContent(dto.getContent());
-        comment.setSenderId(dto.getSenderId());
+        comment.setSenderId(senderId);
         if (dto.getReceiverId() != null) {
             comment.setReceiverId(dto.getReceiverId());
         }

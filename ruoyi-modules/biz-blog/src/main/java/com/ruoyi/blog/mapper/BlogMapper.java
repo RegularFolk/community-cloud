@@ -1,6 +1,7 @@
 package com.ruoyi.blog.mapper;
 
 
+import com.ruoyi.blog.domain.ArticleClassification;
 import com.ruoyi.blog.domain.Blog;
 import com.ruoyi.blog.domain.BlogContent;
 
@@ -19,4 +20,12 @@ public interface BlogMapper {
     void insertBlog(Blog blog);
 
     void insertBlogContent(BlogContent blogContent);
+
+    void insertPersonClassification(ArticleClassification ac);
+
+    int deletePersonClassificationById(Long id);
+
+    int deleteBlogById(Long id);
+
+    int deleteContentById(Long id);
 }

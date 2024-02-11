@@ -13,6 +13,8 @@ public class BlogContent extends BaseEntity {
 
     private String contentFormatting;
 
+    private Integer deleted;
+
 
     public Long getBlogId() {
         return blogId;
@@ -38,12 +40,21 @@ public class BlogContent extends BaseEntity {
         this.contentFormatting = contentFormatting;
     }
 
+    public Integer getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Integer deleted) {
+        this.deleted = deleted;
+    }
+
     @Override
     public String toString() {
         return "BlogContent{" +
                 "blogId=" + blogId +
                 ", content='" + content + '\'' +
                 ", contentFormatting='" + contentFormatting + '\'' +
+                ", deleted=" + deleted +
                 '}';
     }
 }

@@ -1,9 +1,13 @@
 package com.ruoyi.blog.service.impl;
 
 import com.ruoyi.blog.config.BlogConstants;
+import com.ruoyi.blog.domain.ArticleClassification;
 import com.ruoyi.blog.domain.Blog;
 import com.ruoyi.blog.domain.BlogContent;
+import com.ruoyi.blog.domain.dto.ArticleQueryDto;
+import com.ruoyi.blog.domain.dto.PostArticleClassDto;
 import com.ruoyi.blog.domain.dto.PostArticleDto;
+import com.ruoyi.blog.domain.vo.ArticleQueryVo;
 import com.ruoyi.blog.domain.vo.IndexBlogVo;
 import com.ruoyi.blog.enums.BlogStatusEnum;
 import com.ruoyi.blog.enums.BlogTypeEnum;
@@ -11,7 +15,9 @@ import com.ruoyi.blog.mapper.BlogMapper;
 import com.ruoyi.blog.service.BlogService;
 import com.ruoyi.common.core.constant.SecurityConstants;
 import com.ruoyi.common.core.domain.R;
+import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.utils.DateUtils;
+import com.ruoyi.common.security.utils.SecurityUtils;
 import com.ruoyi.system.api.RemoteUserService;
 import com.ruoyi.system.api.domain.SysUser;
 import org.springframework.stereotype.Service;
@@ -68,7 +74,8 @@ public class BlogServiceImpl implements BlogService {
     @Override
     public Long postArticle(PostArticleDto dto) {
         Blog blog = new Blog();
-        blog.setAuthorId(dto.getAuthorId());
+        Long userId = SecurityUtils.getUserId();
+        blog.setAuthorId(userId);
         blog.setTitle(dto.getTitle());
         blog.setStatus(dto.getStatus());
         blog.setArticleClassify(dto.getArticleClassify());
@@ -96,6 +103,40 @@ public class BlogServiceImpl implements BlogService {
         blogMapper.insertBlogContent(blogContent);
 
         return blog.getId();
+    }
+
+    @Override
+    public Long postPersonClassification(PostArticleClassDto dto) {
+        ArticleClassification ac = new ArticleClassification();
+        Long userId = SecurityUtils.getUserId();
+        ac.setUserId(userId);
+        ac.setClassName(dto.getClassName());
+        blogMapper.insertPersonClassification(ac);
+        return ac.getId();
+    }
+
+    @Override
+    public int deletePersonClass(Long id) {
+        return blogMapper.deletePersonClassificationById(id);
+    }
+
+    @Override
+    public int deleteArticle(Long id) {
+        int blogDeleteCnt = blogMapper.deleteBlogById(id);
+        if (blogDeleteCnt == 0) {
+            throw new ServiceException("删除失败！");
+        }
+        blogMapper.deleteContentById(id);
+
+        return blogDeleteCnt;
+    }
+
+    @Override
+    public List<ArticleQueryVo> getArticleList(ArticleQueryDto dto) {
+        // 先查出随笔对象，再根据随笔对象查询出个人分类，组装返回
+
+
+        return null;
     }
 
 

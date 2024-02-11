@@ -240,15 +240,6 @@ export default {
   name: "blog",
   data() {
     return {
-      currentUser:{
-        userId: '',
-        userName: '',
-        nickName: '',
-        email: '',
-        phoneNumber: '',
-        sex: '',
-        avatar: ''
-      },
       blogs: [
         {
           authorFollowed: '',
@@ -292,29 +283,8 @@ export default {
   },
   created() {
     this.getTestBlogList()
-    this.initCurUser()
   },
   methods: {
-    initCurUser() {
-      getUserProfile().then(resp => {
-        if (resp.code !== 200) {
-          this.$message({
-            message: '初始化用户信息失败!',
-            type: 'error'
-          })
-          return
-        }
-
-        let userData = resp.data;
-        this.currentUser.avatar = userData.avatar
-        this.currentUser.userId = userData.userId
-        this.currentUser.userName = userData.userName
-        this.currentUser.nickName = userData.nickName
-        this.currentUser.email = userData.email
-        this.currentUser.phoneNumber = userData.phoneNumber
-        this.currentUser.sex = userData.sex
-      })
-    },
 
     // 发送评论
     sendComment(pCommentId) {
@@ -330,7 +300,6 @@ export default {
 
       let putCommentDto = {
         blogId: this.showBlog.blogId,
-        senderId: this.currentUser.userId
       }
 
       // 如果不传入 pCommentId, 说明是一级评论

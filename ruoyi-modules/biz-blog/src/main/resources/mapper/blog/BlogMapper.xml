@@ -27,6 +27,12 @@
         <result property="contentFormatting"    column="content_formatting"/>
     </resultMap>
 
+    <resultMap id="ArticleClassification" type="com.ruoyi.blog.domain.ArticleClassification">
+        <id     property="id"                   column="id"/>
+        <result property="userId"               column="user_id"/>
+        <result property="className"            column="class_name"/>
+    </resultMap>
+
     <insert id="insertBlog" useGeneratedKeys="true" keyProperty="id">
         insert into blog(
             <if test="title != null and title != ''">title,</if>
@@ -67,6 +73,23 @@
             #{blogId}
         )
     </insert>
+
+    <insert id="insertPersonClassification" useGeneratedKeys="true" keyProperty="id">
+        insert into article_classification(user_id, class_name)
+        values(#{userId}, #{className})
+    </insert>
+
+    <delete id="deletePersonClassificationById">
+        delete from article_classification where id = #{id}
+    </delete>
+
+    <update id="deleteContentById">
+        update blog_content set deleted = 1 where blog_id = #{id}
+    </update>
+
+    <update id="deleteBlogById">
+        update blog set deleted = 1 where id = #{id}
+    </update>
 
 
     <select id="getTempBlogList" resultMap="Blog">

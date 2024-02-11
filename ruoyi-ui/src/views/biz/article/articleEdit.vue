@@ -89,22 +89,12 @@
 
 <script>
 
-import {getUserProfile} from "@/api/system/user";
 import {postArticle} from "@/api/biz/blog";
 
 export default {
   name: 'articleCreate',
   data() {
     return {
-      currentUser: {
-        userId: '',
-        userName: '',
-        nickName: '',
-        email: '',
-        phoneNumber: '',
-        sex: '',
-        avatar: ''
-      },
       enableEditorLimit: true,
       editorLimit: 5000,
       curInputCnt: 0,
@@ -144,26 +134,6 @@ export default {
   methods: {
     initEditor() {
       this.editorPlaceHolder = '请将字数控制在'+ this.editorLimit +'字以内，如果字数过长，请分批发布~'
-    },
-    initCurUser() {
-      getUserProfile().then(resp => {
-        if (resp.code !== 200) {
-          this.$message({
-            message: '初始化用户信息失败!',
-            type: 'error'
-          })
-          return
-        }
-
-        let userData = resp.data;
-        this.currentUser.avatar = userData.avatar
-        this.currentUser.userId = userData.userId
-        this.currentUser.userName = userData.userName
-        this.currentUser.nickName = userData.nickName
-        this.currentUser.email = userData.email
-        this.currentUser.phoneNumber = userData.phoneNumber
-        this.currentUser.sex = userData.sex
-      })
     },
     valueChanged(delta, oldDelta, source) {
       this.curInputCnt = this.$refs.input.Quill.getLength() - 1
@@ -215,7 +185,6 @@ export default {
       }
 
       let articleDto = {
-        authorId: this.currentUser.userId,
         title: this.titleInput,
         status: this.submitType,
         articleClassify: this.articleClassify,

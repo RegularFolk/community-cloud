@@ -6,8 +6,6 @@ package com.ruoyi.blog.domain.dto;
  */
 public class PostArticleDto {
 
-    private Long authorId;
-
     private String title;
 
     private Integer status;
@@ -19,14 +17,6 @@ public class PostArticleDto {
     private String content;
 
     private String contentFormatting;
-
-    public Long getAuthorId() {
-        return authorId;
-    }
-
-    public void setAuthorId(Long authorId) {
-        this.authorId = authorId;
-    }
 
     public String getTitle() {
         return title;
@@ -79,7 +69,6 @@ public class PostArticleDto {
     @Override
     public String toString() {
         return "PostArticleDto{" +
-                "authorId=" + authorId +
                 ", title='" + title + '\'' +
                 ", status=" + status +
                 ", articleClassify=" + articleClassify +
