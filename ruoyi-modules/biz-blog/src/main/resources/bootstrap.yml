@@ -2,6 +2,10 @@
 server:
   port: 7100
 
+logging:
+  level:
+    root: debug
+
 # Spring
 spring:
   application:

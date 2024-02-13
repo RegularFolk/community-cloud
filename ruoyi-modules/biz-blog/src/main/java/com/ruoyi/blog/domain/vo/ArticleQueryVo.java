@@ -7,7 +7,7 @@ public class ArticleQueryVo {
     // id 用于前端table渲染，无实际业务含义
     private Integer id;
 
-    private Integer classId;
+    private Long classId;
 
     private String className;
 
@@ -21,7 +21,7 @@ public class ArticleQueryVo {
         // id 用于前端table渲染，无实际业务含义
         private Integer id;
 
-        private Integer articleId;
+        private Long articleId;
 
         private String title;
 
@@ -51,11 +51,11 @@ public class ArticleQueryVo {
             this.id = id;
         }
 
-        public Integer getArticleId() {
+        public Long getArticleId() {
             return articleId;
         }
 
-        public void setArticleId(Integer articleId) {
+        public void setArticleId(Long articleId) {
             this.articleId = articleId;
         }
 
@@ -162,11 +162,11 @@ public class ArticleQueryVo {
         this.id = id;
     }
 
-    public Integer getClassId() {
+    public Long getClassId() {
         return classId;
     }
 
-    public void setClassId(Integer classId) {
+    public void setClassId(Long classId) {
         this.classId = classId;
     }
 

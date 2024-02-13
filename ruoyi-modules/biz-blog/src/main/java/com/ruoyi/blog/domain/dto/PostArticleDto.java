@@ -10,9 +10,9 @@ public class PostArticleDto {
 
     private Integer status;
 
-    private Integer articleClassify;
+    private Long articleClassify;
 
-    private Integer personClassify;
+    private Long personClassify;
 
     private String content;
 
@@ -34,19 +34,19 @@ public class PostArticleDto {
         this.status = status;
     }
 
-    public Integer getArticleClassify() {
+    public Long getArticleClassify() {
         return articleClassify;
     }
 
-    public void setArticleClassify(Integer articleClassify) {
+    public void setArticleClassify(Long articleClassify) {
         this.articleClassify = articleClassify;
     }
 
-    public Integer getPersonClassify() {
+    public Long getPersonClassify() {
         return personClassify;
     }
 
-    public void setPersonClassify(Integer personClassify) {
+    public void setPersonClassify(Long personClassify) {
         this.personClassify = personClassify;
     }
 

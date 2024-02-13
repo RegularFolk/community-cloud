@@ -10,4 +10,7 @@ public class BlogConstants {
 
     // 预览长度
     public static final int PREVIEW_LENGTH = 300;
+
+    // 默认个人分类名称
+    public static final String DEFAULT_PERSON_CLASSIFICATION = "默认分类";
 }

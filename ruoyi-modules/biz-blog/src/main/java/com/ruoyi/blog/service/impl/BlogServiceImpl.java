@@ -1,19 +1,23 @@
 package com.ruoyi.blog.service.impl;
 
 import com.ruoyi.blog.config.BlogConstants;
-import com.ruoyi.blog.domain.ArticleClassification;
 import com.ruoyi.blog.domain.Blog;
 import com.ruoyi.blog.domain.BlogContent;
+import com.ruoyi.blog.domain.PersonalClassification;
 import com.ruoyi.blog.domain.dto.ArticleQueryDto;
+import com.ruoyi.blog.domain.dto.DeletePersonClassDto;
 import com.ruoyi.blog.domain.dto.PostArticleClassDto;
 import com.ruoyi.blog.domain.dto.PostArticleDto;
 import com.ruoyi.blog.domain.vo.ArticleQueryVo;
 import com.ruoyi.blog.domain.vo.IndexBlogVo;
+import com.ruoyi.blog.domain.vo.PersonClassVo;
 import com.ruoyi.blog.enums.BlogStatusEnum;
 import com.ruoyi.blog.enums.BlogTypeEnum;
+import com.ruoyi.blog.enums.DeletePersonClassTypeEnum;
 import com.ruoyi.blog.mapper.BlogMapper;
 import com.ruoyi.blog.service.BlogService;
 import com.ruoyi.common.core.constant.SecurityConstants;
+import com.ruoyi.common.core.domain.IdDto;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.utils.DateUtils;
@@ -71,73 +75,7 @@ public class BlogServiceImpl implements BlogService {
         return blogVoList;
     }
 
-    @Override
-    public Long postArticle(PostArticleDto dto) {
-        Blog blog = new Blog();
-        Long userId = SecurityUtils.getUserId();
-        blog.setAuthorId(userId);
-        blog.setTitle(dto.getTitle());
-        blog.setStatus(dto.getStatus());
-        blog.setArticleClassify(dto.getArticleClassify());
-        blog.setPersonClassify(dto.getPersonClassify());
-        blog.setType(BlogTypeEnum.ARTICLE.getType());
 
-        if (blog.getStatus().equals(BlogStatusEnum.PUBLISHED.getStatus())) {
-            blog.setReleaseTime(DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD_HH_MM_SS, new Date()));
-        }
-
-        // 获取内容的前三百字为预览
-        String content = dto.getContent();
-        if (content.length() <= BlogConstants.PREVIEW_LENGTH) {
-            blog.setPreview(content);
-        } else {
-            blog.setPreview(content.substring(0, 300));
-        }
-
-        blogMapper.insertBlog(blog);
-
-        BlogContent blogContent = new BlogContent();
-        blogContent.setBlogId(blog.getId());
-        blogContent.setContent(dto.getContent());
-        blogContent.setContentFormatting(dto.getContentFormatting());
-        blogMapper.insertBlogContent(blogContent);
-
-        return blog.getId();
-    }
-
-    @Override
-    public Long postPersonClassification(PostArticleClassDto dto) {
-        ArticleClassification ac = new ArticleClassification();
-        Long userId = SecurityUtils.getUserId();
-        ac.setUserId(userId);
-        ac.setClassName(dto.getClassName());
-        blogMapper.insertPersonClassification(ac);
-        return ac.getId();
-    }
-
-    @Override
-    public int deletePersonClass(Long id) {
-        return blogMapper.deletePersonClassificationById(id);
-    }
-
-    @Override
-    public int deleteArticle(Long id) {
-        int blogDeleteCnt = blogMapper.deleteBlogById(id);
-        if (blogDeleteCnt == 0) {
-            throw new ServiceException("删除失败！");
-        }
-        blogMapper.deleteContentById(id);
-
-        return blogDeleteCnt;
-    }
-
-    @Override
-    public List<ArticleQueryVo> getArticleList(ArticleQueryDto dto) {
-        // 先查出随笔对象，再根据随笔对象查询出个人分类，组装返回
-
-
-        return null;
-    }
 
 
 }

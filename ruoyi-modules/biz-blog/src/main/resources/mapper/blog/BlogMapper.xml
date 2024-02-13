@@ -5,96 +5,185 @@
 <mapper namespace="com.ruoyi.blog.mapper.BlogMapper">
     
     <resultMap id="Blog" type="com.ruoyi.blog.domain.Blog">
-        <id     property="id"                   column="id"/>
-        <result property="authorId"             column="author_id"/>
-        <result property="title"                column="title"/>
-        <result property="preview"              column="preview"/>
-        <result property="status"               column="status"/>
-        <result property="deleted"              column="deleted"/>
-        <result property="releaseTime"          column="release_time"/>
-        <result property="createTime"           column="create_time"/>
-        <result property="likeCnt"              column="like_cnt"/>
-        <result property="viewCnt"              column="view_cnt"/>
-        <result property="commentCnt"           column="comment_cnt"/>
-        <result property="articleClassify"      column="article_classify"/>
-        <result property="personClassify"       column="person_classify"/>
-        <result property="type"                 column="type"/>
+        <id property="id" column="id"/>
+        <result property="authorId" column="author_id"/>
+        <result property="title" column="title"/>
+        <result property="preview" column="preview"/>
+        <result property="status" column="status"/>
+        <result property="deleted" column="deleted"/>
+        <result property="releaseTime" column="release_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="likeCnt" column="like_cnt"/>
+        <result property="viewCnt" column="view_cnt"/>
+        <result property="commentCnt" column="comment_cnt"/>
+        <result property="articleClassify" column="article_classify"/>
+        <result property="personClassify" column="person_classify"/>
+        <result property="type" column="type"/>
     </resultMap>
 
     <resultMap id="BlogContent" type="com.ruoyi.blog.domain.BlogContent">
-        <id     property="blogId"               column="blog_id"/>
-        <result property="content"              column="content"/>
-        <result property="contentFormatting"    column="content_formatting"/>
+        <id property="blogId" column="blog_id"/>
+        <result property="content" column="content"/>
+        <result property="contentFormatting" column="content_formatting"/>
     </resultMap>
 
-    <resultMap id="ArticleClassification" type="com.ruoyi.blog.domain.ArticleClassification">
-        <id     property="id"                   column="id"/>
-        <result property="userId"               column="user_id"/>
-        <result property="className"            column="class_name"/>
+    <resultMap id="PersonalClassification" type="com.ruoyi.blog.domain.PersonalClassification">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="className" column="class_name"/>
+        <result property="createTime" column="create_time"/>
     </resultMap>
 
     <insert id="insertBlog" useGeneratedKeys="true" keyProperty="id">
         insert into blog(
-            <if test="title != null and title != ''">title,</if>
-            <if test="preview != null and preview != ''">preview,</if>
-            <if test="status != null and status != 0">status,</if>
-            <if test="releaseTime != null and releaseTime != ''">release_time,</if>
-            <if test="likeCnt != null and likeCnt != 0">like_cnt,</if>
-            <if test="commentCnt != null and commentCnt != 0">comment_cnt,</if>
-            <if test="viewCnt != null and viewCnt != 0">viewCnt,</if>
-            <if test="articleClassify != null and articleClassify != 0">article_classify,</if>
-            <if test="personClassify != null and personClassify != 0">person_classify,</if>
-            <if test="type != null and type != 0">type,</if>
-            author_id
+        <if test="title != null and title != ''">title,</if>
+        <if test="preview != null and preview != ''">preview,</if>
+        <if test="status != null and status != 0">status,</if>
+        <if test="releaseTime != null and releaseTime != ''">release_time,</if>
+        <if test="likeCnt != null and likeCnt != 0">like_cnt,</if>
+        <if test="commentCnt != null and commentCnt != 0">comment_cnt,</if>
+        <if test="viewCnt != null and viewCnt != 0">viewCnt,</if>
+        <if test="articleClassify != null and articleClassify != 0">article_classify,</if>
+        <if test="personClassify != null and personClassify != 0">person_classify,</if>
+        <if test="type != null and type != 0">type,</if>
+        author_id
         ) values(
-            <if test="title != null and title != ''">#{title},</if>
-            <if test="preview != null and preview != ''">#{preview},</if>
-            <if test="status != null and status != 0">#{status},</if>
-            <if test="releaseTime != null and releaseTime != ''">#{releaseTime},</if>
-            <if test="likeCnt != null and likeCnt != 0">#{likeCnt},</if>
-            <if test="commentCnt != null and commentCnt != 0">#{commentCnt},</if>
-            <if test="viewCnt != null and viewCnt != 0">#{viewCnt},</if>
-            <if test="articleClassify != null and articleClassify != 0">#{articleClassify},</if>
-            <if test="personClassify != null and personClassify != 0">#{personClassify},</if>
-            <if test="type != null and type != 0">#{type},</if>
-            #{authorId}
+        <if test="title != null and title != ''">#{title},</if>
+        <if test="preview != null and preview != ''">#{preview},</if>
+        <if test="status != null and status != 0">#{status},</if>
+        <if test="releaseTime != null and releaseTime != ''">#{releaseTime},</if>
+        <if test="likeCnt != null and likeCnt != 0">#{likeCnt},</if>
+        <if test="commentCnt != null and commentCnt != 0">#{commentCnt},</if>
+        <if test="viewCnt != null and viewCnt != 0">#{viewCnt},</if>
+        <if test="articleClassify != null and articleClassify != 0">#{articleClassify},</if>
+        <if test="personClassify != null and personClassify != 0">#{personClassify},</if>
+        <if test="type != null and type != 0">#{type},</if>
+        #{authorId}
         )
     </insert>
+
+    <sql id="blogColumns">
+        id
+        , author_id, title, preview, status, release_time, create_time, like_cnt, view_cnt, comment_cnt, article_classify, person_classify, type
+    </sql>
 
 
     <insert id="insertBlogContent">
         insert into blog_content(
-            <if test="content != null and content != ''">content,</if>
-            <if test="contentFormatting != null and contentFormatting != ''">content_formatting,</if>
-            blog_id
+        <if test="content != null and content != ''">content,</if>
+        <if test="contentFormatting != null and contentFormatting != ''">content_formatting,</if>
+        blog_id
         ) values (
-            <if test="content != null and content != ''">#{content},</if>
-            <if test="contentFormatting != null and contentFormatting != ''">#{contentFormatting},</if>
-            #{blogId}
+        <if test="content != null and content != ''">#{content},</if>
+        <if test="contentFormatting != null and contentFormatting != ''">#{contentFormatting},</if>
+        #{blogId}
         )
     </insert>
 
     <insert id="insertPersonClassification" useGeneratedKeys="true" keyProperty="id">
-        insert into article_classification(user_id, class_name)
-        values(#{userId}, #{className})
+        insert into personal_classification(user_id, class_name)
+        select #{userId}, #{className}
+        from dual
+        where not exists(
+                select 1 from personal_classification where user_id = #{userId} and class_name = #{className}
+            )
     </insert>
 
     <delete id="deletePersonClassificationById">
-        delete from article_classification where id = #{id}
+        delete
+        from personal_classification
+        where id = #{id}
+    </delete>
+
+    <delete id="deleteBlogByIds">
+        update blog set deleted = 1 where type = 2 and id in
+        <foreach collection="idList" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <delete id="deleteContentByIds">
+        update blog_content set deleted = 1 where blog_id in
+        <foreach collection="idList" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
     </delete>
 
     <update id="deleteContentById">
-        update blog_content set deleted = 1 where blog_id = #{id}
+        update blog_content
+        set deleted = 1
+        where blog_id = #{id}
     </update>
 
     <update id="deleteBlogById">
-        update blog set deleted = 1 where id = #{id}
+        update blog
+        set deleted = 1
+        where id = #{id}
+    </update>
+
+    <update id="moveToDefaultClass">
+        update blog
+        set person_classify = (
+        select id from personal_classification where user_id = #{userId} and class_name = '默认分类'
+        )
+        where id in
+        <foreach collection="articleIdList" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
     </update>
 
 
     <select id="getTempBlogList" resultMap="Blog">
         select id, author_id, preview, release_time, like_cnt, view_cnt, comment_cnt
-        from blog where deleted = '0' and status = '1' and type = '1'
+        from blog
+        where deleted = '0'
+          and status = '1'
+          and type = '1'
+    </select>
+
+    <select id="getArticleList" resultMap="Blog">
+        select
+        <include refid="blogColumns"/>
+        from blog
+        where author_id = #{blog.authorId} and deleted = '0'
+        <if test="blog.title != null and blog.title != ''">and title like "%"#{blog.title}"%"</if>
+        <if test="blog.status != null and blog.status != 0">and status = #{blog.status}</if>
+        <if test="blog.articleClassify != null and blog.articleClassify != 0">and article_classify =
+            #{blog.articleClassify}
+        </if>
+        <if test="blog.personClassify != null and blog.personClassify != 0">and person_classify =
+            #{blog.personClassify}
+        </if>
+        <if test="blog.type != null and blog.type != 0">and type = #{blog.type}</if>
+        <if test="offset != null and pageSize != null and pageSize != 0">
+            limit #{pageSize} offset #{offset}
+        </if>
+    </select>
+
+    <select id="getPersonClassByIds" resultMap="PersonalClassification">
+        select id, class_name, create_time
+        from personal_classification
+        where id in
+        <foreach collection="idList" item="classId" separator="," open="(" close=")">
+            #{classId}
+        </foreach>
+        order by create_time desc
+    </select>
+
+    <select id="getPersonClassByUserId" resultMap="PersonalClassification">
+        select id, class_name
+        from personal_classification
+        where user_id = #{userId}
+    </select>
+
+    <select id="getArticleCnt" resultType="java.lang.Long">
+        select count(0) from blog
+        where author_id = #{authorId} and deleted = '0'
+        <if test="title != null and title != ''">and title like "%"#{title}"%"</if>
+        <if test="status != null and status != 0">and status = #{status}</if>
+        <if test="articleClassify != null and articleClassify != 0">and article_classify = #{articleClassify}</if>
+        <if test="personClassify != null and personClassify != 0">and person_classify = #{personClassify}</if>
+        <if test="type != null and type != 0">and type = #{type}</if>
     </select>
 
 

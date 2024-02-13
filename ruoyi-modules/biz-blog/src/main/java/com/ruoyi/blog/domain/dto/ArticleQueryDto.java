@@ -9,7 +9,13 @@ public class ArticleQueryDto {
 
     private Integer status;
 
-    private Integer articleClassification;
+    private Long articleClassification;
+
+    private Long personClassification;
+
+    private Integer pageNum;
+
+    private Integer pageSize;
 
     public String getTitle() {
         return title;
@@ -27,12 +33,36 @@ public class ArticleQueryDto {
         this.status = status;
     }
 
-    public Integer getArticleClassification() {
+    public Long getArticleClassification() {
         return articleClassification;
     }
 
-    public void setArticleClassification(Integer articleClassification) {
+    public void setArticleClassification(Long articleClassification) {
         this.articleClassification = articleClassification;
+    }
+
+    public Long getPersonClassification() {
+        return personClassification;
+    }
+
+    public void setPersonClassification(Long personClassification) {
+        this.personClassification = personClassification;
+    }
+
+    public Integer getPageNum() {
+        return pageNum;
+    }
+
+    public void setPageNum(Integer pageNum) {
+        this.pageNum = pageNum;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
     }
 
     @Override
@@ -41,6 +71,9 @@ public class ArticleQueryDto {
                 "title='" + title + '\'' +
                 ", status=" + status +
                 ", articleClassification=" + articleClassification +
+                ", personClassification=" + personClassification +
+                ", pageNum=" + pageNum +
+                ", pageSize=" + pageSize +
                 '}';
     }
 }

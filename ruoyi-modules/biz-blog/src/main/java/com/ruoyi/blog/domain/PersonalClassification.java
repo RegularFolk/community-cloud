@@ -1,9 +1,11 @@
 package com.ruoyi.blog.domain;
 
+import com.ruoyi.common.core.web.domain.BaseEntity;
+
 /**
  * 个人分类表 article_classification
  */
-public class ArticleClassification {
+public class PersonalClassification extends BaseEntity {
 
     private Long id;
 
@@ -37,7 +39,7 @@ public class ArticleClassification {
 
     @Override
     public String toString() {
-        return "ArticleClassification{" +
+        return "PersonalClassification{" +
                 "id=" + id +
                 ", userId=" + userId +
                 ", className=" + className +

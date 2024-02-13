@@ -26,11 +26,5 @@ export function postComment(data) {
   })
 }
 
-// 上传文章
-export function postArticle(data) {
-  return request({
-    url: '/blog/blogController/postArticle',
-    method: 'post',
-    data: data
-  })
-}
+
+

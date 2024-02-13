@@ -382,8 +382,6 @@ export default {
     /** 搜索按钮操作 */
     handleQuery() {
       this.getList();
-      console.log('menuList', this.menuList)
-      console.log('dict', this.dict)
     },
     /** 重置按钮操作 */
     resetQuery() {

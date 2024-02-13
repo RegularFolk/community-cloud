@@ -89,7 +89,7 @@
 
 <script>
 
-import {postArticle} from "@/api/biz/blog";
+import {postArticle} from "@/api/biz/article";
 
 export default {
   name: 'articleCreate',
@@ -128,7 +128,6 @@ export default {
     }
   },
   created() {
-    this.initCurUser()
     this.initEditor()
   },
   methods: {
