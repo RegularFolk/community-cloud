@@ -9,17 +9,23 @@ import com.ruoyi.blog.domain.dto.DeletePersonClassDto;
 import com.ruoyi.blog.domain.dto.PostArticleClassDto;
 import com.ruoyi.blog.domain.dto.PostArticleDto;
 import com.ruoyi.blog.domain.vo.ArticleQueryVo;
+import com.ruoyi.blog.domain.vo.ArticleVo;
 import com.ruoyi.blog.domain.vo.PersonClassVo;
 import com.ruoyi.blog.enums.BlogStatusEnum;
 import com.ruoyi.blog.enums.BlogTypeEnum;
 import com.ruoyi.blog.enums.DeletePersonClassTypeEnum;
 import com.ruoyi.blog.mapper.BlogMapper;
 import com.ruoyi.blog.service.ArticleService;
+import com.ruoyi.common.core.constant.SecurityConstants;
 import com.ruoyi.common.core.domain.IdDto;
+import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.utils.DateUtils;
+import com.ruoyi.common.core.utils.StringUtils;
 import com.ruoyi.common.security.utils.SecurityUtils;
 import com.ruoyi.system.api.RemoteUserService;
+import com.ruoyi.system.api.domain.SysUser;
+import com.ruoyi.system.api.model.LoginUser;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -35,6 +41,9 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Resource
     BlogMapper blogMapper;
+
+    @Resource
+    RemoteUserService remoteUserService;
 
     @Override
     public Long postArticle(PostArticleDto dto) {
@@ -59,13 +68,26 @@ public class ArticleServiceImpl implements ArticleService {
             blog.setPreview(content.substring(0, 300));
         }
 
-        blogMapper.insertBlog(blog);
+        // 如果dto存在id字段为更新，否则为删除
+        boolean updateFlag = dto.getArticleId() != null && dto.getArticleId() != 0;
+        if (updateFlag) {
+            blog.setId(dto.getArticleId());
+            blogMapper.updateBlogById(blog);
+        } else {
+            blogMapper.insertBlog(blog);
+        }
 
         BlogContent blogContent = new BlogContent();
         blogContent.setBlogId(blog.getId());
         blogContent.setContent(dto.getContent());
         blogContent.setContentFormatting(dto.getContentFormatting());
-        blogMapper.insertBlogContent(blogContent);
+        blogContent.setContentHtml(dto.getContentHtml());
+
+        if (updateFlag){
+            blogMapper.updateBlogContent(blogContent);
+        } else {
+            blogMapper.insertBlogContent(blogContent);
+        }
 
         return blog.getId();
     }
@@ -206,5 +228,40 @@ public class ArticleServiceImpl implements ArticleService {
         blog.setPersonClassify(dto.getPersonClassification());
         blog.setType(BlogTypeEnum.ARTICLE.getType());
         return blogMapper.getArticleCnt(blog);
+    }
+
+    @Override
+    public ArticleVo getArticle(Long articleId) {
+        ArticleVo vo = new ArticleVo();
+        Blog blog = new Blog();
+        blog.setAuthorId(SecurityUtils.getUserId());
+        blog.setType(BlogTypeEnum.ARTICLE.getType());
+        blog.setId(articleId);
+        List<Blog> articleList = blogMapper.getArticleList(blog, null, null);
+        if (CollectionUtils.isEmpty(articleList)) {
+            throw new ServiceException("随笔不存在!");
+        }
+        blog = articleList.get(0);
+        BlogContent articleContent = blogMapper.getArticleContent(articleId);
+        List<Long> userId = new ArrayList<>();
+        userId.add(blog.getAuthorId());
+        R<List<SysUser>> r = remoteUserService.getInfoByIds(userId, SecurityConstants.INNER);
+        SysUser sysUser = r.getData().get(0);
+
+        vo.setArticleId(articleId);
+        vo.setTitle(blog.getTitle());
+        vo.setSenderName(sysUser.getNickName());
+        if (StringUtils.isNotEmpty(blog.getReleaseTime())) {
+            vo.setPublishTime(blog.getReleaseTime());
+        }
+        vo.setCommentCnt(blog.getCommentCnt());
+        vo.setLikeCnt(blog.getLikeCnt());
+        vo.setViewCnt(blog.getViewCnt());
+        vo.setContentFormatting(articleContent.getContentFormatting());
+        vo.setContentHtml(articleContent.getContentHtml());
+        vo.setPersonClassify(blog.getPersonClassify());
+        vo.setArticleClassify(blog.getArticleClassify());
+
+        return vo;
     }
 }

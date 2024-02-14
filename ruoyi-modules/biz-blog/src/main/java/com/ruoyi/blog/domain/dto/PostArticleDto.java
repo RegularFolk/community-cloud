@@ -6,6 +6,8 @@ package com.ruoyi.blog.domain.dto;
  */
 public class PostArticleDto {
 
+    private Long articleId;
+
     private String title;
 
     private Integer status;
@@ -17,6 +19,16 @@ public class PostArticleDto {
     private String content;
 
     private String contentFormatting;
+
+    private String contentHtml;
+
+    public Long getArticleId() {
+        return articleId;
+    }
+
+    public void setArticleId(Long articleId) {
+        this.articleId = articleId;
+    }
 
     public String getTitle() {
         return title;
@@ -66,15 +78,25 @@ public class PostArticleDto {
         this.contentFormatting = contentFormatting;
     }
 
+    public String getContentHtml() {
+        return contentHtml;
+    }
+
+    public void setContentHtml(String contentHtml) {
+        this.contentHtml = contentHtml;
+    }
+
     @Override
     public String toString() {
         return "PostArticleDto{" +
+                "articleId=" + articleId +
                 ", title='" + title + '\'' +
                 ", status=" + status +
                 ", articleClassify=" + articleClassify +
                 ", personClassify=" + personClassify +
                 ", content='" + content + '\'' +
                 ", contentFormatting='" + contentFormatting + '\'' +
+                ", contentHtml='" + contentHtml + '\'' +
                 '}';
     }
 }

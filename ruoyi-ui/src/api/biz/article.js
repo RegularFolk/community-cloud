@@ -52,3 +52,13 @@ export function deletePersonClass(data) {
     data: data
   })
 }
+
+// 获取随笔
+export function getArticle(articleId) {
+  return request({
+    url: '/blog/article/getArticle/' + articleId,
+    method: 'get'
+  })
+}
+
+

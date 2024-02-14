@@ -1,7 +1,7 @@
 <template>
   <div style="background-color: #EEF1F6FF">
     <div class="fixed-box-left">
-      <el-menu default-active="1">
+      <el-menu default-active="1" v-if="!loadingPost">
         <el-menu-item index="1" @click="testInterface()">
           <i class="el-icon-message"/>
           <span slot="title">猜你想看</span>
@@ -71,9 +71,9 @@
           <i class="el-icon-user" style="padding-left: 10px"> {{ this.showBlog.senderName }}</i>
         </div>
         <div class="post-sub-title-unit"><i class="el-icon-timer"> 于 {{ this.showBlog.releaseTime }} 发布</i></div>
-        <div class="post-sub-title-unit"><i class="el-icon-view"> 浏览量:{{ this.showBlog.viewCnt }}</i></div>
+        <div class="post-sub-title-unit"><i class="el-icon-view"> 浏览:{{ this.showBlog.viewCnt }}</i></div>
         <div class="post-sub-title-unit"><i class="el-icon-thumb"> 点赞:{{ this.showBlog.likeCnt }}</i></div>
-        <div class="post-sub-title-unit"><i class="el-icon-chat-line-round"> 评论数:{{ this.showBlog.commentCnt }}</i>
+        <div class="post-sub-title-unit"><i class="el-icon-chat-line-round"> 评论:{{ this.showBlog.commentCnt }}</i>
         </div>
       </div>
 
@@ -237,7 +237,7 @@ import {getComment, getTestBlogs, postComment} from "@/api/biz/blog";
 import {getUserProfile} from "@/api/system/user"
 
 export default {
-  name: "blog",
+  name: "Blog",
   data() {
     return {
       blogs: [

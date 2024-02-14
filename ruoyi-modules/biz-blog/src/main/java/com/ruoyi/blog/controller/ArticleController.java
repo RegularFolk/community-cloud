@@ -5,6 +5,7 @@ import com.ruoyi.blog.domain.dto.DeletePersonClassDto;
 import com.ruoyi.blog.domain.dto.PostArticleClassDto;
 import com.ruoyi.blog.domain.dto.PostArticleDto;
 import com.ruoyi.blog.domain.vo.ArticleQueryVo;
+import com.ruoyi.blog.domain.vo.ArticleVo;
 import com.ruoyi.blog.domain.vo.PersonClassVo;
 import com.ruoyi.blog.service.ArticleService;
 import com.ruoyi.common.core.domain.IdDto;
@@ -25,7 +26,7 @@ public class ArticleController extends BaseController {
     private ArticleService articleService;
 
     /**
-     * 上传文章
+     * 上传文章（新增和修改）
      */
     @PostMapping("/postArticle")
     public R<Long> postArticle(@RequestBody PostArticleDto dto) {
@@ -80,6 +81,15 @@ public class ArticleController extends BaseController {
         Long userId = SecurityUtils.getUserId();
         List<PersonClassVo> voList = articleService.getPersonClassList(userId);
         return R.ok(voList);
+    }
+
+    /**
+     * 查询个人随笔
+     */
+    @GetMapping("/getArticle/{articleId}")
+    public R<ArticleVo> getArticle(@PathVariable("articleId") Long articleId) {
+        ArticleVo vo = articleService.getArticle(articleId);
+        return R.ok(vo);
     }
 
 }

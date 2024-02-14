@@ -1,10 +1,9 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-
-Vue.use(Router)
-
 /* Layout */
 import Layout from '@/layout'
+
+Vue.use(Router)
 
 /**
  * Note: 路由配置项
@@ -30,6 +29,37 @@ import Layout from '@/layout'
 
 // 公共路由
 export const constantRoutes = [
+  // 查看文章跳转路由
+  {
+    path: '/article',
+    hidden: true,
+    component: Layout,
+    redirect: 'noredirect',
+    children: [
+      {
+        path: 'browse',
+        component: () => import('@/views/biz/article/articleBrowse'),
+        name: 'articleBrowse',
+        meta: {title: '浏览随笔'}
+      }
+    ]
+  },
+  // 编辑随笔跳转路由
+  {
+    path: '/article',
+    hidden: true,
+    component: Layout,
+    redirect: 'noredirect',
+    children: [
+      {
+        path: 'articleModify',
+        component: () => import('@/views/biz/article/articleEdit'),
+        name: 'ArticleEdit',
+        meta: { title: '修改随笔'}
+      }
+    ]
+
+  },
   {
     path: '/redirect',
     component: Layout,

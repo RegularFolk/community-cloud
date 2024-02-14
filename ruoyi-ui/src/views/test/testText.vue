@@ -1,7 +1,14 @@
 <template>
   <div id="main">
-    <Editor v-model="value" ref="input" @on-text-change="valueChanged" :enable-limit="true" :limit-count="10"/>
-    <div v-html="value"/>
+    <Editor v-model="value" ref="input" @on-text-change="valueChanged" :enable-limit="true" :limit-count="1000"/>
+
+    <!-- 用于回显的部分外部必须套上这两层div -->
+    <div class="ql-container ql-snow">
+      <div class="ql-editor">
+        <div v-html="value"/>
+      </div>
+    </div>
+
 
     <div style="background-color: #aeafb1">currentValue:</div>
     <div>{{this.currentValue}}</div>
@@ -20,7 +27,13 @@
 
 </template>
 
+
+
 <script>
+
+import 'quill/dist/quill.core.css';
+import 'quill/dist/quill.snow.css';
+import 'quill/dist/quill.bubble.css';
 
 export default {
   name: 'xxx',

@@ -13,6 +13,8 @@ public class BlogContent extends BaseEntity {
 
     private String contentFormatting;
 
+    private String contentHtml;
+
     private Integer deleted;
 
 
@@ -40,6 +42,14 @@ public class BlogContent extends BaseEntity {
         this.contentFormatting = contentFormatting;
     }
 
+    public String getContentHtml() {
+        return contentHtml;
+    }
+
+    public void setContentHtml(String contentHtml) {
+        this.contentHtml = contentHtml;
+    }
+
     public Integer getDeleted() {
         return deleted;
     }
@@ -48,12 +58,14 @@ public class BlogContent extends BaseEntity {
         this.deleted = deleted;
     }
 
+
     @Override
     public String toString() {
         return "BlogContent{" +
                 "blogId=" + blogId +
                 ", content='" + content + '\'' +
                 ", contentFormatting='" + contentFormatting + '\'' +
+                ", contentHtml='" + contentHtml + '\'' +
                 ", deleted=" + deleted +
                 '}';
     }

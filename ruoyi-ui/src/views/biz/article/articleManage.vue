@@ -71,7 +71,7 @@
         >展开/折叠
         </el-button>
       </el-col>
-      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"/>
+      <right-toolbar :showSearch.sync="showSearch" @queryTable="handleQuery"/>
     </el-row>
 
     <!-- 文章表格 -->
@@ -127,12 +127,14 @@
               icon="el-icon-search"
               size="mini"
               type="text"
+              @click="browseArticle(scope.row)"
             >查看
             </el-button>
             <el-button
               icon="el-icon-edit"
               size="mini"
               type="text"
+              @click="editArticle(scope.row)"
             >修改
             </el-button>
             <el-button
@@ -194,13 +196,12 @@
 
 <script>
 
-import {deleteArticle, getArticleList, getPersonClassDict, postPersonClass, deletePersonClass} from "@/api/biz/article";
+import {deleteArticle, deletePersonClass, getArticleList, getPersonClassDict, postPersonClass} from "@/api/biz/article";
 
 export default {
-  name: 'articleManege',
+  name: 'ArticleManage',
   dicts: [
     'blog_article_status',
-    'blog_article_classification',
     'blog_article_classification',
     'blog_person_class_delete_type',
   ],
@@ -242,6 +243,24 @@ export default {
     initPersonClassDict() {
       getPersonClassDict().then(resp => {
         this.personClassDict = resp.data
+      })
+    },
+    // 编辑随笔路由跳转
+    editArticle(row) {
+      this.$router.push({
+        path: '/article/articleModify',
+        query: {
+          articleId: row.articleId
+        }
+      })
+    },
+    // 跳转到查看随笔页面
+    browseArticle(row) {
+      this.$router.push({
+        path: '/article/browse',
+        query: {
+          articleId: row.articleId
+        }
       })
     },
     // 确认删除个人分类
@@ -395,10 +414,7 @@ export default {
         this.refreshTable = true;
       });
     },
-    getList() {
-    },
-    queryTable() {
-    },
+
   }
 
 

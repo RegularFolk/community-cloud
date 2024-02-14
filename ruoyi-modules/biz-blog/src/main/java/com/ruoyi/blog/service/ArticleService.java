@@ -5,6 +5,7 @@ import com.ruoyi.blog.domain.dto.DeletePersonClassDto;
 import com.ruoyi.blog.domain.dto.PostArticleClassDto;
 import com.ruoyi.blog.domain.dto.PostArticleDto;
 import com.ruoyi.blog.domain.vo.ArticleQueryVo;
+import com.ruoyi.blog.domain.vo.ArticleVo;
 import com.ruoyi.blog.domain.vo.PersonClassVo;
 import com.ruoyi.common.core.domain.IdDto;
 
@@ -25,4 +26,6 @@ public interface ArticleService {
     List<PersonClassVo> getPersonClassList(Long userId);
 
     long getTotalArticle(ArticleQueryDto dto);
+
+    ArticleVo getArticle(Long articleId);
 }

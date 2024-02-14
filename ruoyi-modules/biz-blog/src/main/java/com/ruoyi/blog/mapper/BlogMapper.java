@@ -45,4 +45,10 @@ public interface BlogMapper {
     List<PersonalClassification> getPersonClassByUserId(Long userId);
 
     long getArticleCnt(Blog blog);
+
+    BlogContent getArticleContent(Long articleId);
+
+    int updateBlogById(Blog blog);
+
+    int updateBlogContent(BlogContent blogContent);
 }
