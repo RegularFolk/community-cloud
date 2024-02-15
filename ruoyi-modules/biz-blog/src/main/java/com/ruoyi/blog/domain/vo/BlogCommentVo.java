@@ -15,6 +15,9 @@ public class BlogCommentVo {
     // 父子评论的总数
     private Long commentCnt;
 
+    // 总评论数
+    private Long commentTotal;
+
     private Boolean hasMore = true;
 
     private List<CommentUnit> comments;
@@ -189,12 +192,21 @@ public class BlogCommentVo {
         this.hasMore = hasMore;
     }
 
+    public Long getCommentTotal() {
+        return commentTotal;
+    }
+
+    public void setCommentTotal(Long commentTotal) {
+        this.commentTotal = commentTotal;
+    }
+
     @Override
     public String toString() {
         return "BlogCommentVo{" +
                 "commentCnt=" + commentCnt +
-                ", comments=" + comments +
+                ", commentTotal=" + commentTotal +
                 ", hasMore=" + hasMore +
+                ", comments=" + comments +
                 '}';
     }
 }

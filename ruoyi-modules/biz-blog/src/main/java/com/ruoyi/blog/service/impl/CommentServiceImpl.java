@@ -1,10 +1,14 @@
 package com.ruoyi.blog.service.impl;
 
 import com.ruoyi.blog.config.BlogConstants;
+import com.ruoyi.blog.domain.Blog;
 import com.ruoyi.blog.domain.BlogComment;
+import com.ruoyi.blog.domain.dto.GetCommentDto;
 import com.ruoyi.blog.domain.dto.PostCommentDto;
 import com.ruoyi.blog.domain.vo.BlogCommentVo;
+import com.ruoyi.blog.enums.CommentOrderEnum;
 import com.ruoyi.blog.mapper.BlogCommentMapper;
+import com.ruoyi.blog.mapper.BlogMapper;
 import com.ruoyi.blog.service.CommentService;
 import com.ruoyi.common.core.constant.SecurityConstants;
 import com.ruoyi.common.core.domain.R;
@@ -17,13 +21,15 @@ import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 public class CommentServiceImpl implements CommentService {
+
+    @Resource
+    BlogMapper blogMapper;
 
     @Resource
     BlogCommentMapper blogCommentMapper;
@@ -33,7 +39,21 @@ public class CommentServiceImpl implements CommentService {
 
 
     @Override
-    public BlogCommentVo getComments(Long blogId, Long start, Boolean refreshFlag) {
+    public BlogCommentVo getComments(GetCommentDto dto) {
+        Long blogId = dto.getBlogId();
+        Long start = dto.getStart();
+        boolean refreshFlag = dto.getRefreshFlag();
+        String commentOrder = dto.getOrder();
+        CommentOrderEnum orderEnum = CommentOrderEnum.getEnum(commentOrder);
+        // 获取评论总数
+        Long userId = SecurityUtils.getUserId();
+        Blog blog = new Blog();
+        blog.setAuthorId(userId);
+        blog.setId(blogId);
+        List<Blog> blogList = blogMapper.getArticleList(blog, null, null);
+        long commentTotal = blogList.get(0).getCommentCnt();
+
+
         int parentCnt = blogCommentMapper.getParentCommentCnt(blogId);
         BlogCommentVo blogCommentVo = new BlogCommentVo();
 
@@ -46,9 +66,9 @@ public class CommentServiceImpl implements CommentService {
 
         List<BlogComment> parentCommentList;
         if (!refreshFlag) {
-            parentCommentList = blogCommentMapper.getParentCommentPartly(blogId, start, (long) BlogConstants.COMMENT_STEP);
+            parentCommentList = blogCommentMapper.getParentCommentPartly(blogId, start, (long) BlogConstants.COMMENT_STEP, orderEnum.getOrder());
         } else {
-            parentCommentList = blogCommentMapper.getParentCommentPartly(blogId, 0L, start + BlogConstants.COMMENT_STEP);
+            parentCommentList = blogCommentMapper.getParentCommentPartly(blogId, 0L, start, orderEnum.getOrder());
         }
         List<Long> parentCommentIds = parentCommentList.stream().map(BlogComment::getId).collect(Collectors.toList());
         List<BlogComment> subCommentList = blogCommentMapper.getSubComment(blogId, parentCommentIds);
@@ -71,7 +91,8 @@ public class CommentServiceImpl implements CommentService {
 
         // 打包数据
         blogCommentVo.setCommentCnt((long) allCommentList.size());
-        blogCommentVo.setHasMore(parentCnt - start > BlogConstants.COMMENT_STEP);
+        // if s+2 >= total no more , so has more = total > s + step - 1, total >= s + step
+        blogCommentVo.setHasMore(refreshFlag ? parentCnt >= start : parentCnt - start >= BlogConstants.COMMENT_STEP);
         // 获取 parentCommentUnit
         List<BlogCommentVo.CommentUnit> parentCommentUnitList = parentCommentList.stream().map(pc -> {
             BlogCommentVo.CommentUnit commentUnit = new BlogCommentVo.CommentUnit();
@@ -90,15 +111,27 @@ public class CommentServiceImpl implements CommentService {
                     subCommentUnit.packFromBlogComment(sc, subSender, subReceiver);
 
                     return subCommentUnit;
-                }).sorted(Comparator.comparing(BlogCommentVo.CommentUnit::getSendTime)).collect(Collectors.toList());
+                }).sorted((a, b) -> {
+                    // 根据commentOrder对子评论进行排序
+                    switch (orderEnum) {
+                        case TIME_DESC:
+                            return b.getSendTime().compareTo(a.getSendTime());
+                        case LIKE_DESC:
+                            return b.getLikeCnt().compareTo(a.getLikeCnt());
+                        case TIME_ASC:
+                        default:
+                            return a.getSendTime().compareTo(b.getSendTime());
+                    }
+                }).collect(Collectors.toList());
 
                 commentUnit.setSubComments(subCommentUnitList);
             }
 
             return commentUnit;
-        }).sorted(Comparator.comparing(BlogCommentVo.CommentUnit::getSendTime)).collect(Collectors.toList());
+        }).collect(Collectors.toList());
 
         blogCommentVo.setComments(parentCommentUnitList);
+        blogCommentVo.setCommentTotal(commentTotal);
 
         return blogCommentVo;
     }

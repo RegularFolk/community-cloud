@@ -9,9 +9,16 @@ public interface BlogCommentMapper {
 
     int getParentCommentCnt(@Param("blogId") Long blogId);
 
-    List<BlogComment> getParentCommentPartly(@Param("blogId") Long blogId, @Param("start") Long start, @Param("commentStep") Long commentStep);
+    /**
+     * order 入参参考 com/ruoyi/blog/enums/CommentOrderEnum.java
+     */
+    List<BlogComment> getParentCommentPartly(@Param("blogId") Long blogId,
+                                             @Param("start") Long start,
+                                             @Param("commentStep") Long commentStep,
+                                             @Param("order") String order);
 
-    List<BlogComment> getSubComment(@Param("blogId") Long blogId, @Param("parentCommentIds") List<Long> parentCommentIds);
+    List<BlogComment> getSubComment(@Param("blogId") Long blogId,
+                                    @Param("parentCommentIds") List<Long> parentCommentIds);
 
 
     int putComment(BlogComment comment);

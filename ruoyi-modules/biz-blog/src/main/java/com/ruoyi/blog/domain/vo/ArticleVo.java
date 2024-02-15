@@ -24,6 +24,8 @@ public class ArticleVo {
 
     private Long commentCnt;
 
+    private Integer status;
+
     public Long getArticleId() {
         return articleId;
     }
@@ -112,6 +114,14 @@ public class ArticleVo {
         this.commentCnt = commentCnt;
     }
 
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
     @Override
     public String toString() {
         return "ArticleVo{" +
@@ -126,6 +136,7 @@ public class ArticleVo {
                 ", viewCnt=" + viewCnt +
                 ", likeCnt=" + likeCnt +
                 ", commentCnt=" + commentCnt +
+                ", status=" + status +
                 '}';
     }
 }

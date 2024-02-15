@@ -10,10 +10,11 @@ export function getTestBlogs() {
 }
 
 // 获取评论
-export function getComment(blogId, start, refreshFlag) {
+export function getComment(data) {
   return request({
-    url: '/blog/comment/getComment/' + blogId + '/' + start + '/' + refreshFlag,
-    method: 'get'
+    url: '/blog/comment/getComment',
+    method: 'post',
+    data: data
   })
 }
 

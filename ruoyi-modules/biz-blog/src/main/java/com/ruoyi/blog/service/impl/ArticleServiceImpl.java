@@ -257,6 +257,7 @@ public class ArticleServiceImpl implements ArticleService {
         vo.setCommentCnt(blog.getCommentCnt());
         vo.setLikeCnt(blog.getLikeCnt());
         vo.setViewCnt(blog.getViewCnt());
+        vo.setStatus(blog.getStatus());
         vo.setContentFormatting(articleContent.getContentFormatting());
         vo.setContentHtml(articleContent.getContentHtml());
         vo.setPersonClassify(blog.getPersonClassify());

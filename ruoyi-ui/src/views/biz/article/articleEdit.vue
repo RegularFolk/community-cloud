@@ -1,6 +1,9 @@
 <template>
   <div style="padding-left: 10px;padding-right: 20px" v-loading="loading">
-    <h1 style="width: 100%;">{{this.pageTitle}}</h1>
+    <div class="flexClass">
+      <h1>{{ this.pageTitle }}</h1>
+      <h2 v-if="article.id">（{{this.article.status === 1 ? '已发布': '草稿'}}）</h2>
+    </div>
 
     <!-- 输入标题部分 -->
     <div style="display: flex">
@@ -89,7 +92,7 @@
 
 <script>
 
-import {getPersonClassDict, postArticle, getArticle} from "@/api/biz/article";
+import {getArticle, getPersonClassDict, postArticle} from "@/api/biz/article";
 import router from '@/router';
 
 export default {
@@ -112,6 +115,7 @@ export default {
         title: '',
         personClassify: 0,
         articleClassify: '',
+        status: '',
       }
     }
   },
@@ -142,6 +146,7 @@ export default {
             this.article.title = articleData.title
             this.article.personClassify = articleData.personClassify
             this.article.articleClassify = '' + articleData.articleClassify
+            this.article.status = articleData.status
 
             // 将内容插入Quill
             this.$refs.input.Quill.setContents(JSON.parse(articleData.contentFormatting))

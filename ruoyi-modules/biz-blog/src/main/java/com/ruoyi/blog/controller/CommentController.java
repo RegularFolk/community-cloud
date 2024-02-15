@@ -1,5 +1,6 @@
 package com.ruoyi.blog.controller;
 
+import com.ruoyi.blog.domain.dto.GetCommentDto;
 import com.ruoyi.blog.domain.dto.PostCommentDto;
 import com.ruoyi.blog.domain.vo.BlogCommentVo;
 import com.ruoyi.blog.service.CommentService;
@@ -20,15 +21,9 @@ public class CommentController extends BaseController {
     /**
      * 获取评论
      */
-    @GetMapping("/getComment/{blogId}/{start}/{refreshFlag}")
-    public R<BlogCommentVo> getComment(
-            @PathVariable("blogId") Long blogId,
-            @PathVariable("start") Long start,
-            @PathVariable("refreshFlag") Boolean refreshFlag) {
-        if (refreshFlag == null) {
-            refreshFlag = false;
-        }
-        BlogCommentVo blogCommentVo = commentService.getComments(blogId, start, refreshFlag);
+    @PostMapping("/getComment")
+    public R<BlogCommentVo> getComment(@RequestBody GetCommentDto dto) {
+        BlogCommentVo blogCommentVo = commentService.getComments(dto);
         return R.ok(blogCommentVo);
     }
 
