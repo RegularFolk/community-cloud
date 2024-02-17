@@ -16,6 +16,7 @@
         <result property="likeCnt" column="like_cnt"/>
         <result property="viewCnt" column="view_cnt"/>
         <result property="commentCnt" column="comment_cnt"/>
+        <result property="collectCnt" column="collect_cnt"/>
         <result property="articleClassify" column="article_classify"/>
         <result property="personClassify" column="person_classify"/>
         <result property="type" column="type"/>
@@ -65,7 +66,7 @@
 
     <sql id="blogColumns">
         id
-        , author_id, title, preview, status, release_time, create_time, like_cnt, view_cnt, comment_cnt, article_classify, person_classify, type
+        , author_id, title, preview, status, release_time, create_time, like_cnt, view_cnt, comment_cnt, collect_cnt, article_classify, person_classify, type
     </sql>
 
 

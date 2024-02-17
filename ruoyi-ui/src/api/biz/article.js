@@ -61,4 +61,31 @@ export function getArticle(articleId) {
   })
 }
 
+// 收藏随笔
+export function collect(data) {
+  return request({
+    url: '/blog/article/collect',
+    method: 'post',
+    data: data
+  })
+}
+
+// 取消收藏随笔
+export function cancelCollect(data) {
+  return request({
+    url: '/blog/article/cancelCollect',
+    method: 'post',
+    data: data
+  })
+}
+
+// 收藏随笔列表查询
+export function collectList(data) {
+  return request({
+    url: '/blog/article/collect/list',
+    method: 'post',
+    data: data
+  })
+}
+
 

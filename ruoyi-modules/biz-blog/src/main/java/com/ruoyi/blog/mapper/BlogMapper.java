@@ -2,6 +2,7 @@ package com.ruoyi.blog.mapper;
 
 
 import com.ruoyi.blog.domain.Blog;
+import com.ruoyi.blog.domain.BlogCollected;
 import com.ruoyi.blog.domain.BlogContent;
 import com.ruoyi.blog.domain.PersonalClassification;
 import org.apache.ibatis.annotations.Param;

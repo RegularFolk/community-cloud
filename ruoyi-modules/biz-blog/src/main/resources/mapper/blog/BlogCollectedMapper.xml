@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--suppress ALL -->
+<mapper namespace="com.ruoyi.blog.mapper.BlogCollectedMapper">
+
+    <resultMap id="BlogCollected" type="com.ruoyi.blog.domain.BlogCollected">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="blogId" column="blog_id"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <resultMap id="ListQueryVo" type="com.ruoyi.blog.domain.vo.ArticleCollectQueryVoUnit">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="preview" column="preview"/>
+        <result property="authorId" column="author_id"/>
+        <result property="articleClassification" column="article_classify"/>
+        <result property="status" column="status"/>
+        <result property="collectTime" column="collect_time"/>
+        <result property="publishTime" column="publish_time"/>
+        <result property="likeCnt" column="like_cnt"/>
+        <result property="commentCnt" column="comment_cnt"/>
+        <result property="viewCnt" column="view_cnt"/>
+        <result property="collectCnt" column="collect_cnt"/>
+    </resultMap>
+
+    <insert id="insertBlogCollected" useGeneratedKeys="true" keyProperty="id">
+        insert into blog_collected(user_id, blog_id)
+        values (#{userId}, #{blogId})
+    </insert>
+
+    <delete id="deleteCollect">
+        delete
+        from blog_collected
+        where user_id = #{userId}
+          and blog_id = #{blogId}
+    </delete>
+
+    <select id="collectList" resultMap="ListQueryVo">
+        select
+        b.id as id,
+        b.title as title,
+        b.preview as preview,
+        b.author_id as author_id,
+        b.article_classify as article_classify,
+        b.status as status,
+        t.create_time as collect_time,
+        b.release_time as publish_time,
+        b.like_cnt as like_cnt,
+        b.comment_cnt as comment_cnt,
+        b.view_cnt as view_cnt,
+        b.collect_cnt as collect_cnt
+        from (
+        select id,
+        title,
+        preview,
+        author_id,
+        article_classify,
+        status,
+        release_time,
+        like_cnt,
+        comment_cnt,
+        view_cnt,
+        collect_cnt
+        from blog
+        where author_id = #{userId}
+        ) b
+        inner join (select blog_id, create_time from blog_collected where user_id = #{userId}) t
+        on b.id = t.blog_id
+        where 1 = 1
+        <if test="dto.title != null and dto.title != ''">and b.title like "%"#{dto.title}"%"</if>
+        <if test="dto.articleClassification != null and dto.articleClassification != 0">and b.article_classify =
+            #{dto.articleClassification}
+        </if>
+        order by t.create_time desc
+        <if test="pageSize != null and offset != null and pageSize != 0">
+            limit #{pageSize} offset #{offset}
+        </if>
+    </select>
+
+    <select id="getCollectedTotal" resultType="java.lang.Long">
+        select count(1)
+        from blog_collected
+        where user_id = #{userId}
+    </select>
+
+
+</mapper>

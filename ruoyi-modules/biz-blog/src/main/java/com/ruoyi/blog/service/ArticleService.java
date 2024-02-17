@@ -1,9 +1,7 @@
 package com.ruoyi.blog.service;
 
-import com.ruoyi.blog.domain.dto.ArticleQueryDto;
-import com.ruoyi.blog.domain.dto.DeletePersonClassDto;
-import com.ruoyi.blog.domain.dto.PostArticleClassDto;
-import com.ruoyi.blog.domain.dto.PostArticleDto;
+import com.ruoyi.blog.domain.dto.*;
+import com.ruoyi.blog.domain.vo.ArticleCollectQueryVo;
 import com.ruoyi.blog.domain.vo.ArticleQueryVo;
 import com.ruoyi.blog.domain.vo.ArticleVo;
 import com.ruoyi.blog.domain.vo.PersonClassVo;
@@ -28,4 +26,10 @@ public interface ArticleService {
     long getTotalArticle(ArticleQueryDto dto);
 
     ArticleVo getArticle(Long articleId);
+
+    int collect(IdDto dto);
+
+    ArticleCollectQueryVo collectList(ArticleCollectQueryDto dto);
+
+    int cancelCollect(IdDto dto);
 }

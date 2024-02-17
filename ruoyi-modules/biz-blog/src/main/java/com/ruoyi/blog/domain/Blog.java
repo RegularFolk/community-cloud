@@ -1,9 +1,6 @@
 package com.ruoyi.blog.domain;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.common.core.web.domain.BaseEntity;
-
-import java.util.Date;
 
 /**
  *
@@ -31,6 +28,8 @@ public class Blog extends BaseEntity {
     private Long viewCnt;
 
     private Long commentCnt;
+
+    private Long collectCnt;
 
     private Long articleClassify;
 
@@ -110,6 +109,14 @@ public class Blog extends BaseEntity {
         this.commentCnt = commentCnt;
     }
 
+    public Long getCollectCnt() {
+        return collectCnt;
+    }
+
+    public void setCollectCnt(Long collectCnt) {
+        this.collectCnt = collectCnt;
+    }
+
     public String getTitle() {
         return title;
     }
@@ -151,10 +158,11 @@ public class Blog extends BaseEntity {
                 ", preview='" + preview + '\'' +
                 ", status=" + status +
                 ", deleted=" + deleted +
-                ", releaseTime=" + releaseTime +
+                ", releaseTime='" + releaseTime + '\'' +
                 ", likeCnt=" + likeCnt +
                 ", viewCnt=" + viewCnt +
                 ", commentCnt=" + commentCnt +
+                ", collectCnt=" + collectCnt +
                 ", articleClassify=" + articleClassify +
                 ", personClassify=" + personClassify +
                 ", type=" + type +

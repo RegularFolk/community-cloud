@@ -2,18 +2,15 @@ package com.ruoyi.blog.service.impl;
 
 import com.ruoyi.blog.config.BlogConstants;
 import com.ruoyi.blog.domain.Blog;
+import com.ruoyi.blog.domain.BlogCollected;
 import com.ruoyi.blog.domain.BlogContent;
 import com.ruoyi.blog.domain.PersonalClassification;
-import com.ruoyi.blog.domain.dto.ArticleQueryDto;
-import com.ruoyi.blog.domain.dto.DeletePersonClassDto;
-import com.ruoyi.blog.domain.dto.PostArticleClassDto;
-import com.ruoyi.blog.domain.dto.PostArticleDto;
-import com.ruoyi.blog.domain.vo.ArticleQueryVo;
-import com.ruoyi.blog.domain.vo.ArticleVo;
-import com.ruoyi.blog.domain.vo.PersonClassVo;
+import com.ruoyi.blog.domain.dto.*;
+import com.ruoyi.blog.domain.vo.*;
 import com.ruoyi.blog.enums.BlogStatusEnum;
 import com.ruoyi.blog.enums.BlogTypeEnum;
 import com.ruoyi.blog.enums.DeletePersonClassTypeEnum;
+import com.ruoyi.blog.mapper.BlogCollectedMapper;
 import com.ruoyi.blog.mapper.BlogMapper;
 import com.ruoyi.blog.service.ArticleService;
 import com.ruoyi.common.core.constant.SecurityConstants;
@@ -25,7 +22,6 @@ import com.ruoyi.common.core.utils.StringUtils;
 import com.ruoyi.common.security.utils.SecurityUtils;
 import com.ruoyi.system.api.RemoteUserService;
 import com.ruoyi.system.api.domain.SysUser;
-import com.ruoyi.system.api.model.LoginUser;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -41,6 +37,9 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Resource
     BlogMapper blogMapper;
+
+    @Resource
+    BlogCollectedMapper blogCollectedMapper;
 
     @Resource
     RemoteUserService remoteUserService;
@@ -264,5 +263,44 @@ public class ArticleServiceImpl implements ArticleService {
         vo.setArticleClassify(blog.getArticleClassify());
 
         return vo;
+    }
+
+    @Override
+    public int collect(IdDto dto) {
+        Long articleId = dto.getId();
+        Long userId = SecurityUtils.getUserId();
+        BlogCollected blogCollected = new BlogCollected();
+        blogCollected.setBlogId(articleId);
+        blogCollected.setUserId(userId);
+        return blogCollectedMapper.insertBlogCollected(blogCollected);
+    }
+
+    @Override
+    public ArticleCollectQueryVo collectList(ArticleCollectQueryDto dto) {
+        ArticleCollectQueryVo vo = new ArticleCollectQueryVo();
+        Long userId = SecurityUtils.getUserId();
+        List<ArticleCollectQueryVoUnit> voUnitList = blogCollectedMapper.collectList(userId, dto, dto.getPageSize(), (dto.getPageNum() - 1) * dto.getPageSize());
+        long total = blogCollectedMapper.getCollectedTotal(userId);
+
+        // 获取作者昵称
+        if (!CollectionUtils.isEmpty(voUnitList)) {
+            List<Long> userIdList = voUnitList
+                    .stream().map(ArticleCollectQueryVoUnit::getAuthorId)
+                    .distinct().collect(Collectors.toList());
+            R<List<SysUser>> infoByIds = remoteUserService.getInfoByIds(userIdList, SecurityConstants.INNER);
+            List<SysUser> userList = infoByIds.getData();
+            Map<Long, List<SysUser>> groupById = userList.stream().collect(Collectors.groupingBy(SysUser::getUserId));
+            voUnitList.forEach(unit -> unit.setAuthorName(groupById.get(unit.getAuthorId()).get(0).getNickName()));
+        }
+
+        vo.setList(voUnitList);
+        vo.setTotal(total);
+        return vo;
+    }
+
+    @Override
+    public int cancelCollect(IdDto dto) {
+        Long userId = SecurityUtils.getUserId();
+        return blogCollectedMapper.deleteCollect(dto.getId(), userId);
     }
 }

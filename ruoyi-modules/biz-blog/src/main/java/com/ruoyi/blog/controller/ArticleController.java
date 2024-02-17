@@ -1,9 +1,7 @@
 package com.ruoyi.blog.controller;
 
-import com.ruoyi.blog.domain.dto.ArticleQueryDto;
-import com.ruoyi.blog.domain.dto.DeletePersonClassDto;
-import com.ruoyi.blog.domain.dto.PostArticleClassDto;
-import com.ruoyi.blog.domain.dto.PostArticleDto;
+import com.ruoyi.blog.domain.dto.*;
+import com.ruoyi.blog.domain.vo.ArticleCollectQueryVo;
 import com.ruoyi.blog.domain.vo.ArticleQueryVo;
 import com.ruoyi.blog.domain.vo.ArticleVo;
 import com.ruoyi.blog.domain.vo.PersonClassVo;
@@ -91,5 +89,33 @@ public class ArticleController extends BaseController {
         ArticleVo vo = articleService.getArticle(articleId);
         return R.ok(vo);
     }
+
+    /**
+     * 收藏随笔
+     */
+    @PostMapping("/collect")
+    public R<Void> collect(@RequestBody IdDto dto) {
+        int flag = articleService.collect(dto);
+        return flag > 0 ? R.ok() : R.fail("收藏失败！请稍后重试或者联系管理员！");
+    }
+
+    /**
+     * 取消收藏
+     */
+    @PostMapping("/cancelCollect")
+    public R<Void> cancelCollect(@RequestBody IdDto dto) {
+        int flag = articleService.cancelCollect(dto);
+        return flag > 0 ? R.ok() : R.fail("取消失败！请稍后重试或者联系管理员");
+    }
+
+    /**
+     * 收藏列表查询
+     */
+    @PostMapping("/collect/list")
+    public R<ArticleCollectQueryVo> collectList(@RequestBody ArticleCollectQueryDto dto) {
+        ArticleCollectQueryVo vo = articleService.collectList(dto);
+        return R.ok(vo);
+    }
+
 
 }
