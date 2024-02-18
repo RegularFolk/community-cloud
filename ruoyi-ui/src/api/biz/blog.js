@@ -27,5 +27,12 @@ export function postComment(data) {
   })
 }
 
+// MQ测试接口
+export function testMq() {
+  return request({
+    url: '/blog/test/test',
+    method: 'get'
+  })
+}
 
 

@@ -182,6 +182,7 @@ public class ArticleServiceImpl implements ArticleService {
                     child.setLikeCnt(b.getLikeCnt());
                     child.setCommentCnt(b.getCommentCnt());
                     child.setViewCnt(b.getViewCnt());
+                    child.setCollectCnt(b.getCollectCnt());
                     return child;
                 }).sorted((a, b) -> b.getCreateTime().compareTo(a.getCreateTime())).collect(Collectors.toList());
             }
@@ -233,7 +234,8 @@ public class ArticleServiceImpl implements ArticleService {
     public ArticleVo getArticle(Long articleId) {
         ArticleVo vo = new ArticleVo();
         Blog blog = new Blog();
-        blog.setAuthorId(SecurityUtils.getUserId());
+        Long userId = SecurityUtils.getUserId();
+        blog.setAuthorId(userId);
         blog.setType(BlogTypeEnum.ARTICLE.getType());
         blog.setId(articleId);
         List<Blog> articleList = blogMapper.getArticleList(blog, null, null);
@@ -242,10 +244,13 @@ public class ArticleServiceImpl implements ArticleService {
         }
         blog = articleList.get(0);
         BlogContent articleContent = blogMapper.getArticleContent(articleId);
-        List<Long> userId = new ArrayList<>();
-        userId.add(blog.getAuthorId());
-        R<List<SysUser>> r = remoteUserService.getInfoByIds(userId, SecurityConstants.INNER);
+        List<Long> userIdList = new ArrayList<>();
+        userIdList.add(userId);
+        R<List<SysUser>> r = remoteUserService.getInfoByIds(userIdList, SecurityConstants.INNER);
         SysUser sysUser = r.getData().get(0);
+
+        // 判断该随笔是否被收藏
+        int collectFlag = blogCollectedMapper.isCollected(articleId, userId);
 
         vo.setArticleId(articleId);
         vo.setTitle(blog.getTitle());
@@ -256,6 +261,8 @@ public class ArticleServiceImpl implements ArticleService {
         vo.setCommentCnt(blog.getCommentCnt());
         vo.setLikeCnt(blog.getLikeCnt());
         vo.setViewCnt(blog.getViewCnt());
+        vo.setCollectCnt(blog.getCollectCnt());
+        vo.setCollected(collectFlag > 0);
         vo.setStatus(blog.getStatus());
         vo.setContentFormatting(articleContent.getContentFormatting());
         vo.setContentHtml(articleContent.getContentHtml());

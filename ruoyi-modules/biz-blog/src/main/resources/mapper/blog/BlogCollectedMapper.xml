@@ -87,5 +87,12 @@
         where user_id = #{userId}
     </select>
 
+    <select id="isCollected" resultType="java.lang.Integer">
+        select count(1)
+        from blog_collected
+        where user_id = #{userId}
+          and blog_id = #{articleId}
+    </select>
+
 
 </mapper>

@@ -102,6 +102,7 @@
       <el-table-column align="center" label="点赞数" prop="likeCnt" width="80"/>
       <el-table-column align="center" label="评论数" prop="commentCnt" width="80"/>
       <el-table-column align="center" label="浏览量" prop="viewCnt" width="80"/>
+      <el-table-column align="center" label="收藏数" prop="collectCnt" width="80"/>
       <el-table-column align="center" class-name="small-padding fixed-width" label="操作">
         <template slot-scope="scope">
           <div v-if="scope.row.isClass">

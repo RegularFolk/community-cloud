@@ -2,7 +2,7 @@
   <div style="background-color: #EEF1F6FF">
     <div class="fixed-box-left">
       <el-menu default-active="1" v-if="!loadingPost">
-        <el-menu-item index="1">
+        <el-menu-item index="1" @click="testInterface">
           <i class="el-icon-message"/>
           <span slot="title">猜你想看</span>
         </el-menu-item>
@@ -98,7 +98,7 @@
 <script>
 
 
-import {getTestBlogs} from "@/api/biz/blog";
+import {getTestBlogs, testMq} from "@/api/biz/blog";
 import BlogComment from "@/components/BlogComment";
 
 export default {
@@ -146,7 +146,15 @@ export default {
     this.getTestBlogList()
   },
   methods: {
+    // 后端接口测试方法
+    testInterface() {
+      testMq()
 
+      this.$message({
+        message: '测试接口已发送请求！',
+        type: 'success'
+      })
+    },
     testMethod(msg) {
       this.$message({
         message: '获得响应！\n' + msg,

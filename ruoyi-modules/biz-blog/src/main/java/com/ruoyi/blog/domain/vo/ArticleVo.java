@@ -24,6 +24,10 @@ public class ArticleVo {
 
     private Long commentCnt;
 
+    private Long collectCnt;
+
+    private Boolean collected;
+
     private Integer status;
 
     public Long getArticleId() {
@@ -114,6 +118,22 @@ public class ArticleVo {
         this.commentCnt = commentCnt;
     }
 
+    public Long getCollectCnt() {
+        return collectCnt;
+    }
+
+    public void setCollectCnt(Long collectCnt) {
+        this.collectCnt = collectCnt;
+    }
+
+    public Boolean getCollected() {
+        return collected;
+    }
+
+    public void setCollected(Boolean collected) {
+        this.collected = collected;
+    }
+
     public Integer getStatus() {
         return status;
     }
@@ -136,6 +156,8 @@ public class ArticleVo {
                 ", viewCnt=" + viewCnt +
                 ", likeCnt=" + likeCnt +
                 ", commentCnt=" + commentCnt +
+                ", collectCnt=" + collectCnt +
+                ", collected=" + collected +
                 ", status=" + status +
                 '}';
     }

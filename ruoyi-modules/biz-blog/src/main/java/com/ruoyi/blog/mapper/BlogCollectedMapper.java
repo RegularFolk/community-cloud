@@ -19,4 +19,6 @@ public interface BlogCollectedMapper {
     long getCollectedTotal(Long userId);
 
     int deleteCollect(@Param("blogId") Long blogId, @Param("userId") Long userId);
+
+    int isCollected(@Param("articleId") Long articleId, @Param("userId") Long userId);
 }

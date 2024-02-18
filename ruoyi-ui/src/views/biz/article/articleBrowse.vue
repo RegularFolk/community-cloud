@@ -20,9 +20,11 @@
       </div>
 
       <div class="flexClass" style="margin-right: 40px">
-        <div class="sub-title-item"><i class="el-icon-view"> 浏览:{{ this.article.viewCnt }}</i></div>
-        <div class="sub-title-item"><i class="el-icon-thumb"> 点赞:{{ this.article.likeCnt }}</i></div>
-        <div class="sub-title-item"><i class="el-icon-chat-line-round"> 评论:{{ this.article.commentCnt }}</i>
+        <div class="sub-title-item"><i class="el-icon-view"> 浏览：{{ this.article.viewCnt }}</i></div>
+        <div class="sub-title-item"><i class="el-icon-thumb"> 点赞：{{ this.article.likeCnt }}</i></div>
+        <div class="sub-title-item"><i class="el-icon-chat-line-round"> 评论：{{ this.article.commentCnt }}</i>
+        </div>
+        <div class="sub-title-item"><i class="el-icon-star-off"> 收藏：{{ this.article.collectCnt }}</i>
         </div>
       </div>
 
@@ -35,13 +37,22 @@
 
     <!-- 正文下方操作按钮 -->
     <div class="flexClass" style="justify-content: flex-end;margin: 10px">
-      <el-tooltip class="item" content="点个赞吧~" effect="dark" placement="top">
-        <el-button circle icon="el-icon-thumb" type="danger"/>
+      <el-tooltip class="item" content="点个赞吧~" effect="dark" placement="top" style="margin-right: 10px">
+        <el-button circle icon="el-icon-thumb" type="danger" :loading="buttonLoading"/>
       </el-tooltip>
 
-      <el-tooltip class="item" content="收藏一下~" effect="dark" placement="top">
-        <el-button circle icon="el-icon-star-off" type="warning"/>
-      </el-tooltip>
+      <div v-if="!article.collected">
+        <el-tooltip class="item" content="收藏一下~" effect="dark" placement="top">
+          <el-button circle icon="el-icon-star-off" type="warning" @click="addCollect" :loading="buttonLoading"/>
+        </el-tooltip>
+      </div>
+
+      <div v-if="article.collected">
+        <el-tooltip class="item" content="已收藏" effect="dark" placement="top">
+          <el-button circle icon="el-icon-check" type="success" @click="confirmCancelCollect" :loading="buttonLoading"/>
+        </el-tooltip>
+      </div>
+
 
     </div>
 
@@ -57,7 +68,7 @@ import 'quill/dist/quill.core.css';
 import 'quill/dist/quill.snow.css';
 import 'quill/dist/quill.bubble.css';
 
-import {getArticle} from "@/api/biz/article";
+import {cancelCollect, collect, getArticle} from "@/api/biz/article";
 import BlogComment from "@/components/BlogComment";
 
 export default {
@@ -75,8 +86,11 @@ export default {
         articleClassify: undefined,
         viewCnt: undefined,
         likeCnt: undefined,
-        commentCnt: undefined
-      }
+        commentCnt: undefined,
+        collectCnt: undefined,
+        collected: false
+      },
+      buttonLoading: false
     }
   },
   activated() {
@@ -112,7 +126,8 @@ export default {
           this.article.viewCnt = resp.data.viewCnt
           this.article.likeCnt = resp.data.likeCnt
           this.article.commentCnt = resp.data.commentCnt
-
+          this.article.collectCnt = resp.data.collectCnt
+          this.article.collected = resp.data.collected
 
         } else {
           this.$message({
@@ -120,6 +135,62 @@ export default {
             type: 'error'
           })
         }
+      })
+    },
+    // 收藏随笔
+    addCollect() {
+      this.buttonLoading = true
+      let dto = {
+        id: this.article.articleId
+      }
+      collect(dto).then(resp => {
+        if (resp.code === 200) {
+          this.article.collected = true
+          this.$message({
+            message: '收藏成功！',
+            type: 'success'
+          })
+        }
+      }).catch(ex => {
+        this.$message({
+          message: ex.message,
+          type: 'error'
+        })
+      }).finally(() => {
+        this.buttonLoading = false
+      })
+
+    },
+    // 取消收藏随笔
+    confirmCancelCollect() {
+      this.$confirm('要狠心取消收藏吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.buttonLoading = true
+        let dto = {
+          id: this.article.articleId
+        }
+
+        cancelCollect(dto).then(resp => {
+          if (resp.code === 200) {
+            this.article.collected = false
+            this.$message({
+              type: 'success',
+              message: '操作成功!'
+            });
+          } else {
+            this.$message({
+              message: resp.msg,
+              type: 'error'
+            })
+          }
+        }).finally(() => {
+          this.buttonLoading = false
+        })
+
+
       })
     }
   }

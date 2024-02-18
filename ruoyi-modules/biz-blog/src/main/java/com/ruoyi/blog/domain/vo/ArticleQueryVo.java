@@ -41,6 +41,8 @@ public class ArticleQueryVo {
 
         private Long viewCnt;
 
+        private Long collectCnt;
+
         private final Boolean isClass = false;
 
         public Integer getId() {
@@ -131,9 +133,18 @@ public class ArticleQueryVo {
             this.viewCnt = viewCnt;
         }
 
+        public Long getCollectCnt() {
+            return collectCnt;
+        }
+
+        public void setCollectCnt(Long collectCnt) {
+            this.collectCnt = collectCnt;
+        }
+
         public Boolean getIsClass() {
             return isClass;
         }
+
 
         @Override
         public String toString() {
@@ -149,6 +160,7 @@ public class ArticleQueryVo {
                     ", likeCnt=" + likeCnt +
                     ", commentCnt=" + commentCnt +
                     ", viewCnt=" + viewCnt +
+                    ", collectCnt=" + collectCnt +
                     ", isClass=" + isClass +
                     '}';
         }

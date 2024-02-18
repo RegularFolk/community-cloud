@@ -35,11 +35,20 @@
         <minio.version>8.2.2</minio.version>
         <poi.version>4.1.2</poi.version>
         <transmittable-thread-local.version>2.14.4</transmittable-thread-local.version>
+        <rocketmq-starter.version>2.0.2</rocketmq-starter.version>
     </properties>
 
     <!-- 依赖声明 -->
     <dependencyManagement>
         <dependencies>
+
+            <!-- RocketMq -->
+            <dependency>
+                <groupId>org.apache.rocketmq</groupId>
+                <artifactId>rocketmq-spring-boot-starter</artifactId>
+                <version>${rocketmq-starter.version}</version>
+            </dependency>
+
 
             <!-- SpringCloud 微服务 -->
             <dependency>
