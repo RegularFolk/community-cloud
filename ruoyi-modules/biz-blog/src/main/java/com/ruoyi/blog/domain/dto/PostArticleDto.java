@@ -1,6 +1,9 @@
 package com.ruoyi.blog.domain.dto;
 
 
+import com.ruoyi.blog.enums.ArticleClassificationEnum;
+import com.ruoyi.blog.enums.BlogStatusEnum;
+
 /**
  * 添加文章入参
  */
@@ -10,8 +13,14 @@ public class PostArticleDto {
 
     private String title;
 
+    /**
+     * {@link BlogStatusEnum}
+     */
     private Integer status;
 
+    /**
+     * {@link ArticleClassificationEnum}
+     */
     private Long articleClassify;
 
     private Long personClassify;

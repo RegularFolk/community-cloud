@@ -1,0 +1,33 @@
+# Tomcat
+server:
+  port: 7200
+
+logging:
+  level:
+    root: info
+
+# Spring
+spring:
+  application:
+    # 应用名称
+    name: mq-consumers
+  profiles:
+    # 环境配置
+    active: dev
+  cloud:
+    nacos:
+      discovery:
+        # 服务注册地址
+        server-addr: 121.43.39.16:8848
+        username: nacos
+        password: nacos
+      config:
+        # 配置中心地址
+        server-addr: 121.43.39.16:8848
+        username: nacos
+        password: nacos
+        # 配置文件格式
+        file-extension: yml
+        # 共享配置
+        shared-configs:
+          - application-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}

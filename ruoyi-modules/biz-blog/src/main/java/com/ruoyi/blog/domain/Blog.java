@@ -1,5 +1,8 @@
 package com.ruoyi.blog.domain;
 
+import com.ruoyi.blog.enums.ArticleClassificationEnum;
+import com.ruoyi.blog.enums.BlogStatusEnum;
+import com.ruoyi.blog.enums.BlogTypeEnum;
 import com.ruoyi.common.core.web.domain.BaseEntity;
 
 /**
@@ -17,6 +20,9 @@ public class Blog extends BaseEntity {
 
     private String preview;
 
+    /**
+     * {@link BlogStatusEnum}
+     */
     private Integer status;
 
     private Integer deleted;
@@ -31,10 +37,16 @@ public class Blog extends BaseEntity {
 
     private Long collectCnt;
 
+    /**
+     * {@link ArticleClassificationEnum}
+     */
     private Long articleClassify;
 
     private Long personClassify;
 
+    /**
+     * {@link BlogTypeEnum}
+     */
     private Integer type;
 
     public Long getId() {

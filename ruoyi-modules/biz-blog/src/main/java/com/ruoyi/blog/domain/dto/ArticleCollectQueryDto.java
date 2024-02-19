@@ -1,5 +1,7 @@
 package com.ruoyi.blog.domain.dto;
 
+import com.ruoyi.blog.enums.ArticleClassificationEnum;
+
 /**
  * 收藏管理列表查询入参
  */
@@ -7,6 +9,9 @@ public class ArticleCollectQueryDto {
 
     private String title;
 
+    /**
+     * {@link ArticleClassificationEnum}
+     */
     private Integer articleClassification;
 
     private Integer pageNum = 1;

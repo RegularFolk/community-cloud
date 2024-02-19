@@ -1,5 +1,7 @@
 package com.ruoyi.blog.domain.dto;
 
+import com.ruoyi.blog.enums.DeletePersonClassTypeEnum;
+
 import javax.validation.constraints.NotNull;
 
 /**
@@ -7,6 +9,9 @@ import javax.validation.constraints.NotNull;
  */
 public class DeletePersonClassDto {
 
+    /**
+     * {@link DeletePersonClassTypeEnum}
+     */
     @NotNull(message = "删除类型不能为空！")
     private Integer deleteType;
 

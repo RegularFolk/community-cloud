@@ -13,9 +13,17 @@ import com.ruoyi.blog.service.CommentService;
 import com.ruoyi.common.core.constant.SecurityConstants;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.exception.ServiceException;
+import com.ruoyi.common.mq.constants.MqTopicConstants;
+import com.ruoyi.common.mq.domain.BlogCommentMessage;
+import com.ruoyi.common.mq.enums.OperateType;
 import com.ruoyi.common.security.utils.SecurityUtils;
 import com.ruoyi.system.api.RemoteUserService;
 import com.ruoyi.system.api.domain.SysUser;
+import org.apache.rocketmq.client.producer.SendCallback;
+import org.apache.rocketmq.client.producer.SendResult;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -37,6 +45,11 @@ public class CommentServiceImpl implements CommentService {
     @Resource
     RemoteUserService remoteUserService;
 
+    @Resource
+    private RocketMQTemplate rocketmqTemplate;
+
+    private static final Logger log = LoggerFactory.getLogger(CommentServiceImpl.class);
+
 
     @Override
     public BlogCommentVo getComments(GetCommentDto dto) {
@@ -46,9 +59,7 @@ public class CommentServiceImpl implements CommentService {
         String commentOrder = dto.getOrder();
         CommentOrderEnum orderEnum = CommentOrderEnum.getEnum(commentOrder);
         // 获取评论总数
-        Long userId = SecurityUtils.getUserId();
         Blog blog = new Blog();
-        blog.setAuthorId(userId);
         blog.setId(blogId);
         List<Blog> blogList = blogMapper.getArticleList(blog, null, null);
         long commentTotal = blogList.get(0).getCommentCnt();
@@ -61,6 +72,7 @@ public class CommentServiceImpl implements CommentService {
             blogCommentVo.setHasMore(false);
             blogCommentVo.setCommentCnt(0L);
             blogCommentVo.setComments(new ArrayList<>());
+            blogCommentVo.setCommentTotal((long) parentCnt);
             return blogCommentVo;
         }
 
@@ -151,6 +163,27 @@ public class CommentServiceImpl implements CommentService {
         }
 
         int flag = blogCommentMapper.putComment(comment);
+
+        if (flag > 0) {
+            // 发送消息更新评论计数
+            BlogCommentMessage message = new BlogCommentMessage();
+            message.setBlogId(dto.getBlogId());
+            message.setOperateType(OperateType.ADD.getType());
+            message.setMessageId(dto.getBlogId());
+
+            rocketmqTemplate.asyncSendOrderly(MqTopicConstants.COMMENT_TOPIC, message, String.valueOf(message.getBlogId()), new SendCallback() {
+                @Override
+                public void onSuccess(SendResult sendResult) {
+                    log.info("消息发送成功！message = {}", message);
+                }
+
+                @Override
+                public void onException(Throwable throwable) {
+                    log.error("消息发送失败！message = {}\nerror = {}", message, throwable.getMessage());
+                }
+            });
+
+        }
 
         return flag > 0;
     }

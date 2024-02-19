@@ -1,5 +1,8 @@
 package com.ruoyi.blog.domain.dto;
 
+import com.ruoyi.blog.enums.ArticleClassificationEnum;
+import com.ruoyi.blog.enums.BlogStatusEnum;
+
 /**
  * 随笔管理列表查询入参
  */
@@ -7,8 +10,14 @@ public class ArticleQueryDto {
 
     private String title;
 
+    /**
+     * {@link BlogStatusEnum}
+     */
     private Integer status;
 
+    /**
+     * {@link ArticleClassificationEnum}
+     */
     private Long articleClassification;
 
     private Long personClassification;

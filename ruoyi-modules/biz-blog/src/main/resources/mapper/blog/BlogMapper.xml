@@ -173,7 +173,8 @@
         select
         <include refid="blogColumns"/>
         from blog
-        where author_id = #{blog.authorId} and deleted = '0'
+        where deleted = '0'
+        <if test="blog.authorId != null and blog.authorId != 0">and author_id = #{blog.authorId}</if>
         <if test="blog.id != null and blog.id != 0">and id = #{blog.id}</if>
         <if test="blog.title != null and blog.title != ''">and title like "%"#{blog.title}"%"</if>
         <if test="blog.status != null and blog.status != 0">and status = #{blog.status}</if>

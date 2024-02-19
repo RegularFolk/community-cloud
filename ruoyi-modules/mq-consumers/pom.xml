@@ -9,23 +9,18 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>biz-blog</artifactId>
+    <artifactId>mq-consumers</artifactId>
 
     <description>
-        博客推文服务
+        MQ消费者服务
     </description>
 
     <dependencies>
+
         <!-- RocketMq -->
         <dependency>
             <groupId>org.apache.rocketmq</groupId>
             <artifactId>rocketmq-spring-boot-starter</artifactId>
-        </dependency>
-
-        <!-- Biz Common Mq -->
-        <dependency>
-            <groupId>com.ruoyi</groupId>
-            <artifactId>biz-common-mq</artifactId>
         </dependency>
 
         <!-- SpringCloud Alibaba Nacos -->
@@ -84,9 +79,14 @@
             <artifactId>ruoyi-common-swagger</artifactId>
         </dependency>
 
+        <!-- Biz Common Mq -->
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>biz-common-mq</artifactId>
+        </dependency>
+
 
     </dependencies>
-
 
     <build>
         <finalName>${project.artifactId}</finalName>
@@ -104,6 +104,5 @@
             </plugin>
         </plugins>
     </build>
-
 
 </project>

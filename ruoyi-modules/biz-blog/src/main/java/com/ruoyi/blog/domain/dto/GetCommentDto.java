@@ -11,6 +11,9 @@ public class GetCommentDto {
     // 默认不刷新
     private Boolean refreshFlag = false;
 
+    /**
+     * {@link CommentOrderEnum}
+     */
     // 默认排序方式为时间升序
     private String order = CommentOrderEnum.TIME_ASC.getOrder();
 
