@@ -37,9 +37,18 @@
 
     <!-- 正文下方操作按钮 -->
     <div class="flexClass" style="justify-content: flex-end;margin: 10px">
-      <el-tooltip class="item" content="点个赞吧~" effect="dark" placement="top" style="margin-right: 10px">
-        <el-button circle icon="el-icon-thumb" type="danger" :loading="buttonLoading"/>
-      </el-tooltip>
+      <div v-if="!article.liked">
+        <el-tooltip class="item" content="点个赞吧~" effect="dark" placement="top" style="margin-right: 30px">
+          <el-button :loading="buttonLoading" circle icon="el-icon-thumb" type="danger" @click="submitLike"/>
+        </el-tooltip>
+      </div>
+
+      <div v-if="article.liked">
+        <el-tooltip class="item" content="已点赞" effect="dark" placement="top" style="margin-right: 30px">
+          <el-button :loading="buttonLoading" circle icon="el-icon-check" type="danger" @click="cancelLike"/>
+        </el-tooltip>
+      </div>
+
 
       <div v-if="!article.collected">
         <el-tooltip class="item" content="收藏一下~" effect="dark" placement="top">
@@ -69,6 +78,7 @@ import 'quill/dist/quill.snow.css';
 import 'quill/dist/quill.bubble.css';
 
 import {cancelCollect, collect, getArticle} from "@/api/biz/article";
+import {like} from "@/api/biz/blog"
 import BlogComment from "@/components/BlogComment";
 
 export default {
@@ -88,7 +98,8 @@ export default {
         likeCnt: undefined,
         commentCnt: undefined,
         collectCnt: undefined,
-        collected: false
+        collected: false,
+        liked: undefined
       },
       buttonLoading: false
     }
@@ -128,6 +139,7 @@ export default {
           this.article.commentCnt = resp.data.commentCnt
           this.article.collectCnt = resp.data.collectCnt
           this.article.collected = resp.data.collected
+          this.article.liked = resp.data.liked
 
         } else {
           this.$message({
@@ -191,6 +203,49 @@ export default {
         })
 
 
+      })
+    },
+    // 点赞
+    submitLike() {
+      let likeDto = {
+        blogId: this.article.articleId,
+        operateType: 1
+      }
+      this.postLike(likeDto)
+    },
+    // 取消点赞
+    cancelLike() {
+      this.$confirm('要取消点赞吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        let likeDto = {
+          blogId: this.article.articleId,
+          operateType: 2
+        }
+        this.postLike(likeDto)
+      })
+
+    },
+    // 提交点赞请求
+    postLike(dto) {
+      this.buttonLoading = true
+      like(dto).then(resp => {
+        if (resp.code === 200) {
+          this.article.liked = !this.article.liked
+          this.$message({
+            message: '操作成功！',
+            type: 'success'
+          })
+        } else {
+          this.$message({
+            message: resp.msg,
+            type: 'error'
+          })
+        }
+      }).finally(() => {
+        this.buttonLoading = false
       })
     }
   }

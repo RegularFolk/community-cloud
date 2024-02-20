@@ -13,14 +13,13 @@ import com.ruoyi.blog.service.CommentService;
 import com.ruoyi.common.core.constant.SecurityConstants;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.exception.ServiceException;
+import com.ruoyi.common.mq.callBack.DefaultCallBack;
 import com.ruoyi.common.mq.constants.MqTopicConstants;
 import com.ruoyi.common.mq.domain.BlogCommentMessage;
 import com.ruoyi.common.mq.enums.OperateType;
 import com.ruoyi.common.security.utils.SecurityUtils;
 import com.ruoyi.system.api.RemoteUserService;
 import com.ruoyi.system.api.domain.SysUser;
-import org.apache.rocketmq.client.producer.SendCallback;
-import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -171,17 +170,11 @@ public class CommentServiceImpl implements CommentService {
             message.setOperateType(OperateType.ADD.getType());
             message.setMessageId(dto.getBlogId());
 
-            rocketmqTemplate.asyncSendOrderly(MqTopicConstants.COMMENT_TOPIC, message, String.valueOf(message.getBlogId()), new SendCallback() {
-                @Override
-                public void onSuccess(SendResult sendResult) {
-                    log.info("消息发送成功！message = {}", message);
-                }
-
-                @Override
-                public void onException(Throwable throwable) {
-                    log.error("消息发送失败！message = {}\nerror = {}", message, throwable.getMessage());
-                }
-            });
+            rocketmqTemplate.asyncSendOrderly(
+                    MqTopicConstants.COMMENT_TOPIC,
+                    message,
+                    String.valueOf(message.getBlogId()),
+                    new DefaultCallBack<>(this.getClass(), message));
 
         }
 

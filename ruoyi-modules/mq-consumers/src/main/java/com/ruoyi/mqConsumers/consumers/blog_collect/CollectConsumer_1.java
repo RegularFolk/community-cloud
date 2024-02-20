@@ -1,8 +1,9 @@
-package com.ruoyi.mqConsumers.consumers.blog_like;
+package com.ruoyi.mqConsumers.consumers.blog_collect;
 
 import com.ruoyi.common.mq.constants.MqConsumerGroupConstants;
 import com.ruoyi.common.mq.constants.MqTopicConstants;
-import com.ruoyi.common.mq.domain.BlogLikeMessage;
+import com.ruoyi.common.mq.domain.BlogCollectMessage;
+import com.ruoyi.common.mq.domain.BlogViewMessage;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.spring.annotation.ConsumeMode;
 import org.apache.rocketmq.spring.annotation.MessageModel;
@@ -17,25 +18,25 @@ import javax.annotation.Resource;
 
 @Component
 @RocketMQMessageListener(
-        topic = MqTopicConstants.LIKE_TOPIC,
-        consumerGroup = MqConsumerGroupConstants.LIKE_GROUP,
+        topic = MqTopicConstants.COLLECT_TOPIC,
+        consumerGroup = MqConsumerGroupConstants.COLLECT_GROUP,
         consumeMode = ConsumeMode.ORDERLY,
         messageModel = MessageModel.CLUSTERING)
-public class LikeConsumer_2 implements RocketMQListener<BlogLikeMessage>, RocketMQPushConsumerLifecycleListener {
+public class CollectConsumer_1 implements RocketMQListener<BlogCollectMessage>, RocketMQPushConsumerLifecycleListener {
 
     @Resource
-    private LikeHandler handler;
+    private CollectHandler handler;
 
-    private static final Logger log = LoggerFactory.getLogger(LikeConsumer_2.class);
+    private static final Logger log = LoggerFactory.getLogger(CollectConsumer_1.class);
 
     @Override
-    public void onMessage(BlogLikeMessage message) {
-        log.info("LikeConsumer_2 收到消息，message = {}", message);
+    public void onMessage(BlogCollectMessage message) {
+        log.info("CollectConsumer_1 收到消息，message = {}", message);
         handler.handle(message);
     }
 
     @Override
     public void prepareStart(DefaultMQPushConsumer consumer) {
-        consumer.setInstanceName("LikeConsumer_2");
+        consumer.setInstanceName("CollectConsumer_1");
     }
 }

@@ -35,4 +35,11 @@ export function testMq() {
   })
 }
 
-
+// 点赞接口
+export function like(data) {
+  return request({
+    url: '/blog/blogController/like',
+    method: 'post',
+    data: data
+  })
+}

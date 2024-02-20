@@ -30,6 +30,8 @@ public class ArticleVo {
 
     private Integer status;
 
+    private Boolean isLiked;
+
     public Long getArticleId() {
         return articleId;
     }
@@ -142,6 +144,14 @@ public class ArticleVo {
         this.status = status;
     }
 
+    public Boolean getLiked() {
+        return isLiked;
+    }
+
+    public void setLiked(Boolean liked) {
+        isLiked = liked;
+    }
+
     @Override
     public String toString() {
         return "ArticleVo{" +
@@ -159,6 +169,7 @@ public class ArticleVo {
                 ", collectCnt=" + collectCnt +
                 ", collected=" + collected +
                 ", status=" + status +
+                ", isLiked=" + isLiked +
                 '}';
     }
 }

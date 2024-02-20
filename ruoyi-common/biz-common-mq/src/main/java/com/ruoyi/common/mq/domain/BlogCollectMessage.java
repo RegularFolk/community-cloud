@@ -2,14 +2,14 @@ package com.ruoyi.common.mq.domain;
 
 import com.ruoyi.common.mq.enums.OperateType;
 
-public class BlogCommentMessage extends BaseMessage {
+public class BlogCollectMessage extends BaseMessage{
 
     private Long blogId;
 
     /**
      * {@link OperateType}
      */
-    private Integer operateType;
+    private OperateType operateType;
 
     public Long getBlogId() {
         return blogId;
@@ -19,20 +19,19 @@ public class BlogCommentMessage extends BaseMessage {
         this.blogId = blogId;
     }
 
-    public Integer getOperateType() {
+    public OperateType getOperateType() {
         return operateType;
     }
 
-    public void setOperateType(Integer operateType) {
+    public void setOperateType(OperateType operateType) {
         this.operateType = operateType;
     }
 
     @Override
     public String toString() {
-        return "BlogCommentMessage{" +
-                "messageId=" + getMessageId() +
-                ", blogId=" + blogId +
+        return "BlogCollectMessage{" +
+                "blogId=" + blogId +
                 ", operateType=" + operateType +
-                '}';
+                "} " + super.toString();
     }
 }

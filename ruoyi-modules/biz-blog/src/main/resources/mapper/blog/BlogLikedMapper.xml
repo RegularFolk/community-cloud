@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--suppress ALL -->
+<mapper namespace="com.ruoyi.blog.mapper.BlogLikedMapper">
+
+    <resultMap id="BlogLiked" type="com.ruoyi.blog.domain.BlogLiked">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="blogId" column="blog_id"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <insert id="insertLike">
+        insert into blog_liked(user_id, blog_id)
+        values (#{userId}, #{blogId})
+    </insert>
+
+    <delete id="deleteLike">
+        delete
+        from blog_liked
+        where user_id = #{userId}
+          and blog_id = #{blogId}
+    </delete>
+
+    <select id="isLiked" resultType="java.lang.Integer">
+        select count(1)
+        from blog_liked
+        where user_id = #{userId}
+          and blog_id = #{articleId}
+    </select>
+
+
+</mapper>

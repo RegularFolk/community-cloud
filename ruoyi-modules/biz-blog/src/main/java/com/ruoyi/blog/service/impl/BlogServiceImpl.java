@@ -1,35 +1,26 @@
 package com.ruoyi.blog.service.impl;
 
-import com.ruoyi.blog.config.BlogConstants;
 import com.ruoyi.blog.domain.Blog;
-import com.ruoyi.blog.domain.BlogContent;
-import com.ruoyi.blog.domain.PersonalClassification;
-import com.ruoyi.blog.domain.dto.ArticleQueryDto;
-import com.ruoyi.blog.domain.dto.DeletePersonClassDto;
-import com.ruoyi.blog.domain.dto.PostArticleClassDto;
-import com.ruoyi.blog.domain.dto.PostArticleDto;
-import com.ruoyi.blog.domain.vo.ArticleQueryVo;
+import com.ruoyi.blog.domain.dto.BlogLikeDto;
 import com.ruoyi.blog.domain.vo.IndexBlogVo;
-import com.ruoyi.blog.domain.vo.PersonClassVo;
-import com.ruoyi.blog.enums.BlogStatusEnum;
-import com.ruoyi.blog.enums.BlogTypeEnum;
-import com.ruoyi.blog.enums.DeletePersonClassTypeEnum;
+import com.ruoyi.blog.mapper.BlogLikedMapper;
 import com.ruoyi.blog.mapper.BlogMapper;
 import com.ruoyi.blog.service.BlogService;
 import com.ruoyi.common.core.constant.SecurityConstants;
-import com.ruoyi.common.core.domain.IdDto;
 import com.ruoyi.common.core.domain.R;
-import com.ruoyi.common.core.exception.ServiceException;
-import com.ruoyi.common.core.utils.DateUtils;
+import com.ruoyi.common.mq.callBack.DefaultCallBack;
+import com.ruoyi.common.mq.constants.MqTopicConstants;
+import com.ruoyi.common.mq.domain.BlogLikeMessage;
+import com.ruoyi.common.mq.enums.OperateType;
 import com.ruoyi.common.security.utils.SecurityUtils;
 import com.ruoyi.system.api.RemoteUserService;
 import com.ruoyi.system.api.domain.SysUser;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -38,10 +29,16 @@ import java.util.stream.Collectors;
 public class BlogServiceImpl implements BlogService {
 
     @Resource
-    BlogMapper blogMapper;
+    private BlogMapper blogMapper;
 
     @Resource
-    RemoteUserService remoteUserService;
+    private BlogLikedMapper blogLikedMapper;
+
+    @Resource
+    private RemoteUserService remoteUserService;
+
+    @Resource
+    private RocketMQTemplate rocketMQTemplate;
 
     @Override
     public List<IndexBlogVo> getRandomBlog() {
@@ -75,7 +72,45 @@ public class BlogServiceImpl implements BlogService {
         return blogVoList;
     }
 
+    @Override
+    public int blogLike(BlogLikeDto dto) {
+        int flag = 0;
+        Long userId = SecurityUtils.getUserId();
+        Long blogId = dto.getBlogId();
+        OperateType typeEnum = OperateType.getEnum(dto.getOperateType());
 
+        switch (typeEnum) {
+            case ADD:
+                int cnt = blogLikedMapper.isLiked(userId, blogId);
+                if (cnt == 0) {
+                    flag = blogLikedMapper.insertLike(userId, blogId);
+                }
+                break;
+            case CANCEL:
+                flag = blogLikedMapper.deleteLike(userId, blogId);
+                break;
+            default:
+                // unreachable
+                break;
+        }
+
+        if (flag > 0) {
+            // 通知下游改变点赞计数
+            BlogLikeMessage message = new BlogLikeMessage();
+            message.setOperateType(typeEnum.getType());
+            message.setUserId(userId);
+            message.setBlogId(blogId);
+            message.setMessageId(blogId);
+            rocketMQTemplate.asyncSendOrderly(
+                    MqTopicConstants.LIKE_TOPIC,
+                    message,
+                    String.valueOf(message.getMessageId()),
+                    new DefaultCallBack<>(this.getClass(), message)
+            );
+        }
+
+        return flag;
+    }
 
 
 }

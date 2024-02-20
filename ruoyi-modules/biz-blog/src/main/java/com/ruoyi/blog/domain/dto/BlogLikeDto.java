@@ -1,9 +1,11 @@
-package com.ruoyi.common.mq.domain;
+package com.ruoyi.blog.domain.dto;
 
 import com.ruoyi.common.mq.enums.OperateType;
 
-public class BlogLikeMessage extends BaseMessage{
-
+/**
+ * 点赞/取消点赞 入参
+ */
+public class BlogLikeDto {
 
     private Long blogId;
 
@@ -11,8 +13,6 @@ public class BlogLikeMessage extends BaseMessage{
      * {@link OperateType}
      */
     private Integer operateType;
-
-    private Long userId;
 
     public Long getBlogId() {
         return blogId;
@@ -30,21 +30,11 @@ public class BlogLikeMessage extends BaseMessage{
         this.operateType = operateType;
     }
 
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
     @Override
     public String toString() {
-        return "BlogLikeMessage{" +
-                "messageId=" + getMessageId() +
-                ", blogId=" + blogId +
+        return "BlogLikeDto{" +
+                "blogId=" + blogId +
                 ", operateType=" + operateType +
-                ", userId=" + userId +
                 '}';
     }
 }

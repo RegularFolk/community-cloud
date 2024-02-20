@@ -9,6 +9,8 @@ import org.apache.rocketmq.spring.annotation.MessageModel;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.apache.rocketmq.spring.core.RocketMQPushConsumerLifecycleListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -22,11 +24,13 @@ import javax.annotation.Resource;
 public class CommentConsumer_1 implements RocketMQListener<BlogCommentMessage>, RocketMQPushConsumerLifecycleListener {
 
     @Resource
-    CommentMessageHandler handler;
+    CommentHandler handler;
+
+    private static final Logger log = LoggerFactory.getLogger(CommentConsumer_1.class);
 
     @Override
     public void onMessage(BlogCommentMessage message) {
-        System.out.println("CommentConsumer_1 收到消息，message  = " + message);
+        log.info("CommentConsumer_1 收到消息，message = {}", message);
         handler.handle(message);
     }
 

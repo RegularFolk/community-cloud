@@ -11,6 +11,7 @@ import com.ruoyi.blog.enums.BlogStatusEnum;
 import com.ruoyi.blog.enums.BlogTypeEnum;
 import com.ruoyi.blog.enums.DeletePersonClassTypeEnum;
 import com.ruoyi.blog.mapper.BlogCollectedMapper;
+import com.ruoyi.blog.mapper.BlogLikedMapper;
 import com.ruoyi.blog.mapper.BlogMapper;
 import com.ruoyi.blog.service.ArticleService;
 import com.ruoyi.common.core.constant.SecurityConstants;
@@ -19,9 +20,15 @@ import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.utils.DateUtils;
 import com.ruoyi.common.core.utils.StringUtils;
+import com.ruoyi.common.mq.callBack.DefaultCallBack;
+import com.ruoyi.common.mq.constants.MqTopicConstants;
+import com.ruoyi.common.mq.domain.BlogCollectMessage;
+import com.ruoyi.common.mq.domain.BlogViewMessage;
+import com.ruoyi.common.mq.enums.OperateType;
 import com.ruoyi.common.security.utils.SecurityUtils;
 import com.ruoyi.system.api.RemoteUserService;
 import com.ruoyi.system.api.domain.SysUser;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -36,13 +43,19 @@ import java.util.stream.Collectors;
 public class ArticleServiceImpl implements ArticleService {
 
     @Resource
-    BlogMapper blogMapper;
+    private BlogMapper blogMapper;
 
     @Resource
-    BlogCollectedMapper blogCollectedMapper;
+    private BlogCollectedMapper blogCollectedMapper;
 
     @Resource
-    RemoteUserService remoteUserService;
+    private BlogLikedMapper blogLikedMapper;
+
+    @Resource
+    private RemoteUserService remoteUserService;
+
+    @Resource
+    private RocketMQTemplate rocketmqTemplate;
 
     @Override
     public Long postArticle(PostArticleDto dto) {
@@ -97,8 +110,7 @@ public class ArticleServiceImpl implements ArticleService {
         Long userId = SecurityUtils.getUserId();
         ac.setUserId(userId);
         ac.setClassName(dto.getClassName());
-        int flag = blogMapper.insertPersonClassification(ac);
-        return flag;
+        return blogMapper.insertPersonClassification(ac);
     }
 
     @Override
@@ -249,6 +261,19 @@ public class ArticleServiceImpl implements ArticleService {
         R<List<SysUser>> r = remoteUserService.getInfoByIds(userIdList, SecurityConstants.INNER);
         SysUser sysUser = r.getData().get(0);
 
+        int likedFlag = blogLikedMapper.isLiked(userId, articleId);
+
+        // 消息通知下游增加计数
+        BlogViewMessage message = new BlogViewMessage();
+        message.setBlogId(articleId);
+        message.setMessageId(articleId);
+        rocketmqTemplate.asyncSendOrderly(
+                MqTopicConstants.VIEW_TOPIC,
+                message,
+                String.valueOf(message.getMessageId()),
+                new DefaultCallBack<>(this.getClass(), message));
+
+
         // 判断该随笔是否被收藏
         int collectFlag = blogCollectedMapper.isCollected(articleId, userId);
 
@@ -268,6 +293,7 @@ public class ArticleServiceImpl implements ArticleService {
         vo.setContentHtml(articleContent.getContentHtml());
         vo.setPersonClassify(blog.getPersonClassify());
         vo.setArticleClassify(blog.getArticleClassify());
+        vo.setLiked(likedFlag > 0);
 
         return vo;
     }
@@ -279,7 +305,23 @@ public class ArticleServiceImpl implements ArticleService {
         BlogCollected blogCollected = new BlogCollected();
         blogCollected.setBlogId(articleId);
         blogCollected.setUserId(userId);
-        return blogCollectedMapper.insertBlogCollected(blogCollected);
+
+        int flag = blogCollectedMapper.insertBlogCollected(blogCollected);
+
+        if (flag > 0) {
+            // 通知下游改变收藏计数
+            BlogCollectMessage message = new BlogCollectMessage();
+            message.setBlogId(dto.getId());
+            message.setMessageId(dto.getId());
+            message.setOperateType(OperateType.ADD);
+            rocketmqTemplate.asyncSendOrderly(
+                    MqTopicConstants.COLLECT_TOPIC,
+                    message,
+                    String.valueOf(message.getMessageId()),
+                    new DefaultCallBack<>(this.getClass(), message));
+        }
+
+        return flag;
     }
 
     @Override
@@ -308,6 +350,23 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public int cancelCollect(IdDto dto) {
         Long userId = SecurityUtils.getUserId();
-        return blogCollectedMapper.deleteCollect(dto.getId(), userId);
+
+        int flag = blogCollectedMapper.deleteCollect(dto.getId(), userId);
+
+        if (flag > 0) {
+            // 通知下游改变收藏计数
+            BlogCollectMessage message = new BlogCollectMessage();
+            message.setBlogId(dto.getId());
+            message.setMessageId(dto.getId());
+            message.setOperateType(OperateType.CANCEL);
+            rocketmqTemplate.asyncSendOrderly(
+                    MqTopicConstants.COLLECT_TOPIC,
+                    message,
+                    String.valueOf(message.getMessageId()),
+                    new DefaultCallBack<>(this.getClass(), message)
+            );
+        }
+
+        return flag;
     }
 }

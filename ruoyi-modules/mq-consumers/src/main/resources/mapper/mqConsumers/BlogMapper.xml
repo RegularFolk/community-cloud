@@ -2,11 +2,42 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--suppress ALL -->
 <mapper namespace="com.ruoyi.mqConsumers.mapper.BlogMapper">
 
     <update id="increaseCommentCnt">
         update blog
         set comment_cnt = comment_cnt + 1
+        where id = #{blogId}
+    </update>
+
+    <update id="increaseViewCnt">
+        update blog
+        set view_cnt = view_cnt + 1
+        where id = #{blogId}
+    </update>
+
+    <update id="increaseCollectCnt">
+        update blog
+        set collect_cnt = collect_cnt + 1
+        where id = #{blogId}
+    </update>
+
+    <update id="decreaseCollectCnt">
+        update blog
+        set collect_cnt = collect_cnt - 1
+        where id = #{blogId}
+    </update>
+
+    <update id="increaseLikeCnt">
+        update blog
+        set like_cnt = like_cnt + 1
+        where id = #{blogId}
+    </update>
+
+    <update id="decreaseLikeCnt">
+        update blog
+        set like_cnt = like_cnt - 1
         where id = #{blogId}
     </update>
 </mapper>

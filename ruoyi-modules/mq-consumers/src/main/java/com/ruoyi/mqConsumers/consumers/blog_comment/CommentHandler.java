@@ -9,12 +9,12 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 
 @Component
-public class CommentMessageHandler {
+public class CommentHandler {
 
     @Resource
     private BlogService blogService;
 
-    private static final Logger log = LoggerFactory.getLogger(CommentMessageHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(CommentHandler.class);
 
     public void handle(BlogCommentMessage message) {
         Long blogId = message.getBlogId();
