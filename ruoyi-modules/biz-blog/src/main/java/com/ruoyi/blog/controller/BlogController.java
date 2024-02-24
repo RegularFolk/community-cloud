@@ -1,6 +1,7 @@
 package com.ruoyi.blog.controller;
 
 import com.ruoyi.blog.domain.dto.BlogLikeDto;
+import com.ruoyi.blog.domain.dto.PostBlogDto;
 import com.ruoyi.blog.domain.vo.IndexBlogVo;
 import com.ruoyi.blog.service.BlogService;
 import com.ruoyi.common.core.domain.R;
@@ -22,7 +23,7 @@ public class BlogController extends BaseController {
      */
     @GetMapping("/randomList")
     public R<List<IndexBlogVo>> getRandomBlog() {
-        startPage();
+//        startPage();
         List<IndexBlogVo> blogList = blogService.getRandomBlog();
         return R.ok(blogList);
     }
@@ -35,5 +36,15 @@ public class BlogController extends BaseController {
         int flag = blogService.blogLike(dto);
         return flag > 0 ? R.ok() : R.fail("请勿重复点赞！");
     }
+
+    /**
+     * 提交想法
+     */
+    @PostMapping("/postBlog")
+    public R<Void> postBlog(@RequestBody PostBlogDto dto) {
+        long flag = blogService.postBlog(dto);
+        return flag > 0 ? R.ok() : R.fail("提交失败！请稍后重试或者联系管理员");
+    }
+
 
 }

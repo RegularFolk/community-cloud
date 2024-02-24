@@ -1,13 +1,18 @@
 package com.ruoyi.blog.service.impl;
 
+import com.ruoyi.blog.config.BlogConstants;
 import com.ruoyi.blog.domain.Blog;
 import com.ruoyi.blog.domain.dto.BlogLikeDto;
+import com.ruoyi.blog.domain.dto.PostBlogDto;
 import com.ruoyi.blog.domain.vo.IndexBlogVo;
+import com.ruoyi.blog.enums.BlogStatusEnum;
+import com.ruoyi.blog.enums.BlogTypeEnum;
 import com.ruoyi.blog.mapper.BlogLikedMapper;
 import com.ruoyi.blog.mapper.BlogMapper;
 import com.ruoyi.blog.service.BlogService;
 import com.ruoyi.common.core.constant.SecurityConstants;
 import com.ruoyi.common.core.domain.R;
+import com.ruoyi.common.core.utils.DateUtils;
 import com.ruoyi.common.mq.callBack.DefaultCallBack;
 import com.ruoyi.common.mq.constants.MqTopicConstants;
 import com.ruoyi.common.mq.domain.BlogLikeMessage;
@@ -21,6 +26,7 @@ import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -52,6 +58,8 @@ public class BlogServiceImpl implements BlogService {
         List<SysUser> infoByIds = infoByIdsRes.getData();
         Map<Long, List<SysUser>> groupById = infoByIds.stream().collect(Collectors.groupingBy(SysUser::getUserId));
 
+        Long userId = SecurityUtils.getUserId();
+
         blogVoList = blogList.stream().map(blog -> {
             IndexBlogVo blogVo = new IndexBlogVo();
             SysUser sysUser = groupById.get(blog.getAuthorId()).get(0);
@@ -59,12 +67,21 @@ public class BlogServiceImpl implements BlogService {
             blogVo.setBlogId(blog.getId());
             blogVo.setAuthorFollowed(false); // 测试方法默认设置为未关注
             blogVo.setReleaseTime(blog.getReleaseTime());
-            blogVo.setPreview(blog.getPreview());
+            if (blog.getPreview().length() > BlogConstants.PREVIEW_LENGTH) {
+                blogVo.setPreview(blog.getPreview().substring(0, BlogConstants.PREVIEW_LENGTH) + "······");
+            } else {
+                blogVo.setPreview(blog.getPreview());
+            }
             blogVo.setLikeCnt(blog.getLikeCnt());
             blogVo.setViewCnt(blog.getViewCnt());
             blogVo.setCommentCnt(blog.getCommentCnt());
             blogVo.setSenderName(sysUser.getNickName());
             blogVo.setAvatar(sysUser.getAvatar());
+
+            // 判断是否已点赞
+            int liked = blogLikedMapper.isLiked(userId, blog.getId());
+            blogVo.setLiked(liked > 0);
+
             return blogVo;
         }).collect(Collectors.toList());
 
@@ -110,6 +127,20 @@ public class BlogServiceImpl implements BlogService {
         }
 
         return flag;
+    }
+
+    @Override
+    public long postBlog(PostBlogDto dto) {
+        Long userId = SecurityUtils.getUserId();
+        Blog blog = new Blog();
+        blog.setAuthorId(userId);
+        blog.setPreview(dto.getContent());
+        blog.setStatus(BlogStatusEnum.PUBLISHED.getStatus());
+        blog.setReleaseTime(DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD_HH_MM_SS, new Date()));
+        blog.setType(BlogTypeEnum.TWEET.getType());
+        blog.setPicUrls(dto.getPicUrls());
+        blogMapper.insertBlog(blog);
+        return blog.getId();
     }
 
 

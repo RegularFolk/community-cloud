@@ -49,6 +49,8 @@ public class Blog extends BaseEntity {
      */
     private Integer type;
 
+    private String picUrls;
+
     public Long getId() {
         return id;
     }
@@ -161,6 +163,14 @@ public class Blog extends BaseEntity {
         this.type = type;
     }
 
+    public String getPicUrls() {
+        return picUrls;
+    }
+
+    public void setPicUrls(String picUrls) {
+        this.picUrls = picUrls;
+    }
+
     @Override
     public String toString() {
         return "Blog{" +
@@ -178,6 +188,7 @@ public class Blog extends BaseEntity {
                 ", articleClassify=" + articleClassify +
                 ", personClassify=" + personClassify +
                 ", type=" + type +
-                '}';
+                ", picUrls='" + picUrls + '\'' +
+                "} " + super.toString();
     }
 }

@@ -327,6 +327,23 @@ export default {
 
     },
 
+  },
+  watch: {
+    articleId: {
+      handler(newVal) {
+        this.commentsOrder = '1'
+        this.commentCnt = 0
+        this.commentStatus = '1'
+        this.commentStart = 0
+        this.commentInput = ''
+        this.showCommentReplyId = ''
+        this.showSubCommentReplyId = ''
+        this.commentReplyHolder = '评论的回复:'
+        this.commentReplyInput = ''
+
+        this.getComments(false)
+      }
+    }
   }
 }
 

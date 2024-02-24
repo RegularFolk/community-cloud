@@ -66,7 +66,7 @@
     </div>
 
 
-    <BlogComment :article-id="article.articleId"/>
+    <BlogComment :article-id="article.articleId" ref="comment"/>
 
   </div>
 
@@ -109,7 +109,6 @@ export default {
     if (this.$route.query.articleId !== this.article.articleId) {
       this.loading = true
       this.init()
-
       this.loading = false
     }
   },

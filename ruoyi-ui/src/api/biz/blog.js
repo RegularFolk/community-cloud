@@ -43,3 +43,12 @@ export function like(data) {
     data: data
   })
 }
+
+// 提价想法接口
+export function submitBlog(data) {
+  return request({
+    url: '/blog/blogController/postBlog',
+    method: 'post',
+    data: data
+  })
+}

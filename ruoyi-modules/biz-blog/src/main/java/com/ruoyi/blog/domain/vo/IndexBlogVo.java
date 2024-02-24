@@ -19,6 +19,8 @@ public class IndexBlogVo {
 
     private Long likeCnt;
 
+    private Boolean liked;
+
     private Long commentCnt;
 
     private String avatar;
@@ -37,21 +39,6 @@ public class IndexBlogVo {
 
     public void setCommentCnt(Long commentCnt) {
         this.commentCnt = commentCnt;
-    }
-
-    @Override
-    public String toString() {
-        return "IndexBlogVo{" +
-                "blogId=" + blogId +
-                ", senderName='" + senderName + '\'' +
-                ", releaseTime='" + releaseTime + '\'' +
-                ", isAuthorFollowed=" + isAuthorFollowed +
-                ", preview='" + preview + '\'' +
-                ", viewCnt=" + viewCnt +
-                ", likeCnt=" + likeCnt +
-                ", commentCnt=" + commentCnt +
-                ", avatar='" + avatar + '\'' +
-                '}';
     }
 
     public Long getBlogId() {
@@ -110,4 +97,27 @@ public class IndexBlogVo {
         this.likeCnt = likeCnt;
     }
 
+    public Boolean getLiked() {
+        return liked;
+    }
+
+    public void setLiked(Boolean liked) {
+        this.liked = liked;
+    }
+
+    @Override
+    public String toString() {
+        return "IndexBlogVo{" +
+                "blogId=" + blogId +
+                ", senderName='" + senderName + '\'' +
+                ", releaseTime='" + releaseTime + '\'' +
+                ", isAuthorFollowed=" + isAuthorFollowed +
+                ", preview='" + preview + '\'' +
+                ", viewCnt=" + viewCnt +
+                ", likeCnt=" + likeCnt +
+                ", liked=" + liked +
+                ", commentCnt=" + commentCnt +
+                ", avatar='" + avatar + '\'' +
+                '}';
+    }
 }

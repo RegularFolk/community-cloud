@@ -20,6 +20,7 @@
         <result property="articleClassify" column="article_classify"/>
         <result property="personClassify" column="person_classify"/>
         <result property="type" column="type"/>
+        <result property="picUrls" column="pic_urls"/>
     </resultMap>
 
     <resultMap id="BlogContent" type="com.ruoyi.blog.domain.BlogContent">
@@ -48,6 +49,7 @@
         <if test="articleClassify != null and articleClassify != 0">article_classify,</if>
         <if test="personClassify != null and personClassify != 0">person_classify,</if>
         <if test="type != null and type != 0">type,</if>
+        <if test="picUrls != null and picUrls != ''">pic_urls,</if>
         author_id
         ) values(
         <if test="title != null and title != ''">#{title},</if>
@@ -60,13 +62,14 @@
         <if test="articleClassify != null and articleClassify != 0">#{articleClassify},</if>
         <if test="personClassify != null and personClassify != 0">#{personClassify},</if>
         <if test="type != null and type != 0">#{type},</if>
+        <if test="picUrls != null and picUrls != ''">#{picUrls},</if>
         #{authorId}
         )
     </insert>
 
     <sql id="blogColumns">
         id
-        , author_id, title, preview, status, release_time, create_time, like_cnt, view_cnt, comment_cnt, collect_cnt, article_classify, person_classify, type
+        , author_id, title, preview, status, release_time, create_time, like_cnt, view_cnt, comment_cnt, collect_cnt, article_classify, person_classify, type, pic_urls
     </sql>
 
 
@@ -162,11 +165,12 @@
 
 
     <select id="getTempBlogList" resultMap="Blog">
-        select id, author_id, preview, release_time, like_cnt, view_cnt, comment_cnt
+        select
+        <include refid="blogColumns"/>
         from blog
         where deleted = '0'
-          and status = '1'
-          and type = '1'
+        and status = '1'
+        and type = '1'
     </select>
 
     <select id="getArticleList" resultMap="Blog">
