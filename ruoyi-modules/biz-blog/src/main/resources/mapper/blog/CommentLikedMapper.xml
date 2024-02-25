@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--suppress ALL -->
+<mapper namespace="com.ruoyi.blog.mapper.CommentLikedMapper">
+
+    <resultMap id="CommentLiked" type="com.ruoyi.blog.domain.CommentLiked">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="commentId" column="comment_id"/>
+    </resultMap>
+
+    <insert id="insertLike">
+        insert into comment_liked(user_id, comment_id)
+        values (#{userId}, #{commentId})
+    </insert>
+
+    <delete id="deleteLike">
+        delete
+        from comment_liked
+        where user_id = #{userId}
+          and comment_id = #{commentId}
+    </delete>
+
+    <select id="isLiked" resultType="java.lang.Integer">
+        select count(1)
+        from comment_liked
+        where user_id = #{userId}
+          and comment_id = #{commentId}
+    </select>
+
+    <select id="getLikedIds" resultType="java.lang.Long">
+        select comment_id from comment_liked where user_id = #{userId} and comment_id in
+        <foreach collection="commentIdList" item="commentId" open="(" separator="," close=")">
+            #{commentId}
+        </foreach>
+    </select>
+
+
+</mapper>

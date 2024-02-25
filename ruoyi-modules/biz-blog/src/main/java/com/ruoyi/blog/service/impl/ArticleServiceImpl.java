@@ -22,8 +22,8 @@ import com.ruoyi.common.core.utils.DateUtils;
 import com.ruoyi.common.core.utils.StringUtils;
 import com.ruoyi.common.mq.callBack.DefaultCallBack;
 import com.ruoyi.common.mq.constants.MqTopicConstants;
-import com.ruoyi.common.mq.domain.BlogCollectMessage;
-import com.ruoyi.common.mq.domain.BlogViewMessage;
+import com.ruoyi.common.mq.domain.blog.CollectMessage;
+import com.ruoyi.common.mq.domain.blog.ViewMessage;
 import com.ruoyi.common.mq.enums.OperateType;
 import com.ruoyi.common.security.utils.SecurityUtils;
 import com.ruoyi.system.api.RemoteUserService;
@@ -264,7 +264,7 @@ public class ArticleServiceImpl implements ArticleService {
         int likedFlag = blogLikedMapper.isLiked(userId, articleId);
 
         // 消息通知下游增加计数
-        BlogViewMessage message = new BlogViewMessage();
+        ViewMessage message = new ViewMessage();
         message.setBlogId(articleId);
         message.setMessageId(articleId);
         rocketmqTemplate.asyncSendOrderly(
@@ -310,7 +310,7 @@ public class ArticleServiceImpl implements ArticleService {
 
         if (flag > 0) {
             // 通知下游改变收藏计数
-            BlogCollectMessage message = new BlogCollectMessage();
+            CollectMessage message = new CollectMessage();
             message.setBlogId(dto.getId());
             message.setMessageId(dto.getId());
             message.setOperateType(OperateType.ADD);
@@ -355,7 +355,7 @@ public class ArticleServiceImpl implements ArticleService {
 
         if (flag > 0) {
             // 通知下游改变收藏计数
-            BlogCollectMessage message = new BlogCollectMessage();
+            CollectMessage message = new CollectMessage();
             message.setBlogId(dto.getId());
             message.setMessageId(dto.getId());
             message.setOperateType(OperateType.CANCEL);

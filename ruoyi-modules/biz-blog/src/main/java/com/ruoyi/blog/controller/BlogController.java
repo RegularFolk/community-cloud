@@ -2,6 +2,7 @@ package com.ruoyi.blog.controller;
 
 import com.ruoyi.blog.domain.dto.BlogLikeDto;
 import com.ruoyi.blog.domain.dto.PostBlogDto;
+import com.ruoyi.blog.domain.vo.BlogDetailVo;
 import com.ruoyi.blog.domain.vo.IndexBlogVo;
 import com.ruoyi.blog.service.BlogService;
 import com.ruoyi.common.core.domain.R;
@@ -46,5 +47,13 @@ public class BlogController extends BaseController {
         return flag > 0 ? R.ok() : R.fail("提交失败！请稍后重试或者联系管理员");
     }
 
+    /**
+     * 获取想法完整内容
+     */
+    @GetMapping("/getBlog/{blogId}")
+    public R<BlogDetailVo> getBlogDetail(@PathVariable("blogId") Long blogId) {
+        BlogDetailVo vo = blogService.getBlogDetail(blogId);
+        return R.ok(vo);
+    }
 
 }

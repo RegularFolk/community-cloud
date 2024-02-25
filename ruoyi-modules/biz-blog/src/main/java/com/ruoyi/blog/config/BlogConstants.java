@@ -9,7 +9,7 @@ public class BlogConstants {
     public static final int COMMENT_STEP = 3;
 
     // 预览长度
-    public static final int PREVIEW_LENGTH = 300;
+    public static final int PREVIEW_LENGTH = 150;
 
     // 默认个人分类名称
     public static final String DEFAULT_PERSON_CLASSIFICATION = "默认分类";

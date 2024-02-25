@@ -1,6 +1,6 @@
 package com.ruoyi.mqConsumers.consumers.blog_collect;
 
-import com.ruoyi.common.mq.domain.BlogCollectMessage;
+import com.ruoyi.common.mq.domain.blog.CollectMessage;
 import com.ruoyi.common.mq.enums.OperateType;
 import com.ruoyi.mqConsumers.service.BlogService;
 import org.slf4j.Logger;
@@ -17,7 +17,7 @@ public class CollectHandler {
 
     private static final Logger log = LoggerFactory.getLogger(CollectHandler.class);
 
-    public void handle(BlogCollectMessage message) {
+    public void handle(CollectMessage message) {
         Long blogId = message.getBlogId();
         OperateType typeEnum = message.getOperateType();
 

@@ -55,15 +55,29 @@
                 <div style="margin-right: 10px;padding-top: 4px"><i class="el-icon-time"/>{{ pComment.sendTime }}</div>
               </div>
               <div style="display: flex;flex-wrap: wrap">
+
                 <div class="hover-pointer"
                      @click="showSubCommentInput(pComment.id, '',true)">
                   <i class="el-icon-chat-line-square"/>
                   <span style="margin-left: 5px">回复</span>
                 </div>
-                <div class="hover-pointer" style="margin-left: 20px">
-                  <i class="el-icon-thumb"/>
-                  <span style="margin-left: 5px">{{ pComment.likeCnt }}</span>
-                </div>
+
+                <el-tooltip v-if="!pComment.liked" class="item" content="点赞" effect="dark" placement="top">
+                  <div class="hover-pointer" style="margin-left: 20px"
+                       @click="likeComment(true, pComment.id, pComment)">
+                    <i class="el-icon-thumb"/>
+                    <span style="margin-left: 5px">{{ pComment.likeCnt }}</span>
+                  </div>
+                </el-tooltip>
+
+                <el-tooltip v-if="pComment.liked" class="item" content="已点赞" effect="dark" placement="top">
+                  <div class="hover-pointer" style="margin-left: 20px"
+                       @click="likeComment(false, pComment.id, pComment)">
+                    <i class="el-icon-check"/>
+                    <span style="margin-left: 5px">{{ pComment.likeCnt }}</span>
+                  </div>
+                </el-tooltip>
+
               </div>
             </div>
             <div style="margin-bottom: 10px">
@@ -95,10 +109,24 @@
                     <i class="el-icon-chat-line-square"/>
                     <span style="margin-left: 5px">回复</span>
                   </div>
-                  <div class="hover-pointer" style="margin-left: 20px">
-                    <i class="el-icon-thumb"/>
-                    <span style="margin-left: 5px">{{ subComment.likeCnt }}</span>
-                  </div>
+
+                  <el-tooltip v-if="!subComment.liked" class="item" content="点赞" effect="dark" placement="top">
+                    <div class="hover-pointer" style="margin-left: 20px"
+                         @click="likeComment(true, subComment.id, subComment)">
+                      <i class="el-icon-thumb"/>
+                      <span style="margin-left: 5px">{{ subComment.likeCnt }}</span>
+                    </div>
+                  </el-tooltip>
+
+                  <el-tooltip v-if="subComment.liked" class="item" content="已点赞" effect="dark" placement="top">
+                    <div class="hover-pointer" style="margin-left: 20px"
+                         @click="likeComment(false, subComment.id, subComment)">
+                      <i class="el-icon-check"/>
+                      <span style="margin-left: 5px">{{ subComment.likeCnt }}</span>
+                    </div>
+                  </el-tooltip>
+
+
                 </div>
 
               </div>
@@ -165,7 +193,7 @@
 
 <script>
 
-import {getComment, postComment} from "@/api/biz/blog";
+import {commentLike, getComment, postComment} from "@/api/biz/blog";
 
 export default {
   name: 'BlogComment',
@@ -191,7 +219,8 @@ export default {
           senderName: '',
           senderId: '',
           receiverId: '',
-          subComments: []
+          subComments: [],
+          liked: false
         }
       ],
 
@@ -213,6 +242,33 @@ export default {
     }
   },
   methods: {
+    //评论点赞/取消点赞，flag：是否已点赞
+    likeComment(flag, commentId, comment) {
+      let operate = flag ? 1 : 2;
+      let dto = {
+        commentId: commentId,
+        operateType: operate
+      }
+      this.submitLike(dto, comment)
+    },
+    // 提交点赞请求
+    submitLike(dto, comment) {
+      commentLike(dto).then(resp => {
+        if (resp.code === 200) {
+          if (dto.operateType === 1) {
+            comment.likeCnt += 1
+          } else if (dto.operateType === 2) {
+            comment.likeCnt -= 1
+          }
+          comment.liked = !comment.liked
+        } else {
+          this.$message({
+            message: resp.msg,
+            type: 'error'
+          })
+        }
+      })
+    },
     // 改变评论的排序方式
     changeOrder(label) {
       this.getComments(true)
@@ -253,6 +309,9 @@ export default {
         }
 
         this.commentCnt = resp.data.commentTotal
+
+        this.$emit('commentCntUpdated', this.commentCnt)
+
         if (!refreshFlag) {
           this.commentStart += 3
         }

@@ -7,6 +7,8 @@ public class MqConsumerGroupConstants {
 
     public static final String LIKE_GROUP = "consumer_group_biz_blog_like";
 
+    public static final String COMMENT_LIKE_GROUP = "consumer_group_biz_comment_like";
+
     public static final String VIEW_GROUP = "consumer_group_biz_blog_view";
 
     public static final String COMMENT_GROUP = "consumer_group_biz_blog_comment";

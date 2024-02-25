@@ -7,6 +7,8 @@ public class MqTopicConstants {
 
     public static final String LIKE_TOPIC = "topic_biz_blog_like";
 
+    public static final String COMMENT_LIKE_TOPIC = "topic_biz_blog_comment_like";
+
     public static final String VIEW_TOPIC = "topic_biz_blog_view";
 
     public static final String COMMENT_TOPIC = "topic_biz_blog_comment";

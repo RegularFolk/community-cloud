@@ -43,6 +43,8 @@ public class BlogCommentVo {
 
         private Long receiverId;
 
+        private Boolean liked;
+
         private List<CommentUnit> subComments = new ArrayList<>();
 
         public void packFromBlogComment(BlogComment blogComment, SysUser sender, SysUser receiver) {
@@ -150,6 +152,14 @@ public class BlogCommentVo {
             this.receiverId = receiverId;
         }
 
+        public Boolean getLiked() {
+            return liked;
+        }
+
+        public void setLiked(Boolean liked) {
+            this.liked = liked;
+        }
+
         @Override
         public String toString() {
             return "CommentUnit{" +
@@ -163,6 +173,7 @@ public class BlogCommentVo {
                     ", content='" + content + '\'' +
                     ", senderId=" + senderId +
                     ", receiverId=" + receiverId +
+                    ", liked=" + liked +
                     ", subComments=" + subComments +
                     '}';
         }

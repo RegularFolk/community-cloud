@@ -66,7 +66,7 @@
     </div>
 
 
-    <BlogComment :article-id="article.articleId" ref="comment"/>
+    <BlogComment ref="comment" :article-id="article.articleId" @commentCntUpdated="updateCommentCnt"/>
 
   </div>
 
@@ -148,6 +148,10 @@ export default {
         }
       })
     },
+    // 评论总数更新
+    updateCommentCnt(commentCnt) {
+      this.article.commentCnt = commentCnt
+    },
     // 收藏随笔
     addCollect() {
       this.buttonLoading = true
@@ -157,6 +161,7 @@ export default {
       collect(dto).then(resp => {
         if (resp.code === 200) {
           this.article.collected = true
+          this.article.collectCnt += 1
           this.$message({
             message: '收藏成功！',
             type: 'success'
@@ -187,6 +192,7 @@ export default {
         cancelCollect(dto).then(resp => {
           if (resp.code === 200) {
             this.article.collected = false
+            this.article.collectCnt -= 1
             this.$message({
               type: 'success',
               message: '操作成功!'
@@ -233,6 +239,12 @@ export default {
       like(dto).then(resp => {
         if (resp.code === 200) {
           this.article.liked = !this.article.liked
+          if (dto.operateType === 1) {
+            this.article.likeCnt += 1
+          } else if (dto.operateType === 2) {
+            this.article.likeCnt -= 1
+          }
+
           this.$message({
             message: '操作成功！',
             type: 'success'

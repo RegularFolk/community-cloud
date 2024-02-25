@@ -1,7 +1,7 @@
 package com.ruoyi.mqConsumers.consumers.blog_view;
 
 
-import com.ruoyi.common.mq.domain.BlogViewMessage;
+import com.ruoyi.common.mq.domain.blog.ViewMessage;
 import com.ruoyi.mqConsumers.service.BlogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +17,7 @@ public class ViewHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ViewHandler.class);
 
-    public void handle(BlogViewMessage message) {
+    public void handle(ViewMessage message) {
         Long blogId = message.getBlogId();
         int flag = blogService.addViewCnt(blogId);
 

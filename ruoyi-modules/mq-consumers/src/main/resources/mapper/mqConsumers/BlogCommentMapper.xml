@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--suppress ALL -->
+<mapper namespace="com.ruoyi.mqConsumers.mapper.BlogCommentMapper">
+
+    <update id="increaseLikeCnt">
+        update blog_comment
+        set like_cnt = like_cnt + 1
+        where id = #{commentId}
+    </update>
+
+    <update id="decreaseLikeCnt">
+        update blog_comment
+        set like_cnt = like_cnt - 1
+        where id = #{commentId}
+    </update>
+</mapper>

@@ -1,5 +1,7 @@
 package com.ruoyi.blog.domain.vo;
 
+import java.util.List;
+
 /**
  * 推荐页面博客对象
  */
@@ -24,6 +26,8 @@ public class IndexBlogVo {
     private Long commentCnt;
 
     private String avatar;
+
+    private List<String> picUrlList;
 
     public String getAvatar() {
         return avatar;
@@ -105,6 +109,14 @@ public class IndexBlogVo {
         this.liked = liked;
     }
 
+    public List<String> getPicUrlList() {
+        return picUrlList;
+    }
+
+    public void setPicUrlList(List<String> picUrlList) {
+        this.picUrlList = picUrlList;
+    }
+
     @Override
     public String toString() {
         return "IndexBlogVo{" +
@@ -118,6 +130,7 @@ public class IndexBlogVo {
                 ", liked=" + liked +
                 ", commentCnt=" + commentCnt +
                 ", avatar='" + avatar + '\'' +
+                ", picUrlList=" + picUrlList +
                 '}';
     }
 }

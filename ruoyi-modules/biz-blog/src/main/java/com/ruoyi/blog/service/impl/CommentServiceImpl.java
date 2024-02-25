@@ -3,19 +3,22 @@ package com.ruoyi.blog.service.impl;
 import com.ruoyi.blog.config.BlogConstants;
 import com.ruoyi.blog.domain.Blog;
 import com.ruoyi.blog.domain.BlogComment;
+import com.ruoyi.blog.domain.dto.CommentLikeDto;
 import com.ruoyi.blog.domain.dto.GetCommentDto;
 import com.ruoyi.blog.domain.dto.PostCommentDto;
 import com.ruoyi.blog.domain.vo.BlogCommentVo;
 import com.ruoyi.blog.enums.CommentOrderEnum;
 import com.ruoyi.blog.mapper.BlogCommentMapper;
 import com.ruoyi.blog.mapper.BlogMapper;
+import com.ruoyi.blog.mapper.CommentLikedMapper;
 import com.ruoyi.blog.service.CommentService;
 import com.ruoyi.common.core.constant.SecurityConstants;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.mq.callBack.DefaultCallBack;
 import com.ruoyi.common.mq.constants.MqTopicConstants;
-import com.ruoyi.common.mq.domain.BlogCommentMessage;
+import com.ruoyi.common.mq.domain.blog.CommentLikeMessage;
+import com.ruoyi.common.mq.domain.blog.CommentMessage;
 import com.ruoyi.common.mq.enums.OperateType;
 import com.ruoyi.common.security.utils.SecurityUtils;
 import com.ruoyi.system.api.RemoteUserService;
@@ -27,9 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,6 +41,9 @@ public class CommentServiceImpl implements CommentService {
 
     @Resource
     BlogCommentMapper blogCommentMapper;
+
+    @Resource
+    CommentLikedMapper commentLikedMapper;
 
     @Resource
     RemoteUserService remoteUserService;
@@ -100,6 +104,13 @@ public class CommentServiceImpl implements CommentService {
         }
         Map<Long, List<SysUser>> userInfoMap = userInfoRes.getData().stream().collect(Collectors.groupingBy(SysUser::getUserId));
 
+        // 获取是否已点赞信息
+        Long userId = SecurityUtils.getUserId();
+        List<Long> commentIdList = allCommentList.stream().map(BlogComment::getId).collect(Collectors.toList());
+        List<Long> likedCommentIdList = commentLikedMapper.getLikedIds(userId, commentIdList);
+        Set<Long> commentIdSet = new HashSet<>(likedCommentIdList);
+
+
         // 打包数据
         blogCommentVo.setCommentCnt((long) allCommentList.size());
         // if s+2 >= total no more , so has more = total > s + step - 1, total >= s + step
@@ -109,6 +120,7 @@ public class CommentServiceImpl implements CommentService {
             BlogCommentVo.CommentUnit commentUnit = new BlogCommentVo.CommentUnit();
 
             SysUser sender = userInfoMap.get(pc.getSenderId()).get(0);
+            commentUnit.setLiked(commentIdSet.contains(pc.getId()));
             commentUnit.packFromBlogComment(pc, sender, null);
 
             // 获取 subCommentUnit
@@ -120,6 +132,7 @@ public class CommentServiceImpl implements CommentService {
                     SysUser subSender = userInfoMap.get(sc.getSenderId()).get(0);
                     SysUser subReceiver = userInfoMap.get(sc.getReceiverId()).get(0);
                     subCommentUnit.packFromBlogComment(sc, subSender, subReceiver);
+                    subCommentUnit.setLiked(commentIdSet.contains(sc.getId()));
 
                     return subCommentUnit;
                 }).sorted((a, b) -> {
@@ -165,7 +178,7 @@ public class CommentServiceImpl implements CommentService {
 
         if (flag > 0) {
             // 发送消息更新评论计数
-            BlogCommentMessage message = new BlogCommentMessage();
+            CommentMessage message = new CommentMessage();
             message.setBlogId(dto.getBlogId());
             message.setOperateType(OperateType.ADD.getType());
             message.setMessageId(dto.getBlogId());
@@ -179,5 +192,44 @@ public class CommentServiceImpl implements CommentService {
         }
 
         return flag > 0;
+    }
+
+    @Override
+    public int commentLike(CommentLikeDto dto) {
+        int flag = 0;
+        Long userId = SecurityUtils.getUserId();
+        Long commentId = dto.getCommentId();
+        OperateType typeEnum = OperateType.getEnum(dto.getOperateType());
+
+        switch (typeEnum) {
+            case ADD:
+                int cnt = commentLikedMapper.isLiked(userId, commentId);
+                if (cnt == 0) {
+                    flag = commentLikedMapper.insertLike(userId, commentId);
+                }
+                break;
+            case CANCEL:
+                flag = commentLikedMapper.deleteLike(userId, commentId);
+                break;
+            default:
+                // unreachable
+                break;
+        }
+
+        if (flag > 0) {
+            CommentLikeMessage message = new CommentLikeMessage();
+            message.setUserId(userId);
+            message.setCommentId(commentId);
+            message.setMessageId(commentId);
+            message.setOperateType(typeEnum.getType());
+            rocketmqTemplate.asyncSendOrderly(
+                    MqTopicConstants.COMMENT_LIKE_TOPIC,
+                    message,
+                    String.valueOf(message.getMessageId()),
+                    new DefaultCallBack<>(this.getClass(), message)
+            );
+        }
+
+        return flag;
     }
 }

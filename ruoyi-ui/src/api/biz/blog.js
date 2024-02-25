@@ -52,3 +52,24 @@ export function submitBlog(data) {
     data: data
   })
 }
+
+// 查看想法详情接口
+export function getBlogDetail(data) {
+  return request({
+    url: '/blog/blogController/getBlog/' + data,
+    method: 'get'
+  })
+}
+
+// 评论点赞接口
+export function commentLike(data) {
+  return request({
+    url: '/blog/comment/like',
+    method: 'post',
+    data: data
+  })
+}
+
+
+
+

@@ -1,8 +1,9 @@
-package com.ruoyi.common.mq.domain;
+package com.ruoyi.common.mq.domain.blog;
 
+import com.ruoyi.common.mq.domain.BaseMessage;
 import com.ruoyi.common.mq.enums.OperateType;
 
-public class BlogLikeMessage extends BaseMessage{
+public class LikeMessage extends BaseMessage {
 
 
     private Long blogId;
@@ -40,7 +41,7 @@ public class BlogLikeMessage extends BaseMessage{
 
     @Override
     public String toString() {
-        return "BlogLikeMessage{" +
+        return "LikeMessage{" +
                 "messageId=" + getMessageId() +
                 ", blogId=" + blogId +
                 ", operateType=" + operateType +

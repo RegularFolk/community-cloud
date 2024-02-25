@@ -66,7 +66,15 @@
             </div>
             <el-button style="float: right; padding: 10px" type="primary" @click="testMethod()">关注</el-button>
           </div>
-          <div class="card-content">{{ blog.preview }}</div>
+          <div class="card-content">
+            <div style="margin-bottom: 10px;padding: 10px;border-bottom: 1px solid #EEF1F6FF">
+              {{ blog.preview }}
+            </div>
+
+            <BlogPicWall :enable-preview="false" :pic-url-list="blog.picUrlList"/>
+          </div>
+
+
           <div class="card-button">
             <el-badge :value="blog.viewCnt" type="primary">
               <el-button icon="el-icon-search" type="primary" @click="showPost(blog.blogId)">查看</el-button>
@@ -109,7 +117,13 @@
 
         <!-- 测试代码，暂时使用preview -->
         <div style="padding-bottom: 30px">
-          {{ this.showBlog.preview }}
+          <div style="margin-bottom: 10px;padding: 10px;border-bottom: 1px solid #EEF1F6FF">
+            {{ this.showBlog.preview }}
+          </div>
+
+          <BlogPicWall :enable-preview="true" :pic-url-list="showBlog.picUrlList"/>
+
+
         </div>
 
         <BlogComment :article-id="showBlog.blogId"/>
@@ -169,12 +183,13 @@
 <script>
 
 import {getToken} from "@/utils/auth";
-import {getTestBlogs, like, submitBlog, testMq} from "@/api/biz/blog";
+import {getBlogDetail, getTestBlogs, like, submitBlog, testMq} from "@/api/biz/blog";
 import BlogComment from "@/components/BlogComment";
+import BlogPicWall from "@/components/BlogPicWall";
 
 export default {
   name: "Blog",
-  components: {BlogComment},
+  components: {BlogPicWall, BlogComment},
   data() {
     return {
       blogs: [
@@ -188,7 +203,8 @@ export default {
           releaseTime: '',
           senderName: '',
           viewCnt: '',
-          liked: false
+          liked: false,
+          picUrlList: []
         }
       ],
       commentStatus: '1', // 1：加载中，2：加载更多，3：已经到底
@@ -392,8 +408,32 @@ export default {
       })
     },
     showPost(blogId) {
-      this.showBlog = this.blogs.find(u => u.blogId === blogId)
-      this.showPostDetail = true
+      getBlogDetail(blogId).then(resp => {
+        if (resp.code === 200) {
+          let blog = this.blogs.find(u => u.blogId === blogId)
+          blog.viewCnt += 1
+
+          this.showBlog.blogId = blog.blogId
+          this.showBlog.authorFollowed = blog.authorFollowed
+          this.showBlog.avatar = blog.avatar
+          this.showBlog.releaseTime = blog.releaseTime
+          this.showBlog.senderName = blog.senderName
+          this.showBlog.liked = blog.liked
+
+          this.showBlog.viewCnt = resp.data.viewCnt
+          this.showBlog.likeCnt = resp.data.likeCnt
+          this.showBlog.commentCnt = resp.data.commentCnt
+          this.showBlog.preview = resp.data.content
+          this.showBlog.picUrlList = resp.data.picUrlList
+          this.showPostDetail = true
+        } else {
+          this.$message({
+            message: resp.msg,
+            type: 'error'
+          })
+        }
+      })
+
     },
 
     handleClose() {
@@ -418,6 +458,12 @@ export default {
 </script>
 
 <style>
+/* 设置全局样式为flex */
+.flexClass {
+  display: flex;
+  flex-wrap: wrap;
+}
+
 .hover-pointer:hover {
   cursor: pointer;
 }

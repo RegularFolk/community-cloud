@@ -1,6 +1,8 @@
-package com.ruoyi.common.mq.domain;
+package com.ruoyi.common.mq.domain.blog;
 
-public class BlogViewMessage extends BaseMessage{
+import com.ruoyi.common.mq.domain.BaseMessage;
+
+public class ViewMessage extends BaseMessage {
 
     private Long blogId;
 
@@ -14,7 +16,7 @@ public class BlogViewMessage extends BaseMessage{
 
     @Override
     public String toString() {
-        return "BlogViewMessage{" +
+        return "ViewMessage{" +
                 "messageId=" + getMessageId() +
                 ", blogId=" + blogId +
                 '}';

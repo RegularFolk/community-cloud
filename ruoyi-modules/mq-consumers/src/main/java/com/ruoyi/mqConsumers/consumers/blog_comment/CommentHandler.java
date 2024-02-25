@@ -1,6 +1,6 @@
 package com.ruoyi.mqConsumers.consumers.blog_comment;
 
-import com.ruoyi.common.mq.domain.BlogCommentMessage;
+import com.ruoyi.common.mq.domain.blog.CommentMessage;
 import com.ruoyi.mqConsumers.service.BlogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +16,7 @@ public class CommentHandler {
 
     private static final Logger log = LoggerFactory.getLogger(CommentHandler.class);
 
-    public void handle(BlogCommentMessage message) {
+    public void handle(CommentMessage message) {
         Long blogId = message.getBlogId();
         int i = blogService.addCommentCnt(blogId);
         if (i <= 0) {

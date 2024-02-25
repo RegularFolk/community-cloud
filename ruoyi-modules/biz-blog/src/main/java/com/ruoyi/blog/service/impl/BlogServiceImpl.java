@@ -4,6 +4,7 @@ import com.ruoyi.blog.config.BlogConstants;
 import com.ruoyi.blog.domain.Blog;
 import com.ruoyi.blog.domain.dto.BlogLikeDto;
 import com.ruoyi.blog.domain.dto.PostBlogDto;
+import com.ruoyi.blog.domain.vo.BlogDetailVo;
 import com.ruoyi.blog.domain.vo.IndexBlogVo;
 import com.ruoyi.blog.enums.BlogStatusEnum;
 import com.ruoyi.blog.enums.BlogTypeEnum;
@@ -12,10 +13,13 @@ import com.ruoyi.blog.mapper.BlogMapper;
 import com.ruoyi.blog.service.BlogService;
 import com.ruoyi.common.core.constant.SecurityConstants;
 import com.ruoyi.common.core.domain.R;
+import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.utils.DateUtils;
+import com.ruoyi.common.core.utils.StringUtils;
 import com.ruoyi.common.mq.callBack.DefaultCallBack;
 import com.ruoyi.common.mq.constants.MqTopicConstants;
-import com.ruoyi.common.mq.domain.BlogLikeMessage;
+import com.ruoyi.common.mq.domain.blog.LikeMessage;
+import com.ruoyi.common.mq.domain.blog.ViewMessage;
 import com.ruoyi.common.mq.enums.OperateType;
 import com.ruoyi.common.security.utils.SecurityUtils;
 import com.ruoyi.system.api.RemoteUserService;
@@ -25,10 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -82,6 +83,12 @@ public class BlogServiceImpl implements BlogService {
             int liked = blogLikedMapper.isLiked(userId, blog.getId());
             blogVo.setLiked(liked > 0);
 
+            // 获取picUrls
+            String picUrls = blog.getPicUrls();
+            if (picUrls != null && picUrls.length() > 0) {
+                blogVo.setPicUrlList(Arrays.asList(picUrls.split("[,]")));
+            }
+
             return blogVo;
         }).collect(Collectors.toList());
 
@@ -113,7 +120,7 @@ public class BlogServiceImpl implements BlogService {
 
         if (flag > 0) {
             // 通知下游改变点赞计数
-            BlogLikeMessage message = new BlogLikeMessage();
+            LikeMessage message = new LikeMessage();
             message.setOperateType(typeEnum.getType());
             message.setUserId(userId);
             message.setBlogId(blogId);
@@ -141,6 +148,38 @@ public class BlogServiceImpl implements BlogService {
         blog.setPicUrls(dto.getPicUrls());
         blogMapper.insertBlog(blog);
         return blog.getId();
+    }
+
+    @Override
+    public BlogDetailVo getBlogDetail(Long blogId) {
+        BlogDetailVo vo = new BlogDetailVo();
+        Blog blog = new Blog();
+        blog.setId(blogId);
+        List<Blog> list = blogMapper.getArticleList(blog, null, null);
+        if (CollectionUtils.isEmpty(list)) {
+            throw new ServiceException("想法不存在！");
+        }
+        blog = list.get(0);
+        vo.setContent(blog.getPreview());
+        vo.setCommentCnt(blog.getCommentCnt());
+        vo.setViewCnt(blog.getViewCnt());
+        vo.setLikeCnt(blog.getLikeCnt());
+        if (StringUtils.isNotEmpty(blog.getPicUrls())) {
+            vo.setPicUrlList(Arrays.asList(blog.getPicUrls().split("[,]")));
+        }
+
+        // 向下游发送通知
+        ViewMessage message = new ViewMessage();
+        message.setBlogId(blogId);
+        message.setMessageId(blogId);
+        rocketMQTemplate.asyncSendOrderly(
+                MqTopicConstants.VIEW_TOPIC,
+                message,
+                String.valueOf(message.getMessageId()),
+                new DefaultCallBack<>(this.getClass(), message)
+        );
+
+        return vo;
     }
 
 

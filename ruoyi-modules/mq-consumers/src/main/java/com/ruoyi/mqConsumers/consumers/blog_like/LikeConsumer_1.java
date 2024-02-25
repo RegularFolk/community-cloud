@@ -2,8 +2,7 @@ package com.ruoyi.mqConsumers.consumers.blog_like;
 
 import com.ruoyi.common.mq.constants.MqConsumerGroupConstants;
 import com.ruoyi.common.mq.constants.MqTopicConstants;
-import com.ruoyi.common.mq.domain.BlogLikeMessage;
-import com.ruoyi.mqConsumers.consumers.blog_view.ViewConsumer_1;
+import com.ruoyi.common.mq.domain.blog.LikeMessage;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.spring.annotation.ConsumeMode;
 import org.apache.rocketmq.spring.annotation.MessageModel;
@@ -22,7 +21,7 @@ import javax.annotation.Resource;
         consumerGroup = MqConsumerGroupConstants.LIKE_GROUP,
         consumeMode = ConsumeMode.ORDERLY,
         messageModel = MessageModel.CLUSTERING)
-public class LikeConsumer_1 implements RocketMQListener<BlogLikeMessage>, RocketMQPushConsumerLifecycleListener {
+public class LikeConsumer_1 implements RocketMQListener<LikeMessage>, RocketMQPushConsumerLifecycleListener {
 
     @Resource
     private LikeHandler handler;
@@ -30,7 +29,7 @@ public class LikeConsumer_1 implements RocketMQListener<BlogLikeMessage>, Rocket
     private static final Logger log = LoggerFactory.getLogger(LikeConsumer_1.class);
 
     @Override
-    public void onMessage(BlogLikeMessage message) {
+    public void onMessage(LikeMessage message) {
         log.info("LikeConsumer_1 收到消息，message = {}", message);
         handler.handle(message);
     }

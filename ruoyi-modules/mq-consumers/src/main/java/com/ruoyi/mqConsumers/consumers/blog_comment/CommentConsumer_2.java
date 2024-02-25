@@ -2,7 +2,7 @@ package com.ruoyi.mqConsumers.consumers.blog_comment;
 
 import com.ruoyi.common.mq.constants.MqConsumerGroupConstants;
 import com.ruoyi.common.mq.constants.MqTopicConstants;
-import com.ruoyi.common.mq.domain.BlogCommentMessage;
+import com.ruoyi.common.mq.domain.blog.CommentMessage;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.spring.annotation.ConsumeMode;
 import org.apache.rocketmq.spring.annotation.MessageModel;
@@ -21,7 +21,7 @@ import javax.annotation.Resource;
         consumerGroup = MqConsumerGroupConstants.COMMENT_GROUP,
         consumeMode = ConsumeMode.ORDERLY,
         messageModel = MessageModel.CLUSTERING)
-public class CommentConsumer_2 implements RocketMQListener<BlogCommentMessage>, RocketMQPushConsumerLifecycleListener {
+public class CommentConsumer_2 implements RocketMQListener<CommentMessage>, RocketMQPushConsumerLifecycleListener {
 
     @Resource
     CommentHandler handler;
@@ -29,7 +29,7 @@ public class CommentConsumer_2 implements RocketMQListener<BlogCommentMessage>, 
     private static final Logger log = LoggerFactory.getLogger(CommentConsumer_2.class);
 
     @Override
-    public void onMessage(BlogCommentMessage message) {
+    public void onMessage(CommentMessage message) {
         log.info("CommentConsumer_2 收到消息，message = {}", message);
         handler.handle(message);
     }

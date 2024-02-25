@@ -1,6 +1,6 @@
 package com.ruoyi.mqConsumers.consumers.blog_like;
 
-import com.ruoyi.common.mq.domain.BlogLikeMessage;
+import com.ruoyi.common.mq.domain.blog.LikeMessage;
 import com.ruoyi.common.mq.enums.OperateType;
 import com.ruoyi.mqConsumers.service.BlogService;
 import org.slf4j.Logger;
@@ -17,7 +17,7 @@ public class LikeHandler {
 
     private static final Logger log = LoggerFactory.getLogger(LikeHandler.class);
 
-    public void handle(BlogLikeMessage message) {
+    public void handle(LikeMessage message) {
         Long blogId = message.getBlogId();
         OperateType typeEnum = OperateType.getEnum(message.getOperateType());
 
