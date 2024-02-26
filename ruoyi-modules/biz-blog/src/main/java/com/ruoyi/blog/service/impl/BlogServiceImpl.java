@@ -3,19 +3,24 @@ package com.ruoyi.blog.service.impl;
 import com.ruoyi.blog.config.BlogConstants;
 import com.ruoyi.blog.domain.Blog;
 import com.ruoyi.blog.domain.dto.BlogLikeDto;
+import com.ruoyi.blog.domain.dto.BlogListDto;
 import com.ruoyi.blog.domain.dto.PostBlogDto;
 import com.ruoyi.blog.domain.vo.BlogDetailVo;
 import com.ruoyi.blog.domain.vo.IndexBlogVo;
+import com.ruoyi.blog.enums.BlogQueryModeEnum;
 import com.ruoyi.blog.enums.BlogStatusEnum;
 import com.ruoyi.blog.enums.BlogTypeEnum;
 import com.ruoyi.blog.mapper.BlogLikedMapper;
 import com.ruoyi.blog.mapper.BlogMapper;
+import com.ruoyi.blog.service.ArticleService;
 import com.ruoyi.blog.service.BlogService;
 import com.ruoyi.common.core.constant.SecurityConstants;
+import com.ruoyi.common.core.domain.IdDto;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.utils.DateUtils;
 import com.ruoyi.common.core.utils.StringUtils;
+import com.ruoyi.common.core.utils.sql.SqlUtil;
 import com.ruoyi.common.mq.callBack.DefaultCallBack;
 import com.ruoyi.common.mq.constants.MqTopicConstants;
 import com.ruoyi.common.mq.domain.blog.LikeMessage;
@@ -42,18 +47,70 @@ public class BlogServiceImpl implements BlogService {
     private BlogLikedMapper blogLikedMapper;
 
     @Resource
+    private ArticleService articleService;
+
+    @Resource
     private RemoteUserService remoteUserService;
 
     @Resource
     private RocketMQTemplate rocketMQTemplate;
 
+
+    @Override
+    public List<IndexBlogVo> getBlogList(BlogListDto dto) {
+        BlogQueryModeEnum queryMode = BlogQueryModeEnum.getEnum(dto.getQueryMode());
+        List<Blog> blogList = new ArrayList<>();
+        Blog blog = new Blog();
+
+        switch (queryMode) {
+            case BLOG_MANEGE:
+                blog.setAuthorId(SecurityUtils.getUserId());
+                blog.setType(BlogTypeEnum.TWEET.getType());
+                blogList = blogMapper.getArticleList(
+                        blog,
+                        dto.getPageSize(),
+                        SqlUtil.getOffset(dto.getPageNum(), dto.getPageSize()),
+                        queryMode.getOrderEnum().getOrder());
+
+                break;
+            case REGULAR:
+                // TODO 需要重构
+                blog.setType(BlogTypeEnum.TWEET.getType());
+                blogList = blogMapper.getArticleList(
+                        blog,
+                        dto.getPageSize(),
+                        0,
+                        queryMode.getOrderEnum().getOrder());
+                break;
+            default:
+                // unreachable
+                break;
+        }
+
+        return packBlogVoList(blogList);
+
+    }
+
+    @Override
+    public int deletePersonBlog(IdDto dto) {
+        return articleService.deleteArticle(dto);
+    }
+
     @Override
     public List<IndexBlogVo> getRandomBlog() {
         List<Blog> blogList = blogMapper.getTempBlogList();
+
+        return packBlogVoList(blogList);
+
+    }
+
+    // 将数据表中查询出的 blogList 打包为前端需要的数据格式
+    private List<IndexBlogVo> packBlogVoList(List<Blog> blogList) {
         List<IndexBlogVo> blogVoList = new ArrayList<>();
         if (CollectionUtils.isEmpty(blogList)) {
             return blogVoList;
         }
+
         List<Long> idList = blogList.stream().map(Blog::getAuthorId).collect(Collectors.toList());
         R<List<SysUser>> infoByIdsRes = remoteUserService.getInfoByIds(idList, SecurityConstants.INNER);
         List<SysUser> infoByIds = infoByIdsRes.getData();
@@ -91,8 +148,6 @@ public class BlogServiceImpl implements BlogService {
 
             return blogVo;
         }).collect(Collectors.toList());
-
-
         return blogVoList;
     }
 
@@ -155,7 +210,7 @@ public class BlogServiceImpl implements BlogService {
         BlogDetailVo vo = new BlogDetailVo();
         Blog blog = new Blog();
         blog.setId(blogId);
-        List<Blog> list = blogMapper.getArticleList(blog, null, null);
+        List<Blog> list = blogMapper.getArticleList(blog, null, null, null);
         if (CollectionUtils.isEmpty(list)) {
             throw new ServiceException("想法不存在！");
         }

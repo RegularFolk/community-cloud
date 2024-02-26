@@ -2,10 +2,10 @@
   <div style="background-color: #EEF1F6FF">
 
     <!-- 左侧导航栏 -->
-    <div class="fixed-box-left">
+    <div v-show="!loadingPost" class="fixed-box-left">
       <div style="background-color: white">
-        <el-menu v-if="!loadingPost" default-active="1">
-          <el-menu-item index="1" @click="testInterface">
+        <el-menu ref="leftMenu" default-active="1">
+          <el-menu-item index="1" @click="getDefaultPageList()">
             <i class="el-icon-message"/>
             <span slot="title">猜你想看</span>
           </el-menu-item>
@@ -37,7 +37,7 @@
       </div>
     </div>
 
-    <!-- 右侧按钮 -->
+    <!-- 右上角按钮 -->
     <div style="position: fixed;top: 100px;right: 60px">
 
       <div style="margin: 10px">
@@ -46,12 +46,29 @@
         </div>
 
         <div style="margin: 10px">
-          <el-button icon="el-icon-edit" type="warning" @click="showDrawer">想法管理</el-button>
+          <el-button :disabled="queryParam.queryMode === 2" icon="el-icon-s-opportunity" type="warning"
+                     @click="blogManage">我的想法
+          </el-button>
         </div>
 
       </div>
 
     </div>
+
+    <!-- 右下角按钮 -->
+    <div style="position: fixed;bottom: 100px;right: 60px">
+      <el-button v-show="queryParam.queryMode !== 2" :loading="loadingPost" icon="el-icon-refresh" type="danger"
+                 @click="getDefaultPageList">换一批
+      </el-button>
+
+      <el-tooltip class="item" content="已经到底了哦~~" effect="dark" placement="top" :disabled="personBlogHasMore">
+        <el-button v-show="queryParam.queryMode === 2" :disabled="!personBlogHasMore" :loading="loadingPost" icon="el-icon-plus"
+                   type="success" @click="blogManageMore">查看更多
+        </el-button>
+      </el-tooltip>
+
+    </div>
+
 
     <div v-loading="loadingPost" class="recommended-post" style="width: 100%;height: 100%;z-index: 90">
       <el-main>
@@ -64,7 +81,12 @@
               <div>{{ blog.senderName }}</div>
               <div style="margin-top: 10px">{{ blog.releaseTime }}</div>
             </div>
-            <el-button style="float: right; padding: 10px" type="primary" @click="testMethod()">关注</el-button>
+            <el-button v-if="queryParam.queryMode === 1" style="float: right; padding: 10px" type="primary"
+                       @click="testMethod()">关注
+            </el-button>
+            <el-button v-if="queryParam.queryMode === 2" style="float: right; padding: 10px" type="danger"
+                       @click="removeBlog(blog.blogId)">删除
+            </el-button>
           </div>
           <div class="card-content">
             <div style="margin-bottom: 10px;padding: 10px;border-bottom: 1px solid #EEF1F6FF">
@@ -73,7 +95,6 @@
 
             <BlogPicWall :enable-preview="false" :pic-url-list="blog.picUrlList"/>
           </div>
-
 
           <div class="card-button">
             <el-badge :value="blog.viewCnt" type="primary">
@@ -165,10 +186,12 @@
           list-type="picture"
           style="width: 20%"
         >
-          <el-button slot="trigger" :disabled="uploadDisabled" size="medium" style="margin-right: 20px" type="primary">
+          <el-button slot="trigger" :disabled="uploadDisabled" :loading="postBlogLoading" size="medium"
+                     style="margin-right: 20px"
+                     type="primary">
             上传图片
           </el-button>
-          <el-button size="medium" type="success" @click="submitBlog">发表想法</el-button>
+          <el-button :loading="postBlogLoading" size="medium" type="success" @click="submitBlog">发表想法</el-button>
           <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过{{ this.picSizeLimit }}MB，最多上传9张图片</div>
         </el-upload>
 
@@ -183,7 +206,7 @@
 <script>
 
 import {getToken} from "@/utils/auth";
-import {getBlogDetail, getTestBlogs, like, submitBlog, testMq} from "@/api/biz/blog";
+import {deleteBlog, getBlogDetail, getBlogList, getTestBlogs, like, submitBlog, testMq} from "@/api/biz/blog";
 import BlogComment from "@/components/BlogComment";
 import BlogPicWall from "@/components/BlogPicWall";
 
@@ -192,6 +215,14 @@ export default {
   components: {BlogPicWall, BlogComment},
   data() {
     return {
+      queryParam: {
+        pageSize: 8,
+        pageNum: 1,
+        queryMode: 1 // 查询模式：1：正常模式（暂定），2：我的想法
+      },
+      personBlogHasMore: true,
+      postBlogLoading: false,
+
       blogs: [
         {
           authorFollowed: '',
@@ -243,9 +274,105 @@ export default {
     }
   },
   created() {
-    this.getTestBlogList()
+    this.getDefaultPageList()
   },
   methods: {
+    // 个人博客管理查看更多
+    blogManageMore() {
+      if (!this.personBlogHasMore) {
+        this.$message({
+          message: '已经到底了哦~',
+          type: 'warning'
+        })
+        return
+      }
+      this.loadingPost = true
+      if (this.queryParam.queryMode !== 2) {
+        this.queryParam.pageNum = 1
+      }
+      this.queryParam.queryMode = 2
+
+      getBlogList(this.queryParam).then(resp => {
+        if (resp.code === 200) {
+          if (this.queryParam.pageNum === 1) {
+            this.blogs = resp.data
+          } else {
+            this.blogs = this.blogs.concat(resp.data)
+          }
+
+          if (resp.data.length === this.queryParam.pageSize) {
+            this.queryParam.pageNum++
+          } else {
+            this.personBlogHasMore = false
+          }
+
+        } else {
+          this.$message({
+            message: resp.msg,
+            type: 'error'
+          })
+        }
+      }).finally(() => {
+        this.loadingPost = false
+      })
+    },
+    // 重新加载展示blog
+    reloadBlog() {
+      this.loadingPost = true
+      let dto = {
+        pageSize: this.queryParam.pageSize * this.queryParam.pageNum,
+        pageNum: 1,
+        queryMode: this.queryParam.queryMode
+      }
+
+      getBlogList(dto).then(resp => {
+        if (resp.code !== 200) {
+          this.$message({
+            message: resp.msg,
+            type: 'error'
+          })
+        } else {
+          this.blogs = resp.data
+        }
+      }).finally(() => {
+        this.loadingPost = false
+      })
+
+    },
+    // 删除个人想法
+    removeBlog(blogId) {
+      this.$confirm('确定要删除吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        let dto = {
+          id: blogId
+        }
+        deleteBlog(dto).then(resp => {
+          if (resp.code === 200) {
+            this.reloadBlog()
+          } else {
+            this.$message({
+              message: resp.msg,
+              type: 'error'
+            })
+          }
+        })
+      })
+    },
+    // 我的想法管理
+    blogManage() {
+      // 取消左侧标签选中
+      this.$refs.leftMenu.activeIndex = null
+
+      if (this.queryParam.queryMode === 2) {
+        return
+      }
+
+      this.blogManageMore()
+
+    },
     // 提交点赞请求
     postLike(dto) {
       this.likeButtonLoading = true
@@ -329,6 +456,8 @@ export default {
             type: 'error'
           })
         }
+      }).finally(() => {
+        this.postBlogLoading = false
       })
 
       this.drawerVisible = false
@@ -355,6 +484,7 @@ export default {
         type: 'error'
       })
       console.log('图片上传失败！err,file,fileList', err, file, fileList)
+      this.postBlogLoading = false
     },
     // 发表想法，首先上传图片，图片上传完毕后整理URL，连带着文字内容提交后端
     submitBlog() {
@@ -366,6 +496,8 @@ export default {
         })
         return
       }
+
+      this.postBlogLoading = true
 
       if (hasPic) {
         // 调用图片上传，后续流程在回调中实现
@@ -382,7 +514,6 @@ export default {
     // 文件数目变化时的钩子
     fileAppended(file, fileList) {
       this.picList = fileList
-      console.log('picList', this.picList)
       this.uploadDisabled = fileList.length === this.fileUploadLimit
     },
     handleRemove(file, fileList) {
@@ -448,7 +579,33 @@ export default {
       })
 
     },
+    // 左侧导航 猜你想看列表查询
+    getDefaultPageList() {
+      this.personBlogHasMore = true
+      this.loadingPost = true
+      if (this.queryParam.queryMode !== 1) {
+        this.queryParam.pageNum = 1
+      }
 
+      this.queryParam.queryMode = 1
+      this.queryParam.pageSize = 8
+
+      getBlogList(this.queryParam).then(resp => {
+        if (resp.code === 200) {
+
+          this.blogs = resp.data
+
+        } else {
+          this.$message({
+            message: resp.msg,
+            type: 'error'
+          })
+        }
+      }).finally(() => {
+        this.loadingPost = false
+      })
+
+    }
 
 
   }

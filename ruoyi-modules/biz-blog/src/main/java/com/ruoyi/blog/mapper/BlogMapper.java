@@ -27,13 +27,17 @@ public interface BlogMapper {
 
     int deletePersonClassificationById(Long id);
 
-    int deleteBlogById(Long id);
+    int deleteBlogById(@Param("id") Long id, @Param("authorId")Long authorId);
 
     int deleteContentById(Long id);
 
+    /**
+     * Blog 表通用分页查询方法
+     */
     List<Blog> getArticleList(@Param("blog") Blog blog,
                               @Param("pageSize") Integer pageSize,
-                              @Param("offset") Integer offset);
+                              @Param("offset") Integer offset,
+                              @Param("order") Integer order);
 
     List<PersonalClassification> getPersonClassByIds(@Param("idList") List<Long> idList);
 

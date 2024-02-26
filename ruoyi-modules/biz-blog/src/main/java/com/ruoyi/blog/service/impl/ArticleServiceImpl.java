@@ -121,7 +121,7 @@ public class ArticleServiceImpl implements ArticleService {
         blog.setPersonClassify(dto.getClassId());
         blog.setType(BlogTypeEnum.ARTICLE.getType());
         blog.setAuthorId(userId);
-        List<Blog> articleList = blogMapper.getArticleList(blog, null, null);
+        List<Blog> articleList = blogMapper.getArticleList(blog, null, null, null);
         List<Long> idList = articleList.stream().map(Blog::getId).collect(Collectors.toList());
         int cnt = 0;
         if (DeletePersonClassTypeEnum.DELETE_ALL.getType() == dto.getDeleteType()) {
@@ -138,7 +138,8 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public int deleteArticle(IdDto id) {
-        int blogDeleteCnt = blogMapper.deleteBlogById(id.getId());
+        Long userId = SecurityUtils.getUserId();
+        int blogDeleteCnt = blogMapper.deleteBlogById(id.getId(), userId);
         if (blogDeleteCnt == 0) {
             throw new ServiceException("删除失败！");
         }
@@ -161,7 +162,7 @@ public class ArticleServiceImpl implements ArticleService {
         blog.setType(BlogTypeEnum.ARTICLE.getType());
 
         List<Blog> blogList =
-                blogMapper.getArticleList(blog, dto.getPageSize(), (dto.getPageNum() - 1) * dto.getPageSize());
+                blogMapper.getArticleList(blog, dto.getPageSize(), (dto.getPageNum() - 1) * dto.getPageSize(), null);
         if (CollectionUtils.isEmpty(blogList)) {
             return voList;
         }
@@ -250,7 +251,7 @@ public class ArticleServiceImpl implements ArticleService {
         blog.setAuthorId(userId);
         blog.setType(BlogTypeEnum.ARTICLE.getType());
         blog.setId(articleId);
-        List<Blog> articleList = blogMapper.getArticleList(blog, null, null);
+        List<Blog> articleList = blogMapper.getArticleList(blog, null, null, null);
         if (CollectionUtils.isEmpty(articleList)) {
             throw new ServiceException("随笔不存在!");
         }

@@ -64,7 +64,7 @@ public class CommentServiceImpl implements CommentService {
         // 获取评论总数
         Blog blog = new Blog();
         blog.setId(blogId);
-        List<Blog> blogList = blogMapper.getArticleList(blog, null, null);
+        List<Blog> blogList = blogMapper.getArticleList(blog, null, null, null);
         long commentTotal = blogList.get(0).getCommentCnt();
 
 

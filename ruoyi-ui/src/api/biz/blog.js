@@ -70,6 +70,24 @@ export function commentLike(data) {
   })
 }
 
+// blog 列表查询接口
+export function getBlogList(data) {
+  return request({
+    url: '/blog/blogController/list',
+    method: 'post',
+    data: data
+  })
+}
+
+// blog 删除接口
+export function deleteBlog(data) {
+  return request({
+    url: '/blog/blogController/delete',
+    method: 'post',
+    data: data
+  })
+}
+
 
 
 

@@ -59,12 +59,17 @@ public class SqlUtil
             return;
         }
         String[] sqlKeywords = StringUtils.split(SQL_REGEX, "\\|");
-        for (String sqlKeyword : sqlKeywords)
-        {
-            if (StringUtils.indexOfIgnoreCase(value, sqlKeyword) > -1)
-            {
+        for (String sqlKeyword : sqlKeywords) {
+            if (StringUtils.indexOfIgnoreCase(value, sqlKeyword) > -1) {
                 throw new UtilException("参数存在SQL注入风险");
             }
         }
+    }
+
+    /**
+     * 根据 pageNum 和 pageSize 获取 offset
+     */
+    public static int getOffset(int pageNum, int pageSize) {
+        return (pageNum - 1) * pageSize;
     }
 }
