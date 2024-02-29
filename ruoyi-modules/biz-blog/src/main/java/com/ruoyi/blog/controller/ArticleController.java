@@ -1,10 +1,7 @@
 package com.ruoyi.blog.controller;
 
 import com.ruoyi.blog.domain.dto.*;
-import com.ruoyi.blog.domain.vo.ArticleCollectQueryVo;
-import com.ruoyi.blog.domain.vo.ArticleQueryVo;
-import com.ruoyi.blog.domain.vo.ArticleVo;
-import com.ruoyi.blog.domain.vo.PersonClassVo;
+import com.ruoyi.blog.domain.vo.*;
 import com.ruoyi.blog.service.ArticleService;
 import com.ruoyi.common.core.domain.IdDto;
 import com.ruoyi.common.core.domain.R;
@@ -117,5 +114,13 @@ public class ArticleController extends BaseController {
         return R.ok(vo);
     }
 
+    /**
+     * 随笔查询（非针对本用户）
+     */
+    @PostMapping("/getPersonalArticle")
+    public R<PersonArticleVo> getPersonalArticle(@RequestBody PersonArticleDto dto) {
+        PersonArticleVo vo = articleService.getPersonalArticle(dto);
+        return R.ok(vo);
+    }
 
 }

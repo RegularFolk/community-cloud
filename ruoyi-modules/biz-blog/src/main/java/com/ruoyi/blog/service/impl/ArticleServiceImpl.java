@@ -7,6 +7,7 @@ import com.ruoyi.blog.domain.BlogContent;
 import com.ruoyi.blog.domain.PersonalClassification;
 import com.ruoyi.blog.domain.dto.*;
 import com.ruoyi.blog.domain.vo.*;
+import com.ruoyi.blog.enums.BlogOrderEnum;
 import com.ruoyi.blog.enums.BlogStatusEnum;
 import com.ruoyi.blog.enums.BlogTypeEnum;
 import com.ruoyi.blog.enums.DeletePersonClassTypeEnum;
@@ -20,6 +21,7 @@ import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.utils.DateUtils;
 import com.ruoyi.common.core.utils.StringUtils;
+import com.ruoyi.common.core.utils.sql.SqlUtil;
 import com.ruoyi.common.mq.callBack.DefaultCallBack;
 import com.ruoyi.common.mq.constants.MqTopicConstants;
 import com.ruoyi.common.mq.domain.blog.CollectMessage;
@@ -369,5 +371,44 @@ public class ArticleServiceImpl implements ArticleService {
         }
 
         return flag;
+    }
+
+    @Override
+    public PersonArticleVo getPersonalArticle(PersonArticleDto dto) {
+        Blog blog = new Blog();
+        blog.setType(BlogTypeEnum.ARTICLE.getType());
+        blog.setAuthorId(dto.getUserId());
+        blog.setStatus(BlogStatusEnum.PUBLISHED.getStatus());
+
+        List<Blog> articleList = blogMapper.getArticleList(
+                blog,
+                dto.getPageSize(),
+                SqlUtil.getOffset(dto.getPageNum(), dto.getPageSize()),
+                BlogOrderEnum.PUBLISH_TIME_DESC.getOrder()
+        );
+
+        if (CollectionUtils.isEmpty(articleList)) {
+            return new PersonArticleVo();
+        }
+        PersonArticleVo vo = new PersonArticleVo();
+
+        List<PersonArticleVo.Unit> unitList = articleList.stream().map(a -> {
+            PersonArticleVo.Unit unit = new PersonArticleVo.Unit();
+            unit.setArticleId(a.getId());
+            unit.setTitle(a.getTitle());
+            unit.setPublishTime(a.getReleaseTime());
+            unit.setCommentCnt(a.getCommentCnt());
+            unit.setLikeCnt(a.getLikeCnt());
+            unit.setViewCnt(a.getViewCnt());
+            unit.setCollectCnt(a.getCollectCnt());
+
+            return unit;
+        }).collect(Collectors.toList());
+
+        long total = blogMapper.getArticleCnt(blog);
+
+        vo.setTotal(total);
+        vo.setList(unitList);
+        return vo;
     }
 }

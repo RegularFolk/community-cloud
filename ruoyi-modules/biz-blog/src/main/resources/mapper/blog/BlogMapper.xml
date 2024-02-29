@@ -197,6 +197,7 @@
             <if test="order == 2">create_time desc</if>
             <if test="order == 3">like_cnt desc</if>
             <if test="order == 4">RAND()</if>
+            <if test="order == 5">release_time desc</if>
         </if>
         <if test="offset != null and pageSize != null and pageSize != 0">
             limit #{pageSize} offset #{offset}
@@ -222,7 +223,9 @@
 
     <select id="getArticleCnt" resultType="java.lang.Long">
         select count(0) from blog
-        where author_id = #{authorId} and deleted = '0'
+        where deleted = '0'
+        <if test="id != null and id != 0">and id = #{id}</if>
+        <if test="authorId != null and authorId != 0">and author_id = #{authorId}</if>
         <if test="title != null and title != ''">and title like "%"#{title}"%"</if>
         <if test="status != null and status != 0">and status = #{status}</if>
         <if test="articleClassify != null and articleClassify != 0">and article_classify = #{articleClassify}</if>

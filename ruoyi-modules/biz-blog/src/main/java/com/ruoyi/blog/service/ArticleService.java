@@ -1,10 +1,7 @@
 package com.ruoyi.blog.service;
 
 import com.ruoyi.blog.domain.dto.*;
-import com.ruoyi.blog.domain.vo.ArticleCollectQueryVo;
-import com.ruoyi.blog.domain.vo.ArticleQueryVo;
-import com.ruoyi.blog.domain.vo.ArticleVo;
-import com.ruoyi.blog.domain.vo.PersonClassVo;
+import com.ruoyi.blog.domain.vo.*;
 import com.ruoyi.common.core.domain.IdDto;
 
 import java.util.List;
@@ -32,4 +29,6 @@ public interface ArticleService {
     ArticleCollectQueryVo collectList(ArticleCollectQueryDto dto);
 
     int cancelCollect(IdDto dto);
+
+    PersonArticleVo getPersonalArticle(PersonArticleDto dto);
 }

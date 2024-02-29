@@ -5,7 +5,9 @@ import com.ruoyi.common.core.exception.ServiceException;
 public enum BlogQueryModeEnum {
 
     REGULAR(1, "正常模式", BlogOrderEnum.RAND),
-    BLOG_MANEGE(2, "个人管理", BlogOrderEnum.TIME_DESC);
+    BLOG_MANEGE(2, "个人管理", BlogOrderEnum.TIME_DESC),
+    LATEST(3, "最新一条", BlogOrderEnum.TIME_DESC),
+    PERSONAL_BLOG(4, "针对个人查询", BlogOrderEnum.TIME_DESC);
 
 
     private final int mode;

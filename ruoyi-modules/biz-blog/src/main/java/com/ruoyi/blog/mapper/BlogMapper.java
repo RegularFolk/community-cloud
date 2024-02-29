@@ -49,6 +49,9 @@ public interface BlogMapper {
 
     List<PersonalClassification> getPersonClassByUserId(Long userId);
 
+    /**
+     * Blog 表通用计数方法
+     */
     long getArticleCnt(Blog blog);
 
     BlogContent getArticleContent(Long articleId);

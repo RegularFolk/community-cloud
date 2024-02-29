@@ -88,4 +88,12 @@ export function collectList(data) {
   })
 }
 
+// 查询指定用户随笔
+export function getPersonArticle(data) {
+  return request({
+    url: '/blog/article/getPersonalArticle',
+    method: 'post',
+    data: data
+  })
+}
 

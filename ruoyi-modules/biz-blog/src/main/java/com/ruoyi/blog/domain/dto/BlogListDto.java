@@ -14,6 +14,8 @@ public class BlogListDto {
      */
     private Integer queryMode;
 
+    private Long userId;
+
     public Integer getPageSize() {
         return pageSize;
     }
@@ -38,12 +40,21 @@ public class BlogListDto {
         this.queryMode = queryMode;
     }
 
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
     @Override
     public String toString() {
         return "BlogListDto{" +
                 "pageSize=" + pageSize +
                 ", pageNum=" + pageNum +
                 ", queryMode=" + queryMode +
+                ", userId=" + userId +
                 '}';
     }
 }

@@ -82,6 +82,26 @@ public class BlogServiceImpl implements BlogService {
                         0,
                         queryMode.getOrderEnum().getOrder());
                 break;
+            case LATEST:
+                blog.setAuthorId(dto.getUserId());
+                blog.setType(BlogTypeEnum.TWEET.getType());
+                blogList = blogMapper.getArticleList(
+                        blog,
+                        1,
+                        0,
+                        queryMode.getOrderEnum().getOrder()
+                );
+                break;
+            case PERSONAL_BLOG:
+                blog.setAuthorId(dto.getUserId());
+                blog.setType(BlogTypeEnum.TWEET.getType());
+                blogList = blogMapper.getArticleList(
+                        blog,
+                        dto.getPageSize(),
+                        SqlUtil.getOffset(dto.getPageNum(), dto.getPageSize()),
+                        queryMode.getOrderEnum().getOrder()
+                );
+                break;
             default:
                 // unreachable
                 break;

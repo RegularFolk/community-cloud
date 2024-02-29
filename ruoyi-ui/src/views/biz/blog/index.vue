@@ -69,88 +69,7 @@
 
     </div>
 
-
-    <div v-loading="loadingPost" class="recommended-post" style="width: 100%;height: 100%;z-index: 90">
-      <el-main>
-        <el-card v-for="blog in this.blogs" :key="blog.blogId" shadow="hover" style="margin-bottom: 20px">
-          <div slot="header" class="clearfix">
-            <div style="width: 60px; float: left">
-              <el-avatar :size="50" :src="blog.avatar"/>
-            </div>
-            <div style="float: left;margin-left: 10px">
-              <div>{{ blog.senderName }}</div>
-              <div style="margin-top: 10px">{{ blog.releaseTime }}</div>
-            </div>
-            <el-button v-if="queryParam.queryMode === 1" style="float: right; padding: 10px" type="primary"
-                       @click="testMethod()">关注
-            </el-button>
-            <el-button v-if="queryParam.queryMode === 2" style="float: right; padding: 10px" type="danger"
-                       @click="removeBlog(blog.blogId)">删除
-            </el-button>
-          </div>
-          <div class="card-content">
-            <div style="margin-bottom: 10px;padding: 10px;border-bottom: 1px solid #EEF1F6FF">
-              {{ blog.preview }}
-            </div>
-
-            <BlogPicWall :enable-preview="false" :pic-url-list="blog.picUrlList"/>
-          </div>
-
-          <div class="card-button">
-            <el-badge :value="blog.viewCnt" type="primary">
-              <el-button icon="el-icon-search" type="primary" @click="showPost(blog.blogId)">查看</el-button>
-            </el-badge>
-          </div>
-          <div v-if="!blog.liked" class="card-button" @click="blogLike(blog.blogId)">
-            <el-badge :value="blog.likeCnt" type="danger">
-              <el-button :loading="likeButtonLoading" icon="el-icon-thumb" type="danger">点赞</el-button>
-            </el-badge>
-          </div>
-
-          <div v-if="blog.liked" class="card-button" @click="blogLikeCancel(blog.blogId)">
-            <el-badge :value="blog.likeCnt" type="success">
-              <el-button :loading="likeButtonLoading" icon="el-icon-thumb" type="success">已点赞</el-button>
-            </el-badge>
-          </div>
-
-        </el-card>
-      </el-main>
-    </div>
-
-    <!-- 想法详情弹窗 -->
-    <el-dialog :before-close="handleClose" :close-on-click-modal="false" :visible.sync="this.showPostDetail"
-               v-if="this.showPostDetail"
-               title="推文详情">
-      <!--   标题下灰色副标题区域   -->
-      <div class="post-sub-title">
-        <div class="post-sub-title-unit">
-          <i class="el-icon-user" style="padding-left: 10px"> {{ this.showBlog.senderName }}</i>
-        </div>
-        <div class="post-sub-title-unit"><i class="el-icon-timer"> 于 {{ this.showBlog.releaseTime }} 发布</i></div>
-        <div class="post-sub-title-unit"><i class="el-icon-view"> 浏览:{{ this.showBlog.viewCnt }}</i></div>
-        <div class="post-sub-title-unit"><i class="el-icon-thumb"> 点赞:{{ this.showBlog.likeCnt }}</i></div>
-        <div class="post-sub-title-unit"><i class="el-icon-chat-line-round"> 评论:{{ this.showBlog.commentCnt }}</i>
-        </div>
-      </div>
-
-      <!--   对话框内容部分   -->
-      <div class="comment-container">
-
-        <!-- 测试代码，暂时使用preview -->
-        <div style="padding-bottom: 30px">
-          <div style="margin-bottom: 10px;padding: 10px;border-bottom: 1px solid #EEF1F6FF">
-            {{ this.showBlog.preview }}
-          </div>
-
-          <BlogPicWall :enable-preview="true" :pic-url-list="showBlog.picUrlList"/>
-
-
-        </div>
-
-        <BlogComment :article-id="showBlog.blogId"/>
-
-      </div>
-    </el-dialog>
+    <BlogCard ref="blogCard"/>
 
     <!-- 编辑想法抽屉 -->
     <el-drawer
@@ -206,13 +125,14 @@
 <script>
 
 import {getToken} from "@/utils/auth";
-import {deleteBlog, getBlogDetail, getBlogList, getTestBlogs, like, submitBlog, testMq} from "@/api/biz/blog";
+import {getBlogList, submitBlog} from "@/api/biz/blog";
 import BlogComment from "@/components/BlogComment";
 import BlogPicWall from "@/components/BlogPicWall";
+import BlogCard from "@/components/BlogCard";
 
 export default {
   name: "Blog",
-  components: {BlogPicWall, BlogComment},
+  components: {BlogCard, BlogPicWall, BlogComment},
   data() {
     return {
       queryParam: {
@@ -238,25 +158,7 @@ export default {
           picUrlList: []
         }
       ],
-      commentStatus: '1', // 1：加载中，2：加载更多，3：已经到底
-      commentStart: 0,
-      blogComments: [
-        // {
-        //   content: '',
-        //   id: '',
-        //   likeCnt: '',
-        //   parentId: '',
-        //   receiverName: '',
-        //   sendTime: '',
-        //   senderAvatar: '',
-        //   senderName: '',
-        //   senderId: '',
-        //   receiverId: '',
-        //   subComments: []
-        // }
-      ],
       loadingPost: true,
-      likeButtonLoading: false,
       drawerVisible: false,
       newBlogInput: '',
       uploadUrl: process.env.VUE_APP_BASE_API + "/file/upload", // 上传的图片服务器地址
@@ -268,15 +170,21 @@ export default {
       picList: [],
       picSizeLimit: 5, // 图片上传大小限制，单位MB
 
-
-      showPostDetail: false,
-      showBlog: {},
     }
   },
   created() {
     this.getDefaultPageList()
   },
+  mounted() {
+    this.initBlogCard()
+  },
   methods: {
+    // 初始化博客卡片
+    initBlogCard() {
+      this.$refs.blogCard.blogs = this.blogs
+      this.$refs.blogCard.queryParam.queryMode = this.queryParam.queryMode
+      this.$refs.blogCard.loadingPost = true
+    },
     // 个人博客管理查看更多
     blogManageMore() {
       if (!this.personBlogHasMore) {
@@ -316,51 +224,6 @@ export default {
         this.loadingPost = false
       })
     },
-    // 重新加载展示blog
-    reloadBlog() {
-      this.loadingPost = true
-      let dto = {
-        pageSize: this.queryParam.pageSize * this.queryParam.pageNum,
-        pageNum: 1,
-        queryMode: this.queryParam.queryMode
-      }
-
-      getBlogList(dto).then(resp => {
-        if (resp.code !== 200) {
-          this.$message({
-            message: resp.msg,
-            type: 'error'
-          })
-        } else {
-          this.blogs = resp.data
-        }
-      }).finally(() => {
-        this.loadingPost = false
-      })
-
-    },
-    // 删除个人想法
-    removeBlog(blogId) {
-      this.$confirm('确定要删除吗？', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        let dto = {
-          id: blogId
-        }
-        deleteBlog(dto).then(resp => {
-          if (resp.code === 200) {
-            this.reloadBlog()
-          } else {
-            this.$message({
-              message: resp.msg,
-              type: 'error'
-            })
-          }
-        })
-      })
-    },
     // 我的想法管理
     blogManage() {
       // 取消左侧标签选中
@@ -372,54 +235,6 @@ export default {
 
       this.blogManageMore()
 
-    },
-    // 提交点赞请求
-    postLike(dto) {
-      this.likeButtonLoading = true
-      like(dto).then(resp => {
-        if (resp.code === 200) {
-          // this.article.liked = !this.article.liked
-          this.blogs.forEach(u => {
-            if (u.blogId === dto.blogId) {
-              u.liked = !u.liked
-              if (dto.operateType === 1) {
-                u.likeCnt += 1
-              } else if (dto.operateType === 2) {
-                u.likeCnt -= 1
-              }
-            }
-          });
-        } else {
-          this.$message({
-            message: resp.msg,
-            type: 'error'
-          })
-        }
-      }).finally(() => {
-        this.likeButtonLoading = false
-      })
-    },
-    // 点赞
-    blogLike(blogId) {
-      let likeDto = {
-        blogId: blogId,
-        operateType: 1
-      }
-      this.postLike(likeDto)
-    },
-    // 取消点赞
-    blogLikeCancel(blogId) {
-      this.$confirm('要取消点赞吗？', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        let likeDto = {
-          blogId: blogId,
-          operateType: 2
-        }
-        this.postLike(likeDto)
-      })
     },
     // 图片上传前校验
     handleBeforeUpload(file) {
@@ -519,15 +334,6 @@ export default {
     handleRemove(file, fileList) {
       this.fileAppended(file, fileList)
     },
-    // 后端接口测试方法
-    testInterface() {
-      testMq()
-
-      this.$message({
-        message: '测试接口已发送请求！',
-        type: 'success'
-      })
-    },
     // 打开编辑想法抽屉
     showDrawer() {
       this.drawerVisible = true
@@ -537,47 +343,6 @@ export default {
         message: '获得响应！\n' + msg,
         type: 'success'
       })
-    },
-    showPost(blogId) {
-      getBlogDetail(blogId).then(resp => {
-        if (resp.code === 200) {
-          let blog = this.blogs.find(u => u.blogId === blogId)
-          blog.viewCnt += 1
-
-          this.showBlog.blogId = blog.blogId
-          this.showBlog.authorFollowed = blog.authorFollowed
-          this.showBlog.avatar = blog.avatar
-          this.showBlog.releaseTime = blog.releaseTime
-          this.showBlog.senderName = blog.senderName
-          this.showBlog.liked = blog.liked
-
-          this.showBlog.viewCnt = resp.data.viewCnt
-          this.showBlog.likeCnt = resp.data.likeCnt
-          this.showBlog.commentCnt = resp.data.commentCnt
-          this.showBlog.preview = resp.data.content
-          this.showBlog.picUrlList = resp.data.picUrlList
-          this.showPostDetail = true
-        } else {
-          this.$message({
-            message: resp.msg,
-            type: 'error'
-          })
-        }
-      })
-
-    },
-
-    handleClose() {
-      this.showPostDetail = false
-    },
-
-    getTestBlogList() {
-      this.loadingPost = true
-      getTestBlogs().then(resp => {
-        this.blogs = resp.data
-        this.loadingPost = false
-      })
-
     },
     // 左侧导航 猜你想看列表查询
     getDefaultPageList() {
@@ -608,6 +373,26 @@ export default {
     }
 
 
+  },
+  watch: {
+    blogs: {
+      handler(nVal) {
+        this.$refs.blogCard.blogs = this.blogs
+
+      }
+    },
+    queryParam: {
+      handler(nVal) {
+        this.$refs.blogCard.queryParam = this.queryParam
+      },
+      // deep 监听，可以监听到对象内部值的变化
+      deep: true
+    },
+    loadingPost: {
+      handler(nVal) {
+        this.$refs.blogCard.loadingPost = this.loadingPost
+      }
+    }
   }
 };
 
