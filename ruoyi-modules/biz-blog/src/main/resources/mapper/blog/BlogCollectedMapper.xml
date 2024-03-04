@@ -66,7 +66,6 @@
         view_cnt,
         collect_cnt
         from blog
-        where author_id = #{userId}
         ) b
         inner join (select blog_id, create_time from blog_collected where user_id = #{userId}) t
         on b.id = t.blog_id

@@ -143,6 +143,7 @@ public class BlogServiceImpl implements BlogService {
             SysUser sysUser = groupById.get(blog.getAuthorId()).get(0);
 
             blogVo.setBlogId(blog.getId());
+            blogVo.setAuthorId(sysUser.getUserId());
             blogVo.setAuthorFollowed(false); // 测试方法默认设置为未关注
             blogVo.setReleaseTime(blog.getReleaseTime());
             if (blog.getPreview().length() > BlogConstants.PREVIEW_LENGTH) {

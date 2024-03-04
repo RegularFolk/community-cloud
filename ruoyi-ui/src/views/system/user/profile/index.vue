@@ -2,7 +2,7 @@
   <div class="app-container">
     <el-row :gutter="20">
       <el-col :span="6" :xs="24">
-        <el-card class="box-card">
+        <el-card class="box-card" v-loading="infoCardLoading">
           <div slot="header" class="clearfix">
             <span>个人信息</span>
           </div>
@@ -11,7 +11,7 @@
             <el-tab-pane label="基本信息" name="basicInfo">
               <div>
                 <div class="text-center">
-                  <userAvatar/>
+                  <userAvatar :editable="user.userId == loginUser.userId" ref="userAvatar"/>
                 </div>
                 <ul class="list-group list-group-striped">
                   <li class="list-group-item">
@@ -30,16 +30,6 @@
                     <div class="pull-right">{{ user.email }}</div>
                   </li>
                   <li class="list-group-item">
-                    <svg-icon icon-class="tree"/>
-                    所属部门
-                    <div v-if="user.dept" class="pull-right">{{ user.dept.deptName }} / {{ postGroup }}</div>
-                  </li>
-                  <li class="list-group-item">
-                    <svg-icon icon-class="peoples"/>
-                    所属角色
-                    <div class="pull-right">{{ roleGroup }}</div>
-                  </li>
-                  <li class="list-group-item">
                     <svg-icon icon-class="date"/>
                     创建日期
                     <div class="pull-right">{{ user.createTime }}</div>
@@ -48,11 +38,11 @@
               </div>
             </el-tab-pane>
 
-            <el-tab-pane label="修改资料" name="userinfo">
+            <el-tab-pane label="修改资料" name="userinfo" v-if="user.userId == loginUser.userId">
               <userInfo :user="user"/>
             </el-tab-pane>
 
-            <el-tab-pane label="修改密码" name="resetPwd">
+            <el-tab-pane label="修改密码" name="resetPwd" v-if="user.userId == loginUser.userId">
               <resetPwd/>
             </el-tab-pane>
 
@@ -61,7 +51,7 @@
       </el-col>
 
       <el-col :span="18" :xs="24">
-        <el-card>
+        <el-card v-loading="blogCardLoading">
           <div slot="header" class="clearfix">
             <span>最新动态</span>
           </div>
@@ -75,7 +65,7 @@
 
     <el-row :gutter="20" style="margin-top: 30px">
       <el-col :xs="24">
-        <el-card>
+        <el-card v-loading="articleCardLoading">
           <div slot="header" class="clearfix">
             <span>随笔</span>
           </div>
@@ -93,7 +83,7 @@ import userAvatar from "./userAvatar";
 import userInfo from "./userInfo";
 import resetPwd from "./resetPwd";
 
-import {getUserProfile} from "@/api/system/user";
+import {getUserProfile, getUserProfileById} from "@/api/system/user";
 import BlogReleased from "@/views/system/user/profile/blogReleased";
 import {getBlogList} from "@/api/biz/blog";
 import {getPersonArticle} from "@/api/biz/article"
@@ -104,11 +94,20 @@ export default {
   components: {ArticleReleased, BlogReleased, userAvatar, userInfo, resetPwd},
   data() {
     return {
+      // 当前用户
       user: {},
-      roleGroup: {},
-      postGroup: {},
+      // 查看的用户
+      loginUser: {},
       activeTab: "basicInfo",
+      infoCardLoading: false,
+      blogCardLoading: false,
+      articleCardLoading: false,
     };
+  },
+  activated() {
+    if (this.$route.query.userId !== this.user.userId) {
+      this.initUser()
+    }
   },
   created() {
     /*
@@ -141,6 +140,8 @@ export default {
             type: 'error'
           })
         }
+      }).finally(() => {
+        this.articleCardLoading = false
       })
     },
     // 初始化最新想法
@@ -165,22 +166,56 @@ export default {
             type: 'error'
           })
         }
+      }).finally(() => {
+        this.blogCardLoading = false
       })
     },
     getUser() {
       getUserProfile().then(response => {
-        this.user = response.data;
+        this.infoCardLoading = true
+        this.blogCardLoading = true
+        this.articleCardLoading = true
 
-        /* 最新想法和随笔的初始化放在getUser方法内部，原因是getUser这个请求是异步的，拿出来可能还是来不及初始化 */
-        this.$refs.blogReleased.user = this.user
-        this.initLatestBlog()
+        this.loginUser = response.data;
 
-        this.$refs.articleReleased.userId = this.user.userId
-        this.initArticleReleased()
+        this.initUser()
+      })
+    },
+    initUser() {
+      this.infoCardLoading = true
+      this.blogCardLoading = true
+      this.articleCardLoading = true
+      // 如果路由没有携带userId或者携带的用户Id与登录相等，不需要额外请求
+      if (!this.$route.query.userId || this.$route.query.userId === '0' || this.$route.query.userId === this.loginUser.userId) {
+        this.user = this.loginUser
+        this.infoCardLoading = false
 
-        this.roleGroup = response.roleGroup;
-        this.postGroup = response.postGroup;
-      });
+        this.initRestCards()
+      } else {
+        getUserProfileById({id: this.$route.query.userId}).then(resp => {
+          if (resp.code === 200) {
+            this.user = resp.data
+            this.infoCardLoading = false
+
+            this.$refs.userAvatar.options.img = this.user.avatar
+
+            this.initRestCards()
+          } else {
+            this.$message({
+              message: resp.msg,
+              type: 'error'
+            })
+          }
+        })
+      }
+    },
+    initRestCards() {
+      /* 最新想法和随笔的初始化放在getUser方法内部，原因是getUser这个请求是异步的，拿出来可能还是来不及初始化 */
+      this.$refs.blogReleased.user = this.user
+      this.initLatestBlog()
+
+      this.$refs.articleReleased.userId = this.user.userId
+      this.initArticleReleased()
     },
   }
 };

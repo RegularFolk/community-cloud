@@ -250,7 +250,6 @@ public class ArticleServiceImpl implements ArticleService {
         ArticleVo vo = new ArticleVo();
         Blog blog = new Blog();
         Long userId = SecurityUtils.getUserId();
-        blog.setAuthorId(userId);
         blog.setType(BlogTypeEnum.ARTICLE.getType());
         blog.setId(articleId);
         List<Blog> articleList = blogMapper.getArticleList(blog, null, null, null);
@@ -260,7 +259,7 @@ public class ArticleServiceImpl implements ArticleService {
         blog = articleList.get(0);
         BlogContent articleContent = blogMapper.getArticleContent(articleId);
         List<Long> userIdList = new ArrayList<>();
-        userIdList.add(userId);
+        userIdList.add(blog.getAuthorId());
         R<List<SysUser>> r = remoteUserService.getInfoByIds(userIdList, SecurityConstants.INNER);
         SysUser sysUser = r.getData().get(0);
 
@@ -281,6 +280,7 @@ public class ArticleServiceImpl implements ArticleService {
         int collectFlag = blogCollectedMapper.isCollected(articleId, userId);
 
         vo.setArticleId(articleId);
+        vo.setAuthorId(blog.getAuthorId());
         vo.setTitle(blog.getTitle());
         vo.setSenderName(sysUser.getNickName());
         if (StringUtils.isNotEmpty(blog.getReleaseTime())) {

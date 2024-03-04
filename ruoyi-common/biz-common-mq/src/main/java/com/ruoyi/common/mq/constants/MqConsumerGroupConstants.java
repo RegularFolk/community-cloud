@@ -15,6 +15,6 @@ public class MqConsumerGroupConstants {
 
     public static final String COLLECT_GROUP = "consumer_group_biz_blog_collect";
 
-
+    public static final String USER_FOLLOW_GROUP = "consumer_group_biz_user_follow";
 
 }

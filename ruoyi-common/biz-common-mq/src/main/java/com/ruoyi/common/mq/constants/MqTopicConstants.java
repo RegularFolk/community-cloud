@@ -15,6 +15,8 @@ public class MqTopicConstants {
 
     public static final String COLLECT_TOPIC = "topic_biz_blog_collect";
 
+    public static final String USER_FOLLOW_TOPIC = "topic_biz_user_follow";
+
 
 
 

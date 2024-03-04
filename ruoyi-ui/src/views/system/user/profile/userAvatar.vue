@@ -1,6 +1,7 @@
 <template>
   <div>
-    <div class="user-info-head" @click="editCropper()"><img v-bind:src="options.img" title="点击上传头像" class="img-circle img-lg" /></div>
+    <div v-if="editable" class="user-info-head" @click="editCropper()"><img v-bind:src="options.img" title="点击上传头像" class="img-circle img-lg" /></div>
+    <div v-if="!editable"><img v-bind:src="options.img" class="img-circle img-lg" /></div>
     <el-dialog :title="title" :visible.sync="open" width="800px" append-to-body @opened="modalOpened"  @close="closeDialog">
       <el-row>
         <el-col :xs="24" :md="12" :style="{height: '350px'}">
@@ -55,12 +56,18 @@
 
 <script>
 import store from "@/store";
-import { VueCropper } from "vue-cropper";
-import { uploadAvatar } from "@/api/system/user";
-import { debounce } from '@/utils'
+import {VueCropper} from "vue-cropper";
+import {uploadAvatar} from "@/api/system/user";
+import {debounce} from '@/utils'
 
 export default {
-  components: { VueCropper },
+  components: {VueCropper},
+  props: {
+    editable: {
+      type: Boolean,
+      default: true
+    }
+  },
   data() {
     return {
       // 是否显示弹出层
@@ -85,7 +92,9 @@ export default {
   methods: {
     // 编辑头像
     editCropper() {
-      this.open = true;
+      if (this.editable) {
+        this.open = true;
+      }
     },
     // 打开弹出层结束时的回调
     modalOpened() {

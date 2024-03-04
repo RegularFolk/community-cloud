@@ -1,15 +1,6 @@
 package com.ruoyi.system.controller;
 
-import java.util.Arrays;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
+import com.ruoyi.common.core.domain.IdDto;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.utils.StringUtils;
 import com.ruoyi.common.core.utils.file.FileTypeUtils;
@@ -25,6 +16,11 @@ import com.ruoyi.system.api.domain.SysFile;
 import com.ruoyi.system.api.domain.SysUser;
 import com.ruoyi.system.api.model.LoginUser;
 import com.ruoyi.system.service.ISysUserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Arrays;
 
 /**
  * 个人信息 业务处理
@@ -48,8 +44,7 @@ public class SysProfileController extends BaseController
      * 个人信息
      */
     @GetMapping
-    public AjaxResult profile()
-    {
+    public AjaxResult profile() {
         String username = SecurityUtils.getUsername();
         SysUser user = userService.selectUserByUserName(username);
         AjaxResult ajax = AjaxResult.success(user);
@@ -59,12 +54,22 @@ public class SysProfileController extends BaseController
     }
 
     /**
+     * 根据userId查询个人信息
+     */
+    @PostMapping("/getUserInfoById")
+    public AjaxResult getUserInfoById(@RequestBody IdDto dto) {
+        Long userId = dto.getId();
+        SysUser sysUser = userService.selectUserById(userId);
+        return AjaxResult.success(sysUser);
+    }
+
+
+    /**
      * 修改用户
      */
     @Log(title = "个人信息", businessType = BusinessType.UPDATE)
     @PutMapping
-    public AjaxResult updateProfile(@RequestBody SysUser user)
-    {
+    public AjaxResult updateProfile(@RequestBody SysUser user) {
         LoginUser loginUser = SecurityUtils.getLoginUser();
         SysUser currentUser = loginUser.getSysUser();
         currentUser.setNickName(user.getNickName());

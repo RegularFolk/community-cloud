@@ -3,7 +3,7 @@
     <el-main>
       <el-card v-for="blog in this.blogs" :key="blog.blogId" shadow="hover" style="margin-bottom: 20px">
         <div slot="header" class="clearfix">
-          <div style="width: 60px; float: left">
+          <div style="width: 60px; float: left;cursor: pointer" @click="routeToProfile(blog.authorId)">
             <el-avatar :size="50" :src="blog.avatar"/>
           </div>
           <div style="float: left;margin-left: 10px">
@@ -75,7 +75,7 @@
 
         </div>
 
-        <BlogComment :article-id="showBlog.blogId"/>
+        <BlogComment :article-id="showBlog.blogId" @dialogClose="dialogClose"/>
 
       </div>
     </el-dialog>
@@ -131,6 +131,19 @@ export default {
   created() {
   },
   methods: {
+    // 关闭详情弹窗
+    dialogClose() {
+      this.showPostDetail = false
+    },
+    routeToProfile(authorId) {
+      this.$router.push({
+        path: '/user/profile',
+        query: {
+          userId: authorId
+        }
+      })
+
+    },
     testMethod(msg) {
       this.$message({
         message: '获得响应！\n' + msg,

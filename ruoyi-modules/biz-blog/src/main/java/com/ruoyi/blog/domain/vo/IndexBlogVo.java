@@ -9,6 +9,8 @@ public class IndexBlogVo {
 
     private Long blogId;
 
+    private Long authorId;
+
     private String senderName;
 
     private String releaseTime;
@@ -51,6 +53,14 @@ public class IndexBlogVo {
 
     public void setBlogId(Long blogId) {
         this.blogId = blogId;
+    }
+
+    public Long getAuthorId() {
+        return authorId;
+    }
+
+    public void setAuthorId(Long authorId) {
+        this.authorId = authorId;
     }
 
     public String getSenderName() {
@@ -121,6 +131,7 @@ public class IndexBlogVo {
     public String toString() {
         return "IndexBlogVo{" +
                 "blogId=" + blogId +
+                ", authorId=" + authorId +
                 ", senderName='" + senderName + '\'' +
                 ", releaseTime='" + releaseTime + '\'' +
                 ", isAuthorFollowed=" + isAuthorFollowed +

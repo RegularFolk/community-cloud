@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.BizUserMapper">
+
+    <resultMap id="BizUser" type="com.ruoyi.system.domain.BizUser">
+        <result property="userId" column="user_id"/>
+        <result property="followerCnt" column="follower_cnt"/>
+        <result property="subCnt" column="sub_cnt"/>
+        <result property="likeCnt" column="like_cnt"/>
+    </resultMap>
+
+    <update id="increaseSubCnt">
+        update biz_user
+        set sub_cnt = sub_cnt + 1
+        where user_id = #{userId}
+    </update>
+
+    <update id="decreaseSubCnt">
+        update biz_user
+        set sub_cnt = sub_cnt - 1
+        where user_id = #{userId}
+    </update>
+    <select id="getById" resultMap="BizUser">
+        select user_id, follower_cnt, sub_cnt, like_cnt
+        from biz_user
+        where user_id = #{id}
+    </select>
+
+    <select id="getByIdList" resultMap="BizUser">
+        select user_id, follower_cnt, sub_cnt, like_cnt
+        from biz_user where user_id in
+        <foreach collection="idList" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+
+</mapper>

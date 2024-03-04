@@ -43,7 +43,7 @@
 
         <div style="display: flex">
           <!-- 左部头像框 -->
-          <div style="padding-right: 10px">
+          <div style="padding-right: 10px;cursor: pointer" @click="routeToProfile(pComment.senderId)">
             <el-avatar :size="35" :src="pComment.senderAvatar"/>
           </div>
 
@@ -90,7 +90,7 @@
         <div v-for="subComment in pComment.subComments">
           <div style="width: 95%;margin-left: 5%;display: flex">
 
-            <div style="margin-right: 10px">
+            <div style="margin-right: 10px;cursor: pointer" @click="routeToProfile(subComment.senderId)">
               <el-avatar :size="35" :src="subComment.senderAvatar"/>
             </div>
 
@@ -242,6 +242,17 @@ export default {
     }
   },
   methods: {
+    // 跳转到个人主页
+    routeToProfile(authorId) {
+      // 发布一个事件，让父组件关闭该组件所在的弹窗
+      this.$emit('dialogClose')
+      this.$router.push({
+        path: '/user/profile',
+        query: {
+          userId: authorId
+        }
+      })
+    },
     //评论点赞/取消点赞，flag：是否已点赞
     likeComment(flag, commentId, comment) {
       let operate = flag ? 1 : 2;

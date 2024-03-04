@@ -1,6 +1,24 @@
 import request from '@/utils/request'
 import { parseStrEmpty } from "@/utils/ruoyi";
 
+// 获取粉丝列表
+export function followList(data) {
+  return request({
+    url: '/system/follow/followerList',
+    method: 'post',
+    data: data
+  })
+}
+
+// 获取关注者列表
+export function subList(data) {
+  return request({
+    url: '/system/follow/subList',
+    method: 'post',
+    data: data
+  })
+}
+
 // 查询用户列表
 export function listUser(query) {
   return request({
@@ -75,6 +93,15 @@ export function getUserProfile() {
   return request({
     url: '/system/user/profile',
     method: 'get'
+  })
+}
+
+// 根据userId查询用户信息
+export function getUserProfileById(data) {
+  return request({
+    url: '/system/user/profile/getUserInfoById',
+    method: 'post',
+    data: data
   })
 }
 

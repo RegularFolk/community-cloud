@@ -4,6 +4,8 @@ public class ArticleVo {
 
     private Long articleId;
 
+    private Long authorId;
+
     private String title;
 
     private String senderName;
@@ -38,6 +40,14 @@ public class ArticleVo {
 
     public void setArticleId(Long articleId) {
         this.articleId = articleId;
+    }
+
+    public Long getAuthorId() {
+        return authorId;
+    }
+
+    public void setAuthorId(Long authorId) {
+        this.authorId = authorId;
     }
 
     public String getTitle() {
@@ -156,6 +166,7 @@ public class ArticleVo {
     public String toString() {
         return "ArticleVo{" +
                 "articleId=" + articleId +
+                ", authorId=" + authorId +
                 ", title='" + title + '\'' +
                 ", senderName='" + senderName + '\'' +
                 ", publishTime='" + publishTime + '\'' +

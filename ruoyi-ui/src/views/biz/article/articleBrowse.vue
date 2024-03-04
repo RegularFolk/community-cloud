@@ -11,7 +11,7 @@
     <!-- 灰色副标题 -->
     <div class="flexClass sub-title" style="justify-content: space-between">
       <div class="flexClass">
-        <div class="sub-title-item">
+        <div class="sub-title-item" style="cursor: pointer" @click="routeToProfile(article.authorId)">
           <i class="el-icon-user" style="padding-left: 10px"> {{ this.article.senderName }}</i>
         </div>
         <div v-if="article.publishTime" class="sub-title-item"><i class="el-icon-timer"> 于 {{
@@ -128,6 +128,7 @@ export default {
 
       getArticle(this.article.articleId).then(resp => {
         if (resp.code === 200) {
+          this.article.authorId = resp.data.authorId
           this.article.htmlValue = resp.data.contentHtml
           this.article.title = resp.data.title
           this.article.senderName = resp.data.senderName
@@ -145,6 +146,15 @@ export default {
             message: resp.msg,
             type: 'error'
           })
+        }
+      })
+    },
+    // 跳转到用户主页
+    routeToProfile(authorId) {
+      this.$router.push({
+        path: '/user/profile',
+        query: {
+          userId: authorId
         }
       })
     },
