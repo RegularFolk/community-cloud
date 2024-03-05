@@ -1,8 +1,8 @@
-package com.ruoyi.mqConsumers.consumers.blog_collect;
+package com.ruoyi.mqConsumers.consumers.blog;
 
 import com.ruoyi.common.mq.constants.MqConsumerGroupConstants;
 import com.ruoyi.common.mq.constants.MqTopicConstants;
-import com.ruoyi.common.mq.domain.blog.CollectMessage;
+import com.ruoyi.common.mq.domain.BlogMessage;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.spring.annotation.ConsumeMode;
 import org.apache.rocketmq.spring.annotation.MessageModel;
@@ -17,25 +17,25 @@ import javax.annotation.Resource;
 
 @Component
 @RocketMQMessageListener(
-        topic = MqTopicConstants.COLLECT_TOPIC,
-        consumerGroup = MqConsumerGroupConstants.COLLECT_GROUP,
+        topic = MqTopicConstants.BLOG_TOPIC,
+        consumerGroup = MqConsumerGroupConstants.BLOG_GROUP,
         consumeMode = ConsumeMode.ORDERLY,
         messageModel = MessageModel.CLUSTERING)
-public class CollectConsumer_1 implements RocketMQListener<CollectMessage>, RocketMQPushConsumerLifecycleListener {
+public class BLogConsumer_2 implements RocketMQListener<BlogMessage>, RocketMQPushConsumerLifecycleListener {
 
     @Resource
-    private CollectHandler handler;
+    private BlogHandler handler;
 
-    private static final Logger log = LoggerFactory.getLogger(CollectConsumer_1.class);
+    private static final Logger log = LoggerFactory.getLogger(BLogConsumer_2.class);
 
     @Override
-    public void onMessage(CollectMessage message) {
-        log.info("CollectConsumer_1 收到消息，message = {}", message);
+    public void onMessage(BlogMessage message) {
+        log.info("BLogConsumer_2 收到消息，message = {}", message);
         handler.handle(message);
     }
 
     @Override
     public void prepareStart(DefaultMQPushConsumer consumer) {
-        consumer.setInstanceName("CollectConsumer_1");
+        consumer.setInstanceName("BLogConsumer_2");
     }
 }

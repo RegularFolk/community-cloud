@@ -31,7 +31,7 @@
           <i class="el-icon-caret-bottom" />
         </div>
         <el-dropdown-menu slot="dropdown">
-          <router-link to="/user/profile">
+          <router-link :to="personInfoRoute" :key="$route.fullPath">
             <el-dropdown-item>个人中心</el-dropdown-item>
           </router-link>
           <el-dropdown-item @click.native="setting = true">
@@ -47,6 +47,7 @@
 </template>
 
 <script>
+import {getUserProfile} from "@/api/system/user";
 import { mapGetters } from 'vuex'
 import Breadcrumb from '@/components/Breadcrumb'
 import TopNav from '@/components/TopNav'
@@ -91,7 +92,24 @@ export default {
       }
     }
   },
+  data() {
+    return {
+      user: {},
+      personInfoRoute: '/user/profile'
+    }
+  },
+  created() {
+    this.initUser()
+  },
   methods: {
+    // 初始化用户信息
+    initUser() {
+      getUserProfile().then(resp => {
+        this.user = resp.data
+
+        this.personInfoRoute = '/user/profile?userId=' + this.user.userId
+      })
+    },
     toggleSideBar() {
       this.$store.dispatch('app/toggleSideBar')
     },

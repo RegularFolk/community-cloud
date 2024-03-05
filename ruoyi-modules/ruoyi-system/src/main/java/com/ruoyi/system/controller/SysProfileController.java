@@ -16,10 +16,12 @@ import com.ruoyi.system.api.domain.SysFile;
 import com.ruoyi.system.api.domain.SysUser;
 import com.ruoyi.system.api.model.LoginUser;
 import com.ruoyi.system.service.ISysUserService;
+import com.ruoyi.system.service.UserFollowService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import java.util.Arrays;
 
 /**
@@ -33,6 +35,9 @@ public class SysProfileController extends BaseController
 {
     @Autowired
     private ISysUserService userService;
+
+    @Resource
+    private UserFollowService userFollowService;
     
     @Autowired
     private TokenService tokenService;
@@ -60,7 +65,10 @@ public class SysProfileController extends BaseController
     public AjaxResult getUserInfoById(@RequestBody IdDto dto) {
         Long userId = dto.getId();
         SysUser sysUser = userService.selectUserById(userId);
-        return AjaxResult.success(sysUser);
+        Boolean followed = userFollowService.isFollowed(dto);
+        AjaxResult result = AjaxResult.success(sysUser);
+        result.put("followed", followed);
+        return result;
     }
 
 

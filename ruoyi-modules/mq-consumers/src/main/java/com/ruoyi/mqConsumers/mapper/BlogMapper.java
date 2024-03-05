@@ -1,5 +1,7 @@
 package com.ruoyi.mqConsumers.mapper;
 
+import org.apache.ibatis.annotations.Param;
+
 public interface BlogMapper {
 
 
@@ -14,4 +16,12 @@ public interface BlogMapper {
     int increaseLikeCnt(Long blogId);
 
     int decreaseLikeCnt(Long blogId);
+
+    int updateLikeCnt(@Param("blogId") Long blogId, @Param("type") Integer type);
+
+    int updateViewCnt(@Param("blogId") Long blogId, @Param("type") Integer type);
+
+    int updateCommentCnt(@Param("blogId") Long blogId, @Param("type") Integer type);
+
+    int updateCollectCnt(@Param("blogId") Long blogId, @Param("type") Integer type);
 }

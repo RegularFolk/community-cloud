@@ -17,8 +17,8 @@ import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.mq.callBack.DefaultCallBack;
 import com.ruoyi.common.mq.constants.MqTopicConstants;
-import com.ruoyi.common.mq.domain.blog.CommentLikeMessage;
-import com.ruoyi.common.mq.domain.blog.CommentMessage;
+import com.ruoyi.common.mq.domain.BlogMessage;
+import com.ruoyi.common.mq.domain.CommentMessage;
 import com.ruoyi.common.mq.enums.OperateType;
 import com.ruoyi.common.security.utils.SecurityUtils;
 import com.ruoyi.system.api.RemoteUserService;
@@ -177,18 +177,19 @@ public class CommentServiceImpl implements CommentService {
         int flag = blogCommentMapper.putComment(comment);
 
         if (flag > 0) {
-            // 发送消息更新评论计数
-            CommentMessage message = new CommentMessage();
+            // 下游通知blog评论数更新
+
+            BlogMessage message = new BlogMessage();
+            message.setMessageId(dto.getBlogId());
             message.setBlogId(dto.getBlogId());
             message.setOperateType(OperateType.ADD.getType());
-            message.setMessageId(dto.getBlogId());
-
+            message.setType(BlogMessage.MessageType.COMMENT.getType());
             rocketmqTemplate.asyncSendOrderly(
-                    MqTopicConstants.COMMENT_TOPIC,
+                    MqTopicConstants.BLOG_TOPIC,
                     message,
                     String.valueOf(message.getBlogId()),
-                    new DefaultCallBack<>(this.getClass(), message));
-
+                    new DefaultCallBack<>(this.getClass(), message)
+            );
         }
 
         return flag > 0;
@@ -217,17 +218,19 @@ public class CommentServiceImpl implements CommentService {
         }
 
         if (flag > 0) {
-            CommentLikeMessage message = new CommentLikeMessage();
-            message.setUserId(userId);
-            message.setCommentId(commentId);
+            // 下游通知评论点赞数更新
+            CommentMessage message = new CommentMessage();
             message.setMessageId(commentId);
+            message.setCommentId(commentId);
+            message.setType(CommentMessage.MessageType.LIKE.getType());
             message.setOperateType(typeEnum.getType());
             rocketmqTemplate.asyncSendOrderly(
-                    MqTopicConstants.COMMENT_LIKE_TOPIC,
+                    MqTopicConstants.COMMENT_TOPIC,
                     message,
                     String.valueOf(message.getMessageId()),
                     new DefaultCallBack<>(this.getClass(), message)
             );
+
         }
 
         return flag;

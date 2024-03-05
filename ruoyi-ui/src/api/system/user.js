@@ -28,6 +28,15 @@ export function listUser(query) {
   })
 }
 
+// 关注/取消关注 用户
+export function changeUserFollow(data) {
+  return request({
+    url: '/system/follow/followUser',
+    method: 'post',
+    data: data
+  })
+}
+
 // 查询用户详细
 export function getUser(userId) {
   return request({

@@ -23,8 +23,7 @@ import com.ruoyi.common.core.utils.StringUtils;
 import com.ruoyi.common.core.utils.sql.SqlUtil;
 import com.ruoyi.common.mq.callBack.DefaultCallBack;
 import com.ruoyi.common.mq.constants.MqTopicConstants;
-import com.ruoyi.common.mq.domain.blog.LikeMessage;
-import com.ruoyi.common.mq.domain.blog.ViewMessage;
+import com.ruoyi.common.mq.domain.BlogMessage;
 import com.ruoyi.common.mq.enums.OperateType;
 import com.ruoyi.common.security.utils.SecurityUtils;
 import com.ruoyi.system.api.RemoteUserService;
@@ -195,14 +194,15 @@ public class BlogServiceImpl implements BlogService {
         }
 
         if (flag > 0) {
-            // 通知下游改变点赞计数
-            LikeMessage message = new LikeMessage();
-            message.setOperateType(typeEnum.getType());
-            message.setUserId(userId);
-            message.setBlogId(blogId);
+            // 通知下游改变blog点赞计数
+
+            BlogMessage message = new BlogMessage();
             message.setMessageId(blogId);
+            message.setBlogId(blogId);
+            message.setOperateType(typeEnum.getType());
+            message.setType(BlogMessage.MessageType.LIKE.getType());
             rocketMQTemplate.asyncSendOrderly(
-                    MqTopicConstants.LIKE_TOPIC,
+                    MqTopicConstants.BLOG_TOPIC,
                     message,
                     String.valueOf(message.getMessageId()),
                     new DefaultCallBack<>(this.getClass(), message)
@@ -244,12 +244,14 @@ public class BlogServiceImpl implements BlogService {
             vo.setPicUrlList(Arrays.asList(blog.getPicUrls().split("[,]")));
         }
 
-        // 向下游发送通知
-        ViewMessage message = new ViewMessage();
-        message.setBlogId(blogId);
+        // 向下游发送通知,增加blog浏览量计数
+        BlogMessage message = new BlogMessage();
         message.setMessageId(blogId);
+        message.setBlogId(blogId);
+        message.setOperateType(OperateType.ADD.getType());
+        message.setType(BlogMessage.MessageType.VIEW.getType());
         rocketMQTemplate.asyncSendOrderly(
-                MqTopicConstants.VIEW_TOPIC,
+                MqTopicConstants.BLOG_TOPIC,
                 message,
                 String.valueOf(message.getMessageId()),
                 new DefaultCallBack<>(this.getClass(), message)

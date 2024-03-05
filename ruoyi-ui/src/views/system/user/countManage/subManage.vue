@@ -6,11 +6,14 @@
     </el-header>
 
     <el-main>
-      <UserList ref="userList"/>
+
+      <h1 v-if="total === 0">你还没有关注任何人哦</h1>
+
+      <UserList ref="userList" @refreshList="handlePage"/>
     </el-main>
 
     <el-footer>
-      <Pagination :total="total" :page="pageNum" :limit="pageSize" @pagination="handlePage"/>
+      <Pagination v-if="total !== 0" :total="total" :page="pageNum" :limit="pageSize" @pagination="handlePage"/>
     </el-footer>
 
   </div>

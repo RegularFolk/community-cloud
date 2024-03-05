@@ -5,20 +5,10 @@ package com.ruoyi.common.mq.constants;
  */
 public class MqTopicConstants {
 
-    public static final String LIKE_TOPIC = "topic_biz_blog_like";
+    public static final String USER_TOPIC = "topic_biz_user";
 
-    public static final String COMMENT_LIKE_TOPIC = "topic_biz_blog_comment_like";
+    public static final String BLOG_TOPIC = "topic_biz_blog";
 
-    public static final String VIEW_TOPIC = "topic_biz_blog_view";
-
-    public static final String COMMENT_TOPIC = "topic_biz_blog_comment";
-
-    public static final String COLLECT_TOPIC = "topic_biz_blog_collect";
-
-    public static final String USER_FOLLOW_TOPIC = "topic_biz_user_follow";
-
-
-
-
+    public static final String COMMENT_TOPIC = "topic_biz_comment";
 
 }

@@ -9,44 +9,33 @@
           <el-tabs v-model="activeTab">
 
             <el-tab-pane label="基本信息" name="basicInfo">
-              <div>
-                <div class="text-center">
-                  <userAvatar :editable="user.userId == loginUser.userId" ref="userAvatar"/>
-                </div>
-                <ul class="list-group list-group-striped">
-                  <li class="list-group-item">
-                    <svg-icon icon-class="user"/>
-                    用户名称
-                    <div class="pull-right">{{ user.userName }}</div>
-                  </li>
-                  <li class="list-group-item">
-                    <svg-icon icon-class="phone"/>
-                    手机号码
-                    <div class="pull-right">{{ user.phonenumber }}</div>
-                  </li>
-                  <li class="list-group-item">
-                    <svg-icon icon-class="email"/>
-                    用户邮箱
-                    <div class="pull-right">{{ user.email }}</div>
-                  </li>
-                  <li class="list-group-item">
-                    <svg-icon icon-class="date"/>
-                    创建日期
-                    <div class="pull-right">{{ user.createTime }}</div>
-                  </li>
-                </ul>
-              </div>
+              <keep-alive>
+                <UserBasicInfo ref="userBasicInfo"/>
+              </keep-alive>
             </el-tab-pane>
 
             <el-tab-pane label="修改资料" name="userinfo" v-if="user.userId == loginUser.userId">
-              <userInfo :user="user"/>
+              <keep-alive>
+                <userInfo :user="user"/>
+              </keep-alive>
             </el-tab-pane>
 
             <el-tab-pane label="修改密码" name="resetPwd" v-if="user.userId == loginUser.userId">
-              <resetPwd/>
+              <keep-alive>
+                <resetPwd/>
+              </keep-alive>
             </el-tab-pane>
 
           </el-tabs>
+
+          <div v-if="user.userId != loginUser.userId" style="display: flex;justify-content: center">
+            <el-tooltip v-if="!followed" class="item" content="点击以关注" effect="dark" placement="top">
+              <el-button type="success" @click="subUser">关注</el-button>
+            </el-tooltip>
+            <el-tooltip v-if="followed" class="item" content="点击取消关注" effect="dark" placement="top">
+              <el-button type="danger" @click="unSubUser">已关注</el-button>
+            </el-tooltip>
+          </div>
         </el-card>
       </el-col>
 
@@ -55,9 +44,9 @@
           <div slot="header" class="clearfix">
             <span>最新动态</span>
           </div>
-
-          <BlogReleased ref="blogReleased" @getLatestBlog="latestBlog"/>
-
+          <keep-alive>
+            <BlogReleased ref="blogReleased" @getLatestBlog="latestBlog"/>
+          </keep-alive>
         </el-card>
       </el-col>
 
@@ -69,7 +58,9 @@
           <div slot="header" class="clearfix">
             <span>随笔</span>
           </div>
-          <ArticleReleased ref="articleReleased"/>
+          <keep-alive>
+            <ArticleReleased ref="articleReleased"/>
+          </keep-alive>
         </el-card>
       </el-col>
 
@@ -83,15 +74,16 @@ import userAvatar from "./userAvatar";
 import userInfo from "./userInfo";
 import resetPwd from "./resetPwd";
 
-import {getUserProfile, getUserProfileById} from "@/api/system/user";
+import {changeUserFollow, getUserProfile, getUserProfileById} from "@/api/system/user";
 import BlogReleased from "@/views/system/user/profile/blogReleased";
 import {getBlogList} from "@/api/biz/blog";
 import {getPersonArticle} from "@/api/biz/article"
 import ArticleReleased from "@/views/system/user/profile/articleReleased";
+import UserBasicInfo from "@/views/system/user/profile/userBasicInfo";
 
 export default {
   name: "Profile",
-  components: {ArticleReleased, BlogReleased, userAvatar, userInfo, resetPwd},
+  components: {UserBasicInfo, ArticleReleased, BlogReleased, userAvatar, userInfo, resetPwd},
   data() {
     return {
       // 当前用户
@@ -102,10 +94,17 @@ export default {
       infoCardLoading: false,
       blogCardLoading: false,
       articleCardLoading: false,
+      followed: false
     };
   },
   activated() {
-    if (this.$route.query.userId !== this.user.userId) {
+    let routeUserId = this.$route.query.userId;
+    let userId = this.user.userId;
+    let loginUserId = this.loginUser.userId;
+    if ((routeUserId && userId != routeUserId)
+      || (!routeUserId && userId != loginUserId)) {
+      console.log('this.$route.query.userId', this.$route.query.userId)
+      console.log('this.user.userId', userId)
       this.initUser()
     }
   },
@@ -119,7 +118,7 @@ export default {
     *
     * （父子组件的通信：父组件往子组件中传：props或者$refs；子组件往父组件中传：$emit）
     * */
-
+    console.log('created!!!!!')
     this.getUser();
   },
   methods: {
@@ -155,6 +154,46 @@ export default {
 
       this.latestBlog(queryParam)
     },
+    // 关注用户
+    subUser() {
+      let dto = {
+        followId: this.user.userId,
+        operateType: 1
+      }
+      this.submitSub(dto)
+    },
+    // 取消关注
+    unSubUser() {
+      this.$confirm('确定要取消关注吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        let dto = {
+          followId: this.user.userId,
+          operateType: 2
+        }
+        this.submitSub(dto)
+      })
+
+    },
+    // 提交关注请求
+    submitSub(dto) {
+      changeUserFollow(dto).then(resp => {
+        if (resp.code === 200) {
+          this.$message({
+            message: '操作成功！',
+            type: 'success'
+          })
+          this.followed = !this.followed
+        } else {
+          this.$message({
+            message: resp.msg,
+            type: 'error'
+          })
+        }
+      })
+    },
     latestBlog(queryParam) {
       queryParam.userId = this.user.userId
       getBlogList(queryParam).then(resp => {
@@ -171,12 +210,13 @@ export default {
       })
     },
     getUser() {
+      this.infoCardLoading = true
+      this.blogCardLoading = true
+      this.articleCardLoading = true
       getUserProfile().then(response => {
-        this.infoCardLoading = true
-        this.blogCardLoading = true
-        this.articleCardLoading = true
 
         this.loginUser = response.data;
+        this.$refs.userBasicInfo.loginUser = this.loginUser
 
         this.initUser()
       })
@@ -188,6 +228,8 @@ export default {
       // 如果路由没有携带userId或者携带的用户Id与登录相等，不需要额外请求
       if (!this.$route.query.userId || this.$route.query.userId === '0' || this.$route.query.userId === this.loginUser.userId) {
         this.user = this.loginUser
+        this.$refs.userBasicInfo.user = this.user
+
         this.infoCardLoading = false
 
         this.initRestCards()
@@ -195,9 +237,12 @@ export default {
         getUserProfileById({id: this.$route.query.userId}).then(resp => {
           if (resp.code === 200) {
             this.user = resp.data
+            this.$refs.userBasicInfo.user = this.user
             this.infoCardLoading = false
 
-            this.$refs.userAvatar.options.img = this.user.avatar
+            this.followed = resp.followed
+
+            this.$refs.userBasicInfo.$refs.userAvatar.options.img = this.user.avatar
 
             this.initRestCards()
           } else {
@@ -217,6 +262,14 @@ export default {
       this.$refs.articleReleased.userId = this.user.userId
       this.initArticleReleased()
     },
+  },
+  watch: {
+    // 处理参数不一致路由不跳转的问题
+    '$route'(to, from) {
+      if (to.query.userId !== from.query.userId) {
+        this.initUser()
+      }
+    }
   }
 };
 </script>

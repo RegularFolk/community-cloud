@@ -40,4 +40,34 @@
         set like_cnt = like_cnt - 1
         where id = #{blogId}
     </update>
+
+    <update id="updateLikeCnt">
+        update blog set like_cnt
+        <if test="type == 1">= like_cnt + 1</if>
+        <if test="type == 2">= like_cnt - 1</if>
+        where id = #{blogId}
+    </update>
+
+    <update id="updateViewCnt">
+        update blog set view_cnt
+        <if test="type == 1">= view_cnt + 1</if>
+        <if test="type == 2">= view_cnt - 1</if>
+        where id = #{blogId}
+    </update>
+
+    <update id="updateCommentCnt">
+        update blog set comment_cnt
+        <if test="type == 1">= comment_cnt + 1</if>
+        <if test="type == 2">= comment_cnt - 1</if>
+        where id = #{blogId}
+    </update>
+
+    <update id="updateCollectCnt">
+        update blog set collect_cnt
+        <if test="type == 1">= collect_cnt + 1</if>
+        <if test="type == 2">= collect_cnt - 1</if>
+        where id = #{blogId}
+    </update>
+
+
 </mapper>

@@ -16,4 +16,11 @@
         set like_cnt = like_cnt - 1
         where id = #{commentId}
     </update>
+
+    <update id="updateLikeCnt">
+        update blog_comment set like_cnt
+        <if test="type == 1">= like_cnt + 1</if>
+        <if test="type == 2">= like_cnt - 1</if>
+        where id = #{commentId}
+    </update>
 </mapper>

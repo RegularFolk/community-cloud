@@ -1,6 +1,7 @@
 package com.ruoyi.mqConsumers.service.impl;
 
 import com.baomidou.dynamic.datasource.annotation.DS;
+import com.ruoyi.common.mq.domain.UserMessage;
 import com.ruoyi.common.mq.enums.OperateType;
 import com.ruoyi.mqConsumers.mapper.SysUserMapper;
 import com.ruoyi.mqConsumers.service.SysUserService;
@@ -29,6 +30,23 @@ public class SysUserServiceImpl implements SysUserService {
                 // unreachable
                 break;
         }
+
+        return flag;
+    }
+
+    @Override
+    public int handleUserMessage(Long userId, OperateType operateType, UserMessage.MessageType messageType) {
+        int flag = 0;
+
+        switch (messageType) {
+            case FOLLOW:
+                flag = userMapper.changeFollowCnt(userId, operateType.getType());
+                break;
+            default:
+                // unreachable
+                break;
+        }
+
 
         return flag;
     }

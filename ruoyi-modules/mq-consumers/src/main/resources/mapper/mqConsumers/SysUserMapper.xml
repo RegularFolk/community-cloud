@@ -16,4 +16,11 @@
         set follower_cnt = follower_cnt - 1
         where user_id = #{userId}
     </update>
+
+    <update id="changeFollowCnt">
+        update biz_user set follower_cnt =
+        <if test="type == 1">follower_cnt + 1</if>
+        <if test="type == 2">follower_cnt - 1</if>
+        where user_id = #{userId}
+    </update>
 </mapper>

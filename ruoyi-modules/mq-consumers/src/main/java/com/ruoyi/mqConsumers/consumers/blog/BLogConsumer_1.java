@@ -1,8 +1,8 @@
-package com.ruoyi.mqConsumers.consumers.comment_like;
+package com.ruoyi.mqConsumers.consumers.blog;
 
 import com.ruoyi.common.mq.constants.MqConsumerGroupConstants;
 import com.ruoyi.common.mq.constants.MqTopicConstants;
-import com.ruoyi.common.mq.domain.blog.CommentLikeMessage;
+import com.ruoyi.common.mq.domain.BlogMessage;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.spring.annotation.ConsumeMode;
 import org.apache.rocketmq.spring.annotation.MessageModel;
@@ -17,25 +17,25 @@ import javax.annotation.Resource;
 
 @Component
 @RocketMQMessageListener(
-        topic = MqTopicConstants.COMMENT_LIKE_TOPIC,
-        consumerGroup = MqConsumerGroupConstants.COMMENT_LIKE_GROUP,
+        topic = MqTopicConstants.BLOG_TOPIC,
+        consumerGroup = MqConsumerGroupConstants.BLOG_GROUP,
         consumeMode = ConsumeMode.ORDERLY,
         messageModel = MessageModel.CLUSTERING)
-public class CommentLikeConsumer_1 implements RocketMQListener<CommentLikeMessage>, RocketMQPushConsumerLifecycleListener {
+public class BLogConsumer_1 implements RocketMQListener<BlogMessage>, RocketMQPushConsumerLifecycleListener {
 
     @Resource
-    private CommentLikeHandler handler;
+    private BlogHandler handler;
 
-    private static final Logger log = LoggerFactory.getLogger(CommentLikeConsumer_1.class);
+    private static final Logger log = LoggerFactory.getLogger(BLogConsumer_1.class);
 
     @Override
-    public void onMessage(CommentLikeMessage message) {
-        log.info("CommentLikeConsumer_1 收到消息，message = {}", message);
+    public void onMessage(BlogMessage message) {
+        log.info("BLogConsumer_1 收到消息，message = {}", message);
         handler.handle(message);
     }
 
     @Override
     public void prepareStart(DefaultMQPushConsumer consumer) {
-        consumer.setInstanceName("CommentLikeConsumer_1");
+        consumer.setInstanceName("BLogConsumer_1");
     }
 }

@@ -6,7 +6,7 @@ import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.utils.sql.SqlUtil;
 import com.ruoyi.common.mq.callBack.DefaultCallBack;
 import com.ruoyi.common.mq.constants.MqTopicConstants;
-import com.ruoyi.common.mq.domain.user.UserFollowMessage;
+import com.ruoyi.common.mq.domain.UserMessage;
 import com.ruoyi.common.mq.enums.OperateType;
 import com.ruoyi.common.security.utils.SecurityUtils;
 import com.ruoyi.system.api.domain.SysUser;
@@ -19,12 +19,10 @@ import com.ruoyi.system.mapper.SysUserMapper;
 import com.ruoyi.system.service.UserFollowService;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -72,13 +70,14 @@ public class UserFollowServiceImpl implements UserFollowService {
 
 
         if (flag > 0) {
-            UserFollowMessage message = new UserFollowMessage();
+            // 发布消息更新用户粉丝数量
+            UserMessage message = new UserMessage();
             message.setMessageId(dto.getFollowId());
             message.setUserId(dto.getFollowId());
             message.setOperateType(typeEnum.getType());
-            // 发送消息异步更新用户字段
+            message.setType(UserMessage.MessageType.FOLLOW.getType());
             rocketmqTemplate.asyncSendOrderly(
-                    MqTopicConstants.USER_FOLLOW_TOPIC,
+                    MqTopicConstants.USER_TOPIC,
                     message,
                     String.valueOf(message.getMessageId()),
                     new DefaultCallBack<>(this.getClass(), message)
@@ -108,6 +107,11 @@ public class UserFollowServiceImpl implements UserFollowService {
                 userId,
                 dto.getPageSize(),
                 SqlUtil.getOffset(dto.getPageNum(), dto.getPageSize()));
+
+        if (CollectionUtils.isEmpty(idList)) {
+            return new ArrayList<>();
+        }
+
         return packBizUserVoList(userId, idList);
     }
 
@@ -120,6 +124,10 @@ public class UserFollowServiceImpl implements UserFollowService {
                 dto.getPageSize(),
                 SqlUtil.getOffset(dto.getPageNum(), dto.getPageSize())
         );
+
+        if (CollectionUtils.isEmpty(idList)) {
+            return new ArrayList<>();
+        }
 
         return packBizUserVoList(userId, idList);
 

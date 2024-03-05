@@ -10,6 +10,13 @@ public class IdDto {
     @NotNull(message = "Id不可为空！")
     private Long id;
 
+    public IdDto() {
+    }
+
+    public IdDto(Long id) {
+        this.id = id;
+    }
+
     public Long getId() {
         return id;
     }

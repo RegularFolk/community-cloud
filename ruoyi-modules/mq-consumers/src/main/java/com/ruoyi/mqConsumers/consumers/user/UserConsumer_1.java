@@ -1,8 +1,8 @@
-package com.ruoyi.mqConsumers.consumers.user_follow;
+package com.ruoyi.mqConsumers.consumers.user;
 
 import com.ruoyi.common.mq.constants.MqConsumerGroupConstants;
 import com.ruoyi.common.mq.constants.MqTopicConstants;
-import com.ruoyi.common.mq.domain.user.UserFollowMessage;
+import com.ruoyi.common.mq.domain.UserMessage;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
 import org.apache.rocketmq.spring.annotation.ConsumeMode;
 import org.apache.rocketmq.spring.annotation.MessageModel;
@@ -17,24 +17,26 @@ import javax.annotation.Resource;
 
 @Component
 @RocketMQMessageListener(
-        topic = MqTopicConstants.USER_FOLLOW_TOPIC,
-        consumerGroup = MqConsumerGroupConstants.USER_FOLLOW_GROUP,
+        topic = MqTopicConstants.USER_TOPIC,
+        consumerGroup = MqConsumerGroupConstants.USER_GROUP,
         consumeMode = ConsumeMode.ORDERLY,
         messageModel = MessageModel.CLUSTERING)
-public class UserFollowConsumer_2 implements RocketMQListener<UserFollowMessage>, RocketMQPushConsumerLifecycleListener {
-    @Resource
-    private UserFollowHandler handler;
+public class UserConsumer_1 implements RocketMQListener<UserMessage>, RocketMQPushConsumerLifecycleListener {
 
-    private static final Logger log = LoggerFactory.getLogger(UserFollowConsumer_2.class);
+    @Resource
+    private UserHandler handler;
+
+    private static final Logger log = LoggerFactory.getLogger(UserConsumer_1.class);
+
 
     @Override
-    public void onMessage(UserFollowMessage message) {
-        log.info("UserFollowConsumer_2 收到消息，message = {}", message);
+    public void onMessage(UserMessage message) {
+        log.info("UserConsumer_1 收到消息，message = {}", message);
         handler.handle(message);
     }
 
     @Override
     public void prepareStart(DefaultMQPushConsumer consumer) {
-        consumer.setInstanceName("UserFollowConsumer_2");
+        consumer.setInstanceName("UserConsumer_1");
     }
 }

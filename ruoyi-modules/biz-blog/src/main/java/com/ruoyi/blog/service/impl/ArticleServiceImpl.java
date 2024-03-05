@@ -24,8 +24,7 @@ import com.ruoyi.common.core.utils.StringUtils;
 import com.ruoyi.common.core.utils.sql.SqlUtil;
 import com.ruoyi.common.mq.callBack.DefaultCallBack;
 import com.ruoyi.common.mq.constants.MqTopicConstants;
-import com.ruoyi.common.mq.domain.blog.CollectMessage;
-import com.ruoyi.common.mq.domain.blog.ViewMessage;
+import com.ruoyi.common.mq.domain.BlogMessage;
 import com.ruoyi.common.mq.enums.OperateType;
 import com.ruoyi.common.security.utils.SecurityUtils;
 import com.ruoyi.system.api.RemoteUserService;
@@ -265,16 +264,18 @@ public class ArticleServiceImpl implements ArticleService {
 
         int likedFlag = blogLikedMapper.isLiked(userId, articleId);
 
-        // 消息通知下游增加计数
-        ViewMessage message = new ViewMessage();
-        message.setBlogId(articleId);
+        // 消息通知下游增加blog浏览计数
+        BlogMessage message = new BlogMessage();
         message.setMessageId(articleId);
+        message.setBlogId(articleId);
+        message.setType(BlogMessage.MessageType.VIEW.getType());
+        message.setOperateType(OperateType.ADD.getType());
         rocketmqTemplate.asyncSendOrderly(
-                MqTopicConstants.VIEW_TOPIC,
+                MqTopicConstants.BLOG_TOPIC,
                 message,
                 String.valueOf(message.getMessageId()),
-                new DefaultCallBack<>(this.getClass(), message));
-
+                new DefaultCallBack<>(this.getClass(), message)
+        );
 
         // 判断该随笔是否被收藏
         int collectFlag = blogCollectedMapper.isCollected(articleId, userId);
@@ -313,15 +314,18 @@ public class ArticleServiceImpl implements ArticleService {
 
         if (flag > 0) {
             // 通知下游改变收藏计数
-            CollectMessage message = new CollectMessage();
-            message.setBlogId(dto.getId());
+            BlogMessage message = new BlogMessage();
             message.setMessageId(dto.getId());
-            message.setOperateType(OperateType.ADD);
+            message.setBlogId(dto.getId());
+            message.setOperateType(OperateType.ADD.getType());
+            message.setType(BlogMessage.MessageType.COLLECT.getType());
             rocketmqTemplate.asyncSendOrderly(
-                    MqTopicConstants.COLLECT_TOPIC,
+                    MqTopicConstants.BLOG_TOPIC,
                     message,
                     String.valueOf(message.getMessageId()),
-                    new DefaultCallBack<>(this.getClass(), message));
+                    new DefaultCallBack<>(this.getClass(), message)
+            );
+
         }
 
         return flag;
@@ -358,12 +362,13 @@ public class ArticleServiceImpl implements ArticleService {
 
         if (flag > 0) {
             // 通知下游改变收藏计数
-            CollectMessage message = new CollectMessage();
-            message.setBlogId(dto.getId());
+            BlogMessage message = new BlogMessage();
             message.setMessageId(dto.getId());
-            message.setOperateType(OperateType.CANCEL);
+            message.setBlogId(dto.getId());
+            message.setOperateType(OperateType.CANCEL.getType());
+            message.setType(BlogMessage.MessageType.COLLECT.getType());
             rocketmqTemplate.asyncSendOrderly(
-                    MqTopicConstants.COLLECT_TOPIC,
+                    MqTopicConstants.BLOG_TOPIC,
                     message,
                     String.valueOf(message.getMessageId()),
                     new DefaultCallBack<>(this.getClass(), message)
