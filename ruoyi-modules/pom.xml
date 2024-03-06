@@ -15,6 +15,7 @@
         <module>ruoyi-file</module>
         <module>biz-blog</module>
         <module>mq-consumers</module>
+        <module>notify-service</module>
     </modules>
 
     <artifactId>ruoyi-modules</artifactId>

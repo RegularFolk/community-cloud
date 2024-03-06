@@ -1,0 +1,20 @@
+私信功能：
+
+    新增通知服务 Notify-Service
+    新增数据库 biz-notify
+        新增表 text_message
+            字段： id，sender_id，receiver_id，content，receiver_has_read，create_time
+
+        新增表 contact_book (定义：只要双方之间有消息往来，就加入通讯录)
+            字段： user_id，contact_id，create_time
+
+    私信交流使用弹窗的形式，新建弹窗私信组件
+
+    左侧主菜单增加私信，列表展示最近私信过的人（通讯录）
+
+    现有功能改造，增加用户头像 hover 框，里面包含个人基本信息和关注、私信等按钮
+
+
+
+
+

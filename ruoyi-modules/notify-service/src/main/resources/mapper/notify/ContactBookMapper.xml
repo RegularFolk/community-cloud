@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--suppress ALL -->
+<mapper namespace="com.ruoyi.notify.mapper.ContactBookMapper">
+
+    <resultMap id="ContactBook" type="com.ruoyi.notify.domain.ContactBook">
+        <result property="userId" column="user_id"/>
+        <result property="contactId" column="contact_id"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <insert id="insertContact">
+        insert into contact_book(user_id, contact_id)
+        values (#{userId}, #{contactId})
+    </insert>
+
+    <update id="updateContactTime">
+        update contact_book
+        set create_time = #{createTime}
+        where user_id = #{userId}
+          and contact_id = #{contactId}
+    </update>
+
+    <select id="selectContactList" resultMap="ContactBook">
+        select user_id, contact_id, create_time
+        from contact_book
+        where user_id = #{contactBook.userId}
+        <if test="contactBook.contactId != null and contactBook.contactId != 0">and contact_id =
+            #{contactBook.contactId}
+        </if>
+        order by create_time desc
+        <if test="pageSize != null and offset != null and pageSize != 0">
+            limit #{pageSize} offset #{offset}
+        </if>
+    </select>
+
+    <select id="getTotal" resultType="java.lang.Integer">
+        select count(1)
+        from contact_book
+        where user_id = #{userId}
+    </select>
+
+
+</mapper>

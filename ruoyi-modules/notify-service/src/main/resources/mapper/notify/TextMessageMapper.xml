@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--suppress ALL -->
+<mapper namespace="com.ruoyi.notify.mapper.TextMessageMapper">
+
+    <resultMap id="TextMessage" type="com.ruoyi.notify.domain.TextMessage">
+        <id property="id" column="id"/>
+        <result property="senderId" column="sender_id"/>
+        <result property="receiverId" column="receiver_id"/>
+        <result property="content" column="content"/>
+        <result property="receiverHasRead" column="receiver_has_read"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <sql id="messageFields">
+        id, sender_id, receiver_id, content, receiver_has_read, create_time
+    </sql>
+
+    <insert id="insertMessage" useGeneratedKeys="true" keyProperty="id">
+        insert into text_message(sender_id, receiver_id, content)
+        values (#{senderId}, #{receiverId}, #{content})
+    </insert>
+
+    <update id="updateHasReadMsg">
+        update test_message
+        set receiver_has_read = 1
+        where sender_id = #{senderId}
+          and receiverId = #{receiverId}
+          and receiver_has_read = 0;
+    </update>
+
+    <select id="selectUnReadCnt" resultType="java.util.Map">
+        select receiver_id, count(1) as unread_cnt
+        from text_message
+        where receiver_has_read = 0
+        and sender_id = #{userId}
+        and receiver_id in
+        <foreach collection="contactIdList" item="contactId" open="(" separator="," close=")">
+            #{contactId}
+        </foreach>
+        group by receiver_id
+    </select>
+
+    <!-- 自连接 -->
+    <select id="selectMsgPrevView" resultType="java.util.Map">
+        select m1.receiver_id as receiver_id, left (m1.content, 15) as msg_preview
+        from text_message as m1
+             join (select id, text_message) as m2
+        on m1.id = m2.id and m1.create_time &lt; m2.create_time
+        where m2.id is null
+    </select>
+
+    <select id="selectMsgList" resultMap="TextMessage">
+        select
+        <include refid="messageFields"/>
+        from text_message
+        where id &gt; #{startMsgId} and (sender_id = #{userId} and receiver_id = #{contactId})
+        or (sender_id = #{contactId} and receiver_id = #{userId})
+        order by create_time asc
+        limit #{pageSize}
+    </select>
+
+    <select id="selectUnReadMsg" resultMap="TextMessage">
+        select
+        <include refid="messageFields"/>
+        from text_message
+        where sender_id = #{senderId}
+        and receiver_id = #{receiverId}
+        and receiver_has_read = 0
+    </select>
+
+
+</mapper>
