@@ -13,7 +13,7 @@ public interface ContactBookMapper {
 
     int insertContact(ContactBook contactBook);
 
-    int updateContactTime(ContactBook contactBook);
+    int updateContact(ContactBook contactBook);
 
     int getTotal(@Param("userId") Long userId);
 }

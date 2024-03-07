@@ -9,22 +9,24 @@
         <result property="userId" column="user_id"/>
         <result property="contactId" column="contact_id"/>
         <result property="createTime" column="create_time"/>
+        <result property="msgPreview" column="msg_preview"/>
     </resultMap>
 
     <insert id="insertContact">
-        insert into contact_book(user_id, contact_id)
-        values (#{userId}, #{contactId})
+        insert into contact_book(user_id, contact_id, msg_preview)
+        values (#{userId}, #{contactId}, #{msgPreview})
     </insert>
 
-    <update id="updateContactTime">
+    <update id="updateContact">
         update contact_book
-        set create_time = #{createTime}
+        set create_time = #{createTime},
+            msg_preview = #{msgPreview}
         where user_id = #{userId}
           and contact_id = #{contactId}
     </update>
 
     <select id="selectContactList" resultMap="ContactBook">
-        select user_id, contact_id, create_time
+        select user_id, contact_id, create_time, msg_preview
         from contact_book
         where user_id = #{contactBook.userId}
         <if test="contactBook.contactId != null and contactBook.contactId != 0">and contact_id =

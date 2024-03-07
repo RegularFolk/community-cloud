@@ -6,6 +6,7 @@ import com.ruoyi.common.core.domain.ListDto;
 import com.ruoyi.common.core.utils.sql.SqlUtil;
 import com.ruoyi.common.security.utils.SecurityUtils;
 import com.ruoyi.notify.constants.ColumnConstants;
+import com.ruoyi.notify.constants.MessageConfigConstants;
 import com.ruoyi.notify.domain.ContactBook;
 import com.ruoyi.notify.domain.TextMessage;
 import com.ruoyi.notify.domain.dto.MsgListDto;
@@ -46,21 +47,32 @@ public class MessageServiceImpl implements MessageService {
         int flag = textMessageMapper.insertMessage(message);
 
         if (flag > 0) {
-            // 添加联系人，如果已经是联系人，更新时间
-            ContactBook contactBook = new ContactBook();
-            contactBook.setUserId(senderId);
-            contactBook.setContactId(dto.getReceiverId());
-            List<ContactBook> contact = contactBookMapper.selectContactList(contactBook, null, null);
-
-            if (CollectionUtils.isEmpty(contact)) {
-                flag = contactBookMapper.insertContact(contactBook);
-            } else {
-                contactBook.setCreateTime(new Date());
-                flag = contactBookMapper.updateContactTime(contactBook);
+            flag = getAndUpdateContact(dto.getReceiverId(), senderId, dto.getContent());
+            if (flag > 0) {
+                flag = getAndUpdateContact(senderId, dto.getReceiverId(), dto.getContent());
             }
-
         }
 
+        return flag;
+    }
+
+    private int getAndUpdateContact(Long receiverId, Long senderId, String content) {
+        int flag;
+        // 添加联系人，如果已经是联系人，更新时间；注意，联系人是双向的
+        ContactBook contactBook = new ContactBook();
+        contactBook.setUserId(senderId);
+        contactBook.setContactId(receiverId);
+        contactBook.setMsgPreview(content.length() > MessageConfigConstants.MSG_PREVIEW_LIMIT ?
+                content.substring(0, MessageConfigConstants.MSG_PREVIEW_LIMIT) : content);
+        contactBook.setMsgPreview(contactBook.getMsgPreview() + "......");
+        List<ContactBook> contact = contactBookMapper.selectContactList(contactBook, null, null);
+
+        if (CollectionUtils.isEmpty(contact)) {
+            flag = contactBookMapper.insertContact(contactBook);
+        } else {
+            contactBook.setCreateTime(new Date());
+            flag = contactBookMapper.updateContact(contactBook);
+        }
         return flag;
     }
 
@@ -89,14 +101,13 @@ public class MessageServiceImpl implements MessageService {
                 .stream().collect(Collectors.groupingBy(u -> u.get(ColumnConstants.RCV_ID)));
 
         // 查询与每个联系人最新一条消息的前15个字
-        List<Map<String, Object>> msgPreviewList = textMessageMapper.selectMsgPrevView(userId, contactIdList);
-        Map<Object, List<Map<String, Object>>> msgPreviewGroupByRcvId = msgPreviewList
-                .stream().collect(Collectors.groupingBy(m -> m.get(ColumnConstants.RCV_ID)));
+        Map<Long, List<ContactBook>> contactGroupById = contactBookList
+                .stream().collect(Collectors.groupingBy(ContactBook::getContactId));
 
         return contactBookList.stream().map(book -> {
             SysUser sysUser = groupById.get(book.getContactId()).get(0);
             Long unreadCnt = unReadCntGroupByRcvId.get(sysUser.getUserId()).get(0).get(ColumnConstants.UNREAD_CNT);
-            String msgPreview = msgPreviewGroupByRcvId.get(sysUser.getUserId()).get(0).get(ColumnConstants.MSG_PREVIEW).toString();
+            String msgPreview = contactGroupById.get(book.getContactId()).get(0).getMsgPreview();
             ContactListVo vo = new ContactListVo();
             vo.setContactId(sysUser.getUserId());
             vo.setContactName(sysUser.getNickName());

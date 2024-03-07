@@ -8,6 +8,8 @@ public class ContactBook extends BaseEntity {
 
     private Long contactId;
 
+    private String msgPreview;
+
     public Long getUserId() {
         return userId;
     }
@@ -24,11 +26,20 @@ public class ContactBook extends BaseEntity {
         this.contactId = contactId;
     }
 
+    public String getMsgPreview() {
+        return msgPreview;
+    }
+
+    public void setMsgPreview(String msgPreview) {
+        this.msgPreview = msgPreview;
+    }
+
     @Override
     public String toString() {
         return "ContactBook{" +
                 "userId=" + userId +
                 ", contactId=" + contactId +
+                ", msgPreview='" + msgPreview + '\'' +
                 "} " + super.toString();
     }
 }
