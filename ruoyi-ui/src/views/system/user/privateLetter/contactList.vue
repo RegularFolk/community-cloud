@@ -4,7 +4,7 @@
     <div style="display: flex;justify-content: center;border-bottom: 3px solid #EEF1F6FF">
       <h2>联系人</h2>
     </div>
-    <el-main style="height: 1050px">
+    <el-main :loading="contactLoading" style="height: 1050px">
 
       <el-menu @select="selectContact">
 
@@ -38,11 +38,13 @@
 
       </el-menu>
 
-      <div style="display: flex;justify-content: center;">
-        <el-button :disabled="!hasMore" :loading="getMoreBtnLoading" type="text" @click="getMoreContact">
-          查看更多
-        </el-button>
-      </div>
+      <el-tooltip :disabled="hasMore" class="item" content="没有更多了哦" effect="dark" placement="bottom">
+        <div style="display: flex;justify-content: center;">
+          <el-button :disabled="!hasMore" :loading="getMoreBtnLoading" type="text" @click="getContact">
+            查看更多
+          </el-button>
+        </div>
+      </el-tooltip>
 
     </el-main>
 
@@ -53,130 +55,66 @@
 
 <script>
 
+import {getContactList} from "@/api/biz/message";
+
 export default {
   name: 'ContactList',
   data() {
     return {
-      contactList: [
-        {
-          contactId: 2,
-          avatar: 'http://121.43.39.16:8082/ruoyi-test/2024/02/02/ASCII%E8%A1%A8_20240202161511A004.png',
-          contactName: '用户一',
-          unReadCnt: 10,
-          latestMsgPreview: '哦喔喔我我哦我我我我我......'
-        }, {
-          contactId: 3,
-          avatar: 'http://121.43.39.16:8082/ruoyi-test/2024/02/02/ASCII%E8%A1%A8_20240202161511A004.png',
-          contactName: '用户二',
-          unReadCnt: 0,
-          latestMsgPreview: '哦喔喔我我哦我我我我我......'
-        }, {
-          contactId: 4,
-          avatar: 'http://121.43.39.16:8082/ruoyi-test/2024/02/02/ASCII%E8%A1%A8_20240202161511A004.png',
-          contactName: '用户三',
-          unReadCnt: 0,
-          latestMsgPreview: '哦喔喔我我哦我我我我我......'
-        }, {
-          contactId: 5,
-          avatar: 'http://121.43.39.16:8082/ruoyi-test/2024/02/02/ASCII%E8%A1%A8_20240202161511A004.png',
-          contactName: '用户四',
-          unReadCnt: 0,
-          latestMsgPreview: '哦喔喔我我哦我我我我我......'
-        }, {
-          contactId: 6,
-          avatar: 'http://121.43.39.16:8082/ruoyi-test/2024/02/02/ASCII%E8%A1%A8_20240202161511A004.png',
-          contactName: '用户五',
-          unReadCnt: 99,
-          latestMsgPreview: '哦喔喔我我哦我我我我我......'
-        }, {
-          contactId: 7,
-          avatar: 'http://121.43.39.16:8082/ruoyi-test/2024/02/02/ASCII%E8%A1%A8_20240202161511A004.png',
-          contactName: '用户六',
-          unReadCnt: 0,
-          latestMsgPreview: '哦喔喔我我哦我我我我我......'
-        }, {
-          contactId: 7,
-          avatar: 'http://121.43.39.16:8082/ruoyi-test/2024/02/02/ASCII%E8%A1%A8_20240202161511A004.png',
-          contactName: '用户六',
-          unReadCnt: 0,
-          latestMsgPreview: '哦喔喔我我哦我我我我我......'
-        }, {
-          contactId: 7,
-          avatar: 'http://121.43.39.16:8082/ruoyi-test/2024/02/02/ASCII%E8%A1%A8_20240202161511A004.png',
-          contactName: '用户六',
-          unReadCnt: 0,
-          latestMsgPreview: '哦喔喔我我哦我我我我我......'
-        }, {
-          contactId: 7,
-          avatar: 'http://121.43.39.16:8082/ruoyi-test/2024/02/02/ASCII%E8%A1%A8_20240202161511A004.png',
-          contactName: '用户六',
-          unReadCnt: 0,
-          latestMsgPreview: '哦喔喔我我哦我我我我我......'
-        }, {
-          contactId: 7,
-          avatar: 'http://121.43.39.16:8082/ruoyi-test/2024/02/02/ASCII%E8%A1%A8_20240202161511A004.png',
-          contactName: '用户六',
-          unReadCnt: 0,
-          latestMsgPreview: '哦喔喔我我哦我我我我我......'
-        }, {
-          contactId: 7,
-          avatar: 'http://121.43.39.16:8082/ruoyi-test/2024/02/02/ASCII%E8%A1%A8_20240202161511A004.png',
-          contactName: '用户六',
-          unReadCnt: 0,
-          latestMsgPreview: '哦喔喔我我哦我我我我我......'
-        }, {
-          contactId: 7,
-          avatar: 'http://121.43.39.16:8082/ruoyi-test/2024/02/02/ASCII%E8%A1%A8_20240202161511A004.png',
-          contactName: '用户六',
-          unReadCnt: 0,
-          latestMsgPreview: '哦喔喔我我哦我我我我我......'
-        }, {
-          contactId: 7,
-          avatar: 'http://121.43.39.16:8082/ruoyi-test/2024/02/02/ASCII%E8%A1%A8_20240202161511A004.png',
-          contactName: '用户六',
-          unReadCnt: 0,
-          latestMsgPreview: '哦喔喔我我哦我我我我我......'
-        }, {
-          contactId: 7,
-          avatar: 'http://121.43.39.16:8082/ruoyi-test/2024/02/02/ASCII%E8%A1%A8_20240202161511A004.png',
-          contactName: '用户六',
-          unReadCnt: 0,
-          latestMsgPreview: '哦喔喔我我哦我我我我我......'
-        }, {
-          contactId: 7,
-          avatar: 'http://121.43.39.16:8082/ruoyi-test/2024/02/02/ASCII%E8%A1%A8_20240202161511A004.png',
-          contactName: '用户六',
-          unReadCnt: 0,
-          latestMsgPreview: '哦喔喔我我哦我我我我我......'
-        }, {
-          contactId: 7,
-          avatar: 'http://121.43.39.16:8082/ruoyi-test/2024/02/02/ASCII%E8%A1%A8_20240202161511A004.png',
-          contactName: '用户六',
-          unReadCnt: 0,
-          latestMsgPreview: '哦喔喔我我哦我我我我我......'
-        }, {
-          contactId: 7,
-          avatar: 'http://121.43.39.16:8082/ruoyi-test/2024/02/02/ASCII%E8%A1%A8_20240202161511A004.png',
-          contactName: '用户六',
-          unReadCnt: 0,
-          latestMsgPreview: '哦喔喔我我哦我我我我我......'
-        },
-      ],
+      contactList: [],
       hasMore: true,
       getMoreBtnLoading: false,
+      userId: 0,
+      pageNum: 1,
+      pageSize: 2,
+      contactLoading: false,
+      total: 0,
+      contactSelected: '0'
     }
   },
   created() {
+    this.userId = this.$store.state.user.id
+    this.getContact()
   },
   methods: {
     // 选中一个联系人
     selectContact(index, indexPath,) {
       console.log('index', index)
       console.log('indexPath', indexPath)
+
+      this.contactList.find(c => c.contactId == index).unReadCnt = 0
+
+      if (index !== this.contactSelected) {
+        this.contactSelected = index
+        this.$emit('selectContact', parseInt(this.contactSelected))
+      }
     },
     // 查询更多联系人
-    getMoreContact() {
+    getContact() {
+      let dto = {
+        pageNum: this.pageNum,
+        pageSize: this.pageSize
+      }
 
+      this.contactLoading = true
+      getContactList(dto).then(resp => {
+        if (resp.code === 200) {
+          if (resp.data.length < this.pageSize) {
+            this.hasMore = false
+          }
+
+          this.contactList = this.contactList.concat(resp.data)
+          this.total = resp.total
+
+          this.pageNum++
+
+        } else {
+          this.$message({
+            message: resp.msg,
+            type: 'error'
+          })
+        }
+      })
     }
   }
 }

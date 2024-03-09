@@ -6,7 +6,9 @@ import com.ruoyi.blog.service.ArticleService;
 import com.ruoyi.common.core.domain.IdDto;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.web.controller.BaseController;
+import com.ruoyi.common.core.web.domain.AjaxResult;
 import com.ruoyi.common.core.web.page.TableDataInfo;
+import com.ruoyi.common.security.annotation.InnerAuth;
 import com.ruoyi.common.security.utils.SecurityUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -121,6 +123,17 @@ public class ArticleController extends BaseController {
     public R<PersonArticleVo> getPersonalArticle(@RequestBody PersonArticleDto dto) {
         PersonArticleVo vo = articleService.getPersonalArticle(dto);
         return R.ok(vo);
+    }
+
+    /**
+     * 内部接口，新增用户分类
+     */
+    @InnerAuth
+    @PostMapping("/addPersonClass/{userId}/{className}")
+    public AjaxResult addPersonClass(@PathVariable("userId") Long userId,
+                                     @PathVariable("className") String className) {
+        int flag = articleService.addPersonClass(userId, className);
+        return flag > 0 ? AjaxResult.success() : AjaxResult.error("添加失败！");
     }
 
 }

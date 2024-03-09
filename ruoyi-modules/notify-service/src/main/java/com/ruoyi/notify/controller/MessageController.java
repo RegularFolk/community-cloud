@@ -28,8 +28,8 @@ public class MessageController {
      */
     @PostMapping("/send")
     public AjaxResult send(@RequestBody SendDto dto) {
-        int flag = messageService.send(dto);
-        return flag > 0 ? AjaxResult.success() : AjaxResult.error("发送失败！请稍后重试或者联系管理员");
+        long flag = messageService.send(dto);
+        return flag > 0L ? AjaxResult.success(flag) : AjaxResult.error("发送失败！请稍后重试或者联系管理员");
     }
 
     /**

@@ -1,6 +1,7 @@
 <template>
   <div>
-    <el-main>
+
+    <el-main v-if="contactId !== 0">
 
       <el-card shadow="always">
         <div slot="header" style="display: flex;justify-content: space-between">
@@ -17,11 +18,13 @@
           <el-button v-if="!contactor.followed" style="padding: 10px" type="primary">关注</el-button>
         </div>
 
-        <div ref="messageBox" style="height: 650px;overflow-y: auto">
+        <div ref="messageBox" class="msgBox" style="height: 650px;overflow-y: auto">
           <div style="display: flex;justify-content: center;">
-            <el-button :disabled="!hasMore" :loading="getMoreBtnLoading" type="text" @click="getMoreMsg">
-              查看更多
-            </el-button>
+            <el-tooltip class="item" content="到顶啦" effect="dark" placement="top" :disabled="hasMore">
+              <el-button :disabled="!hasMore" :loading="getMoreBtnLoading" type="text" @click="getMoreMsg">
+                查看更多
+              </el-button>
+            </el-tooltip>
           </div>
 
           <div v-for="msg in msgList" :key="msg.id" style="margin: 10px">
@@ -85,6 +88,9 @@
 
 
 <script>
+import {getUserProfileById} from "@/api/system/user";
+import {msgList, pullMsg, sendMSg} from "@/api/biz/message";
+
 export default {
   name: 'DialogBox',
   props: {
@@ -97,147 +103,275 @@ export default {
   data() {
     return {
       contactor: {
-        id: 2,
-        avatar: 'http://121.43.39.16:8082/ruoyi-test/2024/02/02/ASCII%E8%A1%A8_20240202161511A004.png',
-        userName: '若依',
-        followed: true
+        id: 0,
+        avatar: '',
+        userName: '',
+        followed: false
       },
       self: {
-        id: 1,
-        avatar: 'http://121.43.39.16:8082/ruoyi-test/2024/02/02/2b_20240202165949A006.jpg',
-        userName: '超级管理员'
+        id: 0,
+        avatar: '',
+        userName: ''
       },
       msgList: [
-        {
-          id: 1,
-          senderId: 2,
-          receiverId: 1,
-          content: '你好！',
-          receiverHasRead: 1
-        }, {
-          id: 2,
-          senderId: 1,
-          receiverId: 2,
-          content: '您好呀！',
-          receiverHasRead: 1
-        }, {
-          id: 3,
-          senderId: 2,
-          receiverId: 1,
-          content: '帅哥约吗？',
-          receiverHasRead: 1
-        }, {
-          id: 4,
-          senderId: 1,
-          receiverId: 2,
-          content: '你是什么罩杯？',
-          receiverHasRead: 1
-        }, {
-          id: 5,
-          senderId: 2,
-          receiverId: 1,
-          content: 'A罩杯哦～',
-          receiverHasRead: 0
-        }, {
-          id: 6,
-          senderId: 1,
-          receiverId: 2,
-          content: '再见！',
-          receiverHasRead: 0
-        }, {
-          id: 7,
-          senderId: 1,
-          receiverId: 2,
-          content: '再见！',
-          receiverHasRead: 0
-        }, {
-          id: 8,
-          senderId: 1,
-          receiverId: 2,
-          content: '再见！',
-          receiverHasRead: 0
-        }, {
-          id: 9,
-          senderId: 1,
-          receiverId: 2,
-          content: '再见！',
-          receiverHasRead: 0
-        }, {
-          id: 10,
-          senderId: 1,
-          receiverId: 2,
-          content: '再见！',
-          receiverHasRead: 0
-        }, {
-          id: 11,
-          senderId: 1,
-          receiverId: 2,
-          content: '再见！',
-          receiverHasRead: 0
-        }, {
-          id: 12,
-          senderId: 1,
-          receiverId: 2,
-          content: '再见！',
-          receiverHasRead: 0
-        }, {
-          id: 13,
-          senderId: 1,
-          receiverId: 2,
-          content: '再见！',
-          receiverHasRead: 0
-        }, {
-          id: 14,
-          senderId: 1,
-          receiverId: 2,
-          content: '再见！',
-          receiverHasRead: 0
-        }, {
-          id: 15,
-          senderId: 1,
-          receiverId: 2,
-          content: '再见！',
-          receiverHasRead: 0
-        }, {
-          id: 16,
-          senderId: 1,
-          receiverId: 2,
-          content: '再见！',
-          receiverHasRead: 0
-        }, {
-          id: 17,
-          senderId: 1,
-          receiverId: 2,
-          content: '再见！',
-          receiverHasRead: 0
-        },
+        // {
+        //   id: 1,
+        //   senderId: 2,
+        //   receiverId: 1,
+        //   content: '你好！',
+        //   receiverHasRead: 1
+        // }, {
+        //   id: 2,
+        //   senderId: 1,
+        //   receiverId: 2,
+        //   content: '您好呀！',
+        //   receiverHasRead: 1
+        // }, {
+        //   id: 3,
+        //   senderId: 2,
+        //   receiverId: 1,
+        //   content: '帅哥约吗？',
+        //   receiverHasRead: 1
+        // }, {
+        //   id: 4,
+        //   senderId: 1,
+        //   receiverId: 2,
+        //   content: '你是什么罩杯？',
+        //   receiverHasRead: 1
+        // }, {
+        //   id: 5,
+        //   senderId: 2,
+        //   receiverId: 1,
+        //   content: 'A罩杯哦～',
+        //   receiverHasRead: 0
+        // }, {
+        //   id: 6,
+        //   senderId: 1,
+        //   receiverId: 2,
+        //   content: '再见！',
+        //   receiverHasRead: 0
+        // }, {
+        //   id: 7,
+        //   senderId: 1,
+        //   receiverId: 2,
+        //   content: '再见！',
+        //   receiverHasRead: 0
+        // }, {
+        //   id: 8,
+        //   senderId: 1,
+        //   receiverId: 2,
+        //   content: '再见！',
+        //   receiverHasRead: 0
+        // }, {
+        //   id: 9,
+        //   senderId: 1,
+        //   receiverId: 2,
+        //   content: '再见！',
+        //   receiverHasRead: 0
+        // }, {
+        //   id: 10,
+        //   senderId: 1,
+        //   receiverId: 2,
+        //   content: '再见！',
+        //   receiverHasRead: 0
+        // }, {
+        //   id: 11,
+        //   senderId: 1,
+        //   receiverId: 2,
+        //   content: '再见！',
+        //   receiverHasRead: 0
+        // }, {
+        //   id: 12,
+        //   senderId: 1,
+        //   receiverId: 2,
+        //   content: '再见！',
+        //   receiverHasRead: 0
+        // }, {
+        //   id: 13,
+        //   senderId: 1,
+        //   receiverId: 2,
+        //   content: '再见！',
+        //   receiverHasRead: 0
+        // }, {
+        //   id: 14,
+        //   senderId: 1,
+        //   receiverId: 2,
+        //   content: '再见！',
+        //   receiverHasRead: 0
+        // }, {
+        //   id: 15,
+        //   senderId: 1,
+        //   receiverId: 2,
+        //   content: '再见！',
+        //   receiverHasRead: 0
+        // }, {
+        //   id: 16,
+        //   senderId: 1,
+        //   receiverId: 2,
+        //   content: '再见！',
+        //   receiverHasRead: 0
+        // }, {
+        //   id: 17,
+        //   senderId: 1,
+        //   receiverId: 2,
+        //   content: '再见！',
+        //   receiverHasRead: 0
+        // },
       ],
       msgInput: '',
       sendBtnLoading: false,
       getMoreBtnLoading: false,
       hasMore: true,
+      queryDto: {
+        pageSize: 10,
+        startMsgId: 0
+      },
+      defaultDown: false,
+      msgPulling: false
     }
   },
   created() {
     this.initSelf()
+    this.initContact()
+    this.getMoreMsg()
   },
   mounted() {
-    this.$nextTick(() => {
-      this.scrollToBottom();
+    console.log('mounted');
+    this.scrollToBottom()
+    this.time();
+    // 通过$once来监听定时器，在beforeDestroy钩子可以被清除
+    this.$once("hook:beforeDestroy", () => {
+      // 在页面销毁时，销毁定时器
+      clearInterval(this.timer);
     });
   },
   methods: {
+    // 定时任务
+    time() {
+      this.timer = setInterval(() => {
+        // 这里调用调用需要执行的方法，1为自定义的参数，由于特殊的需求它将用来区分，定时器调用和手工调用，然后执行不同的业务逻辑
+        console.log('定时任务触发！！');
+        if (!this.defaultDown) {
+          this.scrollToBottom()
+          this.defaultDown = true
+        }
+
+        this.pollingMsg()
+
+      }, 1500); // 每两秒执行1次
+    },
+    // 初始化查询条件
+    initQueryDto() {
+      this.hasMore = true
+      this.queryDto = {
+        pageSize: 10,
+        startMsgId: 0
+      }
+      this.msgList = []
+    },
+    // 初始化联系人信息
+    initContact() {
+      this.initQueryDto()
+      let dto = {
+        id: this.contactId
+      }
+      getUserProfileById(dto).then(resp => {
+        if (resp.code === 200) {
+          this.contactor.id = this.contactId
+          this.contactor.avatar = resp.data.avatar
+          this.contactor.userName = resp.data.nickName
+          this.contactor.followed = resp.followed
+        } else {
+          this.$message({
+            message: resp.msg,
+            type: 'error'
+          })
+        }
+      })
+    },
     // 初始化个人信息
     initSelf() {
+      let user = this.$store.state.user
+      this.self.id = user.id
+      this.self.avatar = user.avatar
+      this.self.userName = user.name
+    },
+    // 轮询拉取消息
+    pollingMsg() {
+      if (this.msgPulling) {
+        return
+      }
+      this.msgPulling = true
+      let dto = {
+        id: this.contactId
+      }
 
+      pullMsg(dto).then(resp => {
+        if (resp.code === 200) {
+          if (resp.data.length > 0) {
+            this.msgList = resp.data.concat(this.msgList)
+            this.scrollToBottom()
+          }
+        } else {
+          this.$message({
+            message: resp.msg,
+            type: 'error'
+          })
+        }
+      }).finally(() => {
+        this.msgPulling = false
+      })
     },
     // 滚动到最底层
     scrollToBottom() {
-      const messageBox = this.$refs.messageBox;
-      messageBox.scrollTop = messageBox.scrollHeight;
+      let container = document.querySelector('.msgBox')
+      container.scrollTop = container.scrollHeight
     },
     // 发送消息
     sendMsg() {
+      if (!this.msgInput || this.msgInput === '' || this.msgInput.trim().length === 0) {
+        this.$message({
+          message: '不可以发送空消息！',
+          type: 'warning'
+        })
+        return
+      }
+
+      this.sendBtnLoading = true
+
+      let dto = {
+        receiverId: this.contactId,
+        content: this.msgInput
+      }
+      sendMSg(dto).then(resp => {
+        if (resp.code === 200) {
+          let message = {
+            id: resp.data,
+            content: this.msgInput,
+            senderId: this.self.id,
+            receiverId: this.contactId,
+          }
+          this.msgList.push(message)
+
+          this.msgInput = ''
+
+          this.$message({
+            message: '发送成功！',
+            type: 'success'
+          })
+
+          this.$emit('msgSent', message.content)
+
+        } else {
+          this.$message({
+            message: resp.msg,
+            type: 'error'
+          })
+        }
+      }).finally(() => {
+        this.scrollToBottom();
+        this.sendBtnLoading = false
+      })
     },
     // 跳转到用户主页
     routeToProfile() {
@@ -250,8 +384,37 @@ export default {
     },
     // 查看更多消息
     getMoreMsg() {
+      this.getMoreBtnLoading = true
+      let dto = {
+        contactId: this.contactId,
+        pageSize: this.queryDto.pageSize,
+        startMsgId: this.queryDto.startMsgId
+      }
 
+      msgList(dto).then(resp => {
+        if (resp.code === 200) {
+          this.hasMore = resp.data.length >= this.queryDto.pageSize
+          this.msgList = resp.data.concat(this.msgList)
+          this.queryDto.startMsgId = resp.data[0].id
+
+        } else {
+          this.$message({
+            message: resp.msg,
+            type: 'error'
+          })
+        }
+      }).finally(() => {
+        this.getMoreBtnLoading = false
+      })
     },
+  },
+  watch: {
+    contactor: {
+      handler(nVal) {
+        this.initContact()
+        this.getMoreMsg()
+      }
+    }
   }
 }
 

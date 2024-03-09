@@ -10,6 +10,7 @@
 
     <modules>
         <module>ruoyi-api-system</module>
+        <module>api-blog</module>
     </modules>
 
     <artifactId>ruoyi-api</artifactId>

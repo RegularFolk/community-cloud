@@ -11,6 +11,11 @@
         <result property="likeCnt" column="like_cnt"/>
     </resultMap>
 
+    <insert id="insertBizUser">
+        insert into biz_user(user_id)
+        values #{userId}
+    </insert>
+
     <update id="increaseSubCnt">
         update biz_user
         set sub_cnt = sub_cnt + 1

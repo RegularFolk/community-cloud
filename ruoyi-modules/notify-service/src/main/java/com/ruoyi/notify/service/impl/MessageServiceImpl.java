@@ -5,12 +5,12 @@ import com.ruoyi.common.core.domain.IdDto;
 import com.ruoyi.common.core.domain.ListDto;
 import com.ruoyi.common.core.utils.sql.SqlUtil;
 import com.ruoyi.common.security.utils.SecurityUtils;
-import com.ruoyi.notify.constants.ColumnConstants;
 import com.ruoyi.notify.constants.MessageConfigConstants;
 import com.ruoyi.notify.domain.ContactBook;
 import com.ruoyi.notify.domain.TextMessage;
 import com.ruoyi.notify.domain.dto.MsgListDto;
 import com.ruoyi.notify.domain.dto.SendDto;
+import com.ruoyi.notify.domain.mapper.UnReadCnt;
 import com.ruoyi.notify.domain.vo.ContactListVo;
 import com.ruoyi.notify.mapper.ContactBookMapper;
 import com.ruoyi.notify.mapper.TextMessageMapper;
@@ -37,7 +37,7 @@ public class MessageServiceImpl implements MessageService {
     private RemoteUserService remoteUserService;
 
     @Override
-    public int send(SendDto dto) {
+    public long send(SendDto dto) {
         Long senderId = SecurityUtils.getUserId();
         TextMessage message = new TextMessage();
         message.setSenderId(senderId);
@@ -49,11 +49,11 @@ public class MessageServiceImpl implements MessageService {
         if (flag > 0) {
             flag = getAndUpdateContact(dto.getReceiverId(), senderId, dto.getContent());
             if (flag > 0) {
-                flag = getAndUpdateContact(senderId, dto.getReceiverId(), dto.getContent());
+                getAndUpdateContact(senderId, dto.getReceiverId(), dto.getContent());
             }
         }
 
-        return flag;
+        return message.getId();
     }
 
     private int getAndUpdateContact(Long receiverId, Long senderId, String content) {
@@ -96,9 +96,8 @@ public class MessageServiceImpl implements MessageService {
         Map<Long, List<SysUser>> groupById = userList.stream().collect(Collectors.groupingBy(SysUser::getUserId));
 
         // 查询与每一个联系人的未读消息数
-        List<Map<String, Long>> unReadCntList = textMessageMapper.selectUnReadCnt(userId, contactIdList);
-        Map<Long, List<Map<String, Long>>> unReadCntGroupByRcvId = unReadCntList
-                .stream().collect(Collectors.groupingBy(u -> u.get(ColumnConstants.RCV_ID)));
+        List<UnReadCnt> unReadCntList = textMessageMapper.selectUnReadCnt(userId, contactIdList);
+        Map<Long, List<UnReadCnt>> unReadCntMap = unReadCntList.stream().collect(Collectors.groupingBy(UnReadCnt::getSenderId));
 
         // 查询与每个联系人最新一条消息的前15个字
         Map<Long, List<ContactBook>> contactGroupById = contactBookList
@@ -106,7 +105,9 @@ public class MessageServiceImpl implements MessageService {
 
         return contactBookList.stream().map(book -> {
             SysUser sysUser = groupById.get(book.getContactId()).get(0);
-            Long unreadCnt = unReadCntGroupByRcvId.get(sysUser.getUserId()).get(0).get(ColumnConstants.UNREAD_CNT);
+//            Long unreadCnt = unReadCntGroupByRcvId.get(sysUser.getUserId()).get(0).get(ColumnConstants.UNREAD_CNT);
+            List<UnReadCnt> unReadCnts = unReadCntMap.get(book.getContactId());
+            Long unreadCnt = CollectionUtils.isEmpty(unReadCnts) ? 0L : unReadCnts.get(0).getUnreadCnt();
             String msgPreview = contactGroupById.get(book.getContactId()).get(0).getMsgPreview();
             ContactListVo vo = new ContactListVo();
             vo.setContactId(sysUser.getUserId());
@@ -131,11 +132,11 @@ public class MessageServiceImpl implements MessageService {
         // 判断未读消息数，如果未读消息数大于pageSize，按照未读消息数查询，同时把所有未读消息设置为已读消息
         Long userId = SecurityUtils.getUserId();
 
-        List<Map<String, Long>> unReadCntList = textMessageMapper.selectUnReadCnt(userId, Collections.singletonList(dto.getContactId()));
-        Long unreadCnt = unReadCntList.get(0).get(ColumnConstants.UNREAD_CNT);
+        List<UnReadCnt> unReadCntList = textMessageMapper.selectUnReadCnt(userId, Collections.singletonList(dto.getContactId()));
+        long unreadCnt = CollectionUtils.isEmpty(unReadCntList) ? 0L : unReadCntList.get(0).getUnreadCnt();
 
         if (unreadCnt > dto.getPageSize()) {
-            dto.setPageSize(unreadCnt.intValue());
+            dto.setPageSize((int) unreadCnt);
         }
 
         if (unreadCnt > 0) {
@@ -143,11 +144,15 @@ public class MessageServiceImpl implements MessageService {
             textMessageMapper.updateHasReadMsg(userId, dto.getContactId());
         }
 
-        return textMessageMapper.selectMsgList(
+        List<TextMessage> messageList = textMessageMapper.selectMsgList(
                 userId,
                 dto.getContactId(),
                 dto.getStartMsgId(),
                 dto.getPageSize());
+
+        Collections.reverse(messageList);
+
+        return messageList;
     }
 
     @Override

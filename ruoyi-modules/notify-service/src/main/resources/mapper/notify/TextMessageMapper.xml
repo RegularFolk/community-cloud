@@ -14,6 +14,11 @@
         <result property="createTime" column="create_time"/>
     </resultMap>
 
+    <resultMap id="UnreadCnt" type="com.ruoyi.notify.domain.mapper.UnReadCnt">
+        <result property="senderId" column="sender_id"/>
+        <result property="unreadCnt" column="unread_cnt"/>
+    </resultMap>
+
     <sql id="messageFields">
         id, sender_id, receiver_id, content, receiver_has_read, create_time
     </sql>
@@ -24,23 +29,23 @@
     </insert>
 
     <update id="updateHasReadMsg">
-        update test_message
+        update text_message
         set receiver_has_read = 1
         where sender_id = #{senderId}
-          and receiverId = #{receiverId}
+          and receiver_id = #{receiverId}
           and receiver_has_read = 0;
     </update>
 
-    <select id="selectUnReadCnt" resultType="java.util.Map">
-        select receiver_id, count(1) as unread_cnt
+    <select id="selectUnReadCnt" resultMap="UnreadCnt">
+        select sender_id, count(1) as unread_cnt
         from text_message
         where receiver_has_read = 0
-        and sender_id = #{userId}
-        and receiver_id in
+        and receiver_id = #{userId}
+        and sender_id in
         <foreach collection="contactIdList" item="contactId" open="(" separator="," close=")">
             #{contactId}
         </foreach>
-        group by receiver_id
+        group by sender_id
     </select>
 
     <!-- 自连接 -->
@@ -56,9 +61,10 @@
         select
         <include refid="messageFields"/>
         from text_message
-        where id &gt; #{startMsgId} and (sender_id = #{userId} and receiver_id = #{contactId})
-        or (sender_id = #{contactId} and receiver_id = #{userId})
-        order by create_time asc
+        where ((sender_id = #{userId} and receiver_id = #{contactId})
+        or (sender_id = #{contactId} and receiver_id = #{userId}))
+        <if test="startMsgId != null and startMsgId != 0">and id &lt; #{startMsgId}</if>
+        order by create_time desc
         limit #{pageSize}
     </select>
 
@@ -69,6 +75,7 @@
         where sender_id = #{senderId}
         and receiver_id = #{receiverId}
         and receiver_has_read = 0
+        order by create_time asc
     </select>
 
 

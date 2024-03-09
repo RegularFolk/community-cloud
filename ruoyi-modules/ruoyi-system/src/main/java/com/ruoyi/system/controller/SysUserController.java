@@ -4,7 +4,10 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
+
+import com.ruoyi.blog.api.RemoteBlogService;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -146,7 +149,7 @@ public class SysUserController extends BaseController
     /**
      * 注册用户信息
      */
-    @InnerAuth
+//    @InnerAuth
     @PostMapping("/register")
     public R<Boolean> register(@RequestBody SysUser sysUser)
     {

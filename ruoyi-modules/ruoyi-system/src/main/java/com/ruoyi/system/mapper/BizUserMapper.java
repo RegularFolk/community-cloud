@@ -16,4 +16,6 @@ public interface BizUserMapper {
     BizUser getById(@Param("id") Long id);
 
     List<BizUser> getByIdList(@Param("idList") List<Long> idList);
+
+    int insertBizUser(BizUser bizUser);
 }

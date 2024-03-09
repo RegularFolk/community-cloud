@@ -90,6 +90,11 @@
             <artifactId>ruoyi-common-swagger</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>api-blog</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

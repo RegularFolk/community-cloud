@@ -10,7 +10,7 @@ import com.ruoyi.notify.domain.vo.ContactListVo;
 import java.util.List;
 
 public interface MessageService {
-    int send(SendDto dto);
+    long send(SendDto dto);
 
     List<ContactListVo> contactList(ListDto dto);
 

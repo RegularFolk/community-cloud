@@ -416,4 +416,13 @@ public class ArticleServiceImpl implements ArticleService {
         vo.setList(unitList);
         return vo;
     }
+
+    @Override
+    public int addPersonClass(Long userId, String className) {
+        PersonalClassification pc = new PersonalClassification();
+        pc.setClassName(className);
+        pc.setUserId(userId);
+
+        return blogMapper.insertPersonClassification(pc);
+    }
 }

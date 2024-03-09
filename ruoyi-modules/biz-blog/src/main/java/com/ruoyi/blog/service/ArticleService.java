@@ -31,4 +31,6 @@ public interface ArticleService {
     int cancelCollect(IdDto dto);
 
     PersonArticleVo getPersonalArticle(PersonArticleDto dto);
+
+    int addPersonClass(Long userId, String className);
 }

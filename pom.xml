@@ -215,6 +215,13 @@
                 <version>${ruoyi.version}</version>
             </dependency>
 
+            <!-- blog接口 -->
+            <dependency>
+                <groupId>com.ruoyi</groupId>
+                <artifactId>api-blog</artifactId>
+                <version>${ruoyi.version}</version>
+            </dependency>
+
             <!-- mq服务 -->
             <dependency>
                 <groupId>com.ruoyi</groupId>

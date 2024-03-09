@@ -1,6 +1,7 @@
 package com.ruoyi.notify.mapper;
 
 import com.ruoyi.notify.domain.TextMessage;
+import com.ruoyi.notify.domain.mapper.UnReadCnt;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.Map;
 public interface TextMessageMapper {
     int insertMessage(TextMessage message);
 
-    List<Map<String, Long>> selectUnReadCnt(
+    List<UnReadCnt> selectUnReadCnt(
             @Param("userId") Long userId,
             @Param("contactIdList") List<Long> contactIdList);
 
