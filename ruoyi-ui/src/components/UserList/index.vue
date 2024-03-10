@@ -1,34 +1,32 @@
 <template>
 
   <div v-loading="userListLoading">
-    <div v-for="user in userList" :key="user.userId"
+    <div v-for="user in userList" :key="user.id"
          style="display: flex;padding: 10px;margin: 10px;border-bottom: 1px solid #EEF1F6FF">
-      <div style="margin-right: 20px;cursor: pointer" @click="routeToProfile(user.userId)">
-        <el-avatar :size="60" :src="user.avatar"/>
-      </div>
+      <el-popover
+        placement="right"
+        trigger="hover"
+        width="400">
+        <div slot="reference" style="margin-right: 20px;cursor: pointer" @click="routeToProfile(user.id)">
+          <el-avatar :size="60" :src="user.avatar"/>
+        </div>
+
+        <UserBasicInfo :hover-show="true" :userInjected="user"/>
+
+      </el-popover>
 
       <div style="display: flex;justify-content: space-between;width: 90%">
         <div>
-          {{ user.userName }}
+          {{ user.nickName }}
         </div>
 
         <div>
-          <el-popover
-            placement="left"
-            trigger="hover"
-          >
-            <div style="display: flex">
-              <el-button v-if="user.followed" round type="info" @click="unSubUser(user.userId)">取消关注</el-button>
-              <el-button v-if="!user.followed" round type="danger" @click="subUser(user.userId)">关注</el-button>
-              <el-button round type="primary">私信</el-button>
-            </div>
-            <el-button v-if="user.followed" slot="reference" type="success">
-              <i class="el-icon-check">已关注</i>
-            </el-button>
-            <el-button v-if="!user.followed" slot="reference" type="danger">
-              <i class="el-icon-s-opportunity">未关注</i>
-            </el-button>
-          </el-popover>
+          <el-button v-if="user.followed" type="danger" @click="unSubUser(user.id)">
+            <i class="el-icon-check">已关注</i>
+          </el-button>
+          <el-button v-if="!user.followed" type="success" @click="subUser(user.id)">
+            <i class="el-icon-s-opportunity">未关注</i>
+          </el-button>
         </div>
       </div>
 
@@ -41,9 +39,11 @@
 <script>
 
 import {changeUserFollow} from "@/api/system/user";
+import UserBasicInfo from "@/views/system/user/profile/userBasicInfo";
 
 export default {
   name: 'UserList',
+  components: {UserBasicInfo},
   data() {
     return {
       userListLoading: false,

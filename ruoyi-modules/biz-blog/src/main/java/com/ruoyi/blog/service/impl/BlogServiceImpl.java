@@ -24,6 +24,7 @@ import com.ruoyi.common.core.utils.sql.SqlUtil;
 import com.ruoyi.common.mq.callBack.DefaultCallBack;
 import com.ruoyi.common.mq.constants.MqTopicConstants;
 import com.ruoyi.common.mq.domain.BlogMessage;
+import com.ruoyi.common.mq.domain.UserMessage;
 import com.ruoyi.common.mq.enums.OperateType;
 import com.ruoyi.common.security.utils.SecurityUtils;
 import com.ruoyi.system.api.RemoteUserService;
@@ -195,7 +196,6 @@ public class BlogServiceImpl implements BlogService {
 
         if (flag > 0) {
             // 通知下游改变blog点赞计数
-
             BlogMessage message = new BlogMessage();
             message.setMessageId(blogId);
             message.setBlogId(blogId);
@@ -207,6 +207,25 @@ public class BlogServiceImpl implements BlogService {
                     String.valueOf(message.getMessageId()),
                     new DefaultCallBack<>(this.getClass(), message)
             );
+
+            // 通知下游改变用户点赞计数
+            Blog blog = new Blog();
+            blog.setId(blogId);
+            List<Blog> blogList = blogMapper.getArticleList(blog, null, null, null);
+            Long authorId = blogList.get(0).getAuthorId();
+            UserMessage userMessage = new UserMessage();
+            userMessage.setUserId(authorId);
+            userMessage.setMessageId(authorId);
+            userMessage.setType(UserMessage.MessageType.LIKE.getType());
+            userMessage.setOperateType(typeEnum.getType());
+            rocketMQTemplate.asyncSendOrderly(
+                    MqTopicConstants.USER_TOPIC,
+                    userMessage,
+                    String.valueOf(message.getMessageId()),
+                    new DefaultCallBack<>(this.getClass(), userMessage)
+            );
+
+
         }
 
         return flag;

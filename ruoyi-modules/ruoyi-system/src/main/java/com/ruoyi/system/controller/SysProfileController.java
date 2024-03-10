@@ -15,6 +15,7 @@ import com.ruoyi.system.api.RemoteFileService;
 import com.ruoyi.system.api.domain.SysFile;
 import com.ruoyi.system.api.domain.SysUser;
 import com.ruoyi.system.api.model.LoginUser;
+import com.ruoyi.system.domain.vo.UserBasicInfoVo;
 import com.ruoyi.system.service.ISysUserService;
 import com.ruoyi.system.service.UserFollowService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,6 +72,14 @@ public class SysProfileController extends BaseController
         return result;
     }
 
+    /**
+     * 查询用户基本信息
+     */
+    @PostMapping("/getBasicInfo")
+    public AjaxResult getBasicInfo(@RequestBody IdDto dto) {
+        UserBasicInfoVo vo = userService.getBasicInfo(dto);
+        return AjaxResult.success(vo);
+    }
 
     /**
      * 修改用户

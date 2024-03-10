@@ -66,7 +66,7 @@ export default {
       getMoreBtnLoading: false,
       userId: 0,
       pageNum: 1,
-      pageSize: 2,
+      pageSize: 10,
       contactLoading: false,
       total: 0,
       contactSelected: '0'

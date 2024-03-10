@@ -6,7 +6,9 @@
 
     <el-row>
       <div class="all-center" style="margin: 10px">
-        <el-button round type="success" @click="showAllBlog">查看全部动态</el-button>
+        <el-tooltip class="item" content="当前用户没有发布想法" effect="dark" placement="bottom" :disabled="!btnDisabled">
+          <el-button :disabled="btnDisabled" round type="success" @click="showAllBlog">查看全部动态</el-button>
+        </el-tooltip>
       </div>
     </el-row>
 
@@ -51,7 +53,8 @@ export default {
       },
       loadingPost: false,
       allCardDialog: false,
-      allBlogHasMore: true
+      allBlogHasMore: true,
+      btnDisabled: false
     }
   },
   created() {

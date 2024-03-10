@@ -17,7 +17,8 @@ public class UserMessage extends BaseMessage {
     private Integer type;
 
     public enum MessageType {
-        FOLLOW(1, "关注数增加");
+        FOLLOW(1, "关注数增加"),
+        LIKE(2, "点赞数增加");
 
         private final Integer type;
 

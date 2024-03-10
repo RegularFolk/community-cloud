@@ -19,7 +19,7 @@ public class CommentHandler {
 
     public void handle(CommentMessage message) {
         Long commentId = message.getCommentId();
-        OperateType operateType = OperateType.getEnum(message.getType());
+        OperateType operateType = OperateType.getEnum(message.getOperateType());
         CommentMessage.MessageType messageType = CommentMessage.MessageType.getEnum(message.getType());
 
         int flag = commentService.handleCommentMessage(commentId, operateType, messageType);

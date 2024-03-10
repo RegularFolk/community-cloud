@@ -5,6 +5,7 @@ import com.ruoyi.common.core.domain.ListDto;
 import com.ruoyi.system.domain.BizUser;
 import com.ruoyi.system.domain.dto.FollowDto;
 import com.ruoyi.system.domain.vo.BizUserVo;
+import com.ruoyi.system.domain.vo.UserBasicInfoVo;
 
 import java.util.List;
 
@@ -15,7 +16,7 @@ public interface UserFollowService {
 
     Boolean isFollowed(IdDto dto);
 
-    List<BizUserVo> getFollowList(ListDto dto);
+    List<UserBasicInfoVo> getFollowList(ListDto dto);
 
-    List<BizUserVo> getSubList(ListDto dto);
+    List<UserBasicInfoVo> getSubList(ListDto dto);
 }

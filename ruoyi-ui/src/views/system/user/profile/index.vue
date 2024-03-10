@@ -14,13 +14,13 @@
               </keep-alive>
             </el-tab-pane>
 
-            <el-tab-pane label="修改资料" name="userinfo" v-if="user.userId == loginUser.userId">
+            <el-tab-pane v-if="user.id == loginUser.id" label="修改资料" name="userinfo">
               <keep-alive>
                 <userInfo :user="user"/>
               </keep-alive>
             </el-tab-pane>
 
-            <el-tab-pane label="修改密码" name="resetPwd" v-if="user.userId == loginUser.userId">
+            <el-tab-pane v-if="user.id == loginUser.id" label="修改密码" name="resetPwd">
               <keep-alive>
                 <resetPwd/>
               </keep-alive>
@@ -28,14 +28,7 @@
 
           </el-tabs>
 
-          <div v-if="user.userId != loginUser.userId" style="display: flex;justify-content: center">
-            <el-tooltip v-if="!followed" class="item" content="点击以关注" effect="dark" placement="top">
-              <el-button type="success" @click="subUser">关注</el-button>
-            </el-tooltip>
-            <el-tooltip v-if="followed" class="item" content="点击取消关注" effect="dark" placement="top">
-              <el-button type="danger" @click="unSubUser">已关注</el-button>
-            </el-tooltip>
-          </div>
+
         </el-card>
       </el-col>
 
@@ -74,16 +67,17 @@ import userAvatar from "./userAvatar";
 import userInfo from "./userInfo";
 import resetPwd from "./resetPwd";
 
-import {changeUserFollow, getUserProfile, getUserProfileById} from "@/api/system/user";
+import {getBasicInfo} from "@/api/system/user";
 import BlogReleased from "@/views/system/user/profile/blogReleased";
 import {getBlogList} from "@/api/biz/blog";
 import {getPersonArticle} from "@/api/biz/article"
 import ArticleReleased from "@/views/system/user/profile/articleReleased";
 import UserBasicInfo from "@/views/system/user/profile/userBasicInfo";
+import DialogBox from "@/components/DialogBox";
 
 export default {
   name: "Profile",
-  components: {UserBasicInfo, ArticleReleased, BlogReleased, userAvatar, userInfo, resetPwd},
+  components: {DialogBox, UserBasicInfo, ArticleReleased, BlogReleased, userAvatar, userInfo, resetPwd},
   data() {
     return {
       // 当前用户
@@ -94,13 +88,12 @@ export default {
       infoCardLoading: false,
       blogCardLoading: false,
       articleCardLoading: false,
-      followed: false
     };
   },
   activated() {
     let routeUserId = this.$route.query.userId;
-    let userId = this.user.userId;
-    let loginUserId = this.loginUser.userId;
+    let userId = this.user.id;
+    let loginUserId = this.loginUser.id;
     if ((routeUserId && userId != routeUserId)
       || (!routeUserId && userId != loginUserId)) {
       console.log('this.$route.query.userId', this.$route.query.userId)
@@ -125,7 +118,7 @@ export default {
     // 初始化随笔
     initArticleReleased() {
       let dto = {
-        userId: this.user.userId,
+        userId: this.user.id,
         pageNum: this.$refs.articleReleased.pageNum,
         pageSize: this.$refs.articleReleased.pageSize
       }
@@ -149,56 +142,20 @@ export default {
         pageNum: 1,
         pageSize: 5,
         queryMode: 3,
-        userId: this.user.userId
+        userId: this.user.id
       }
 
       this.latestBlog(queryParam)
     },
-    // 关注用户
-    subUser() {
-      let dto = {
-        followId: this.user.userId,
-        operateType: 1
-      }
-      this.submitSub(dto)
-    },
-    // 取消关注
-    unSubUser() {
-      this.$confirm('确定要取消关注吗？', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        let dto = {
-          followId: this.user.userId,
-          operateType: 2
-        }
-        this.submitSub(dto)
-      })
-
-    },
-    // 提交关注请求
-    submitSub(dto) {
-      changeUserFollow(dto).then(resp => {
-        if (resp.code === 200) {
-          this.$message({
-            message: '操作成功！',
-            type: 'success'
-          })
-          this.followed = !this.followed
-        } else {
-          this.$message({
-            message: resp.msg,
-            type: 'error'
-          })
-        }
-      })
-    },
     latestBlog(queryParam) {
-      queryParam.userId = this.user.userId
+      queryParam.userId = this.user.id
       getBlogList(queryParam).then(resp => {
         if (resp.code === 200) {
-          this.$refs.blogReleased.$refs.blogCard.blogs = resp.data
+          if (resp.data.length === 0) {
+            this.$refs.blogReleased.btnDisabled = true
+          } else {
+            this.$refs.blogReleased.$refs.blogCard.blogs = resp.data
+          }
         } else {
           this.$message({
             message: resp.msg,
@@ -213,11 +170,9 @@ export default {
       this.infoCardLoading = true
       this.blogCardLoading = true
       this.articleCardLoading = true
-      getUserProfile().then(response => {
+      getBasicInfo({id: this.$store.state.user.id}).then(response => {
 
         this.loginUser = response.data;
-        this.$refs.userBasicInfo.loginUser = this.loginUser
-
         this.initUser()
       })
     },
@@ -234,13 +189,11 @@ export default {
 
         this.initRestCards()
       } else {
-        getUserProfileById({id: this.$route.query.userId}).then(resp => {
+        getBasicInfo({id: this.$route.query.userId}).then(resp => {
           if (resp.code === 200) {
             this.user = resp.data
             this.$refs.userBasicInfo.user = this.user
             this.infoCardLoading = false
-
-            this.followed = resp.followed
 
             this.$refs.userBasicInfo.$refs.userAvatar.options.img = this.user.avatar
 
@@ -259,7 +212,7 @@ export default {
       this.$refs.blogReleased.user = this.user
       this.initLatestBlog()
 
-      this.$refs.articleReleased.userId = this.user.userId
+      this.$refs.articleReleased.userId = this.user.id
       this.initArticleReleased()
     },
   },

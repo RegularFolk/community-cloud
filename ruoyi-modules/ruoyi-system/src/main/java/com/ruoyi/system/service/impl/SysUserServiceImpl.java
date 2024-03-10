@@ -3,7 +3,9 @@ package com.ruoyi.system.service.impl;
 import com.ruoyi.blog.api.RemoteBlogService;
 import com.ruoyi.common.core.constant.SecurityConstants;
 import com.ruoyi.common.core.constant.UserConstants;
+import com.ruoyi.common.core.domain.IdDto;
 import com.ruoyi.common.core.exception.ServiceException;
+import com.ruoyi.common.core.utils.DateUtils;
 import com.ruoyi.common.core.utils.SpringUtils;
 import com.ruoyi.common.core.utils.StringUtils;
 import com.ruoyi.common.core.utils.bean.BeanValidators;
@@ -15,9 +17,11 @@ import com.ruoyi.system.domain.BizUser;
 import com.ruoyi.system.domain.SysPost;
 import com.ruoyi.system.domain.SysUserPost;
 import com.ruoyi.system.domain.SysUserRole;
+import com.ruoyi.system.domain.vo.UserBasicInfoVo;
 import com.ruoyi.system.mapper.*;
 import com.ruoyi.system.service.ISysConfigService;
 import com.ruoyi.system.service.ISysUserService;
+import com.ruoyi.system.service.UserFollowService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +68,9 @@ public class SysUserServiceImpl implements ISysUserService
 
     @Resource
     private BizUserMapper bizUserMapper;
+
+    @Resource
+    private UserFollowService userFollowService;
 
     @Autowired
     protected Validator validator;
@@ -551,13 +558,10 @@ public class SysUserServiceImpl implements ISysUserService
                 log.error(msg, e);
             }
         }
-        if (failureNum > 0)
-        {
+        if (failureNum > 0) {
             failureMsg.insert(0, "很抱歉，导入失败！共 " + failureNum + " 条数据格式不正确，错误如下：");
             throw new ServiceException(failureMsg.toString());
-        }
-        else
-        {
+        } else {
             successMsg.insert(0, "恭喜您，数据已全部导入成功！共 " + successNum + " 条，数据如下：");
         }
         return successMsg.toString();
@@ -566,6 +570,29 @@ public class SysUserServiceImpl implements ISysUserService
     @Override
     public List<SysUser> selectUserByIds(List<Long> ids) {
         return userMapper.selectUserByIds(ids);
+    }
+
+    @Override
+    public UserBasicInfoVo getBasicInfo(IdDto dto) {
+        Long userId = dto.getId();
+        SysUser sysUser = userMapper.selectUserById(userId);
+        BizUser bizUser = bizUserMapper.getById(userId);
+        Boolean followed = userFollowService.isFollowed(dto);
+
+        UserBasicInfoVo vo = new UserBasicInfoVo();
+        vo.setId(userId);
+        vo.setAvatar(sysUser.getAvatar());
+        vo.setNickName(sysUser.getNickName());
+        vo.setEmail(sysUser.getEmail());
+        vo.setPhonenumber(sysUser.getPhonenumber());
+        vo.setSex(sysUser.getSex());
+        vo.setFollowed(followed);
+        vo.setLikeCnt(bizUser.getLikeCnt());
+        vo.setFollowerCnt(bizUser.getFollowerCnt());
+        vo.setSubCnt(bizUser.getSubCnt());
+        vo.setCreateTime(DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD_HH_MM_SS, sysUser.getCreateTime()));
+
+        return vo;
     }
 
 }

@@ -8,4 +8,6 @@ public interface SysUserMapper {
     int decreaseFollowCnt(@Param("userId") Long userId);
 
     int changeFollowCnt(@Param("userId") Long userId, @Param("type") Integer type);
+
+    int changeLikeCnt(@Param("userId") Long userId, @Param("type") Integer type);
 }

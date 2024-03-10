@@ -18,7 +18,7 @@ public class UserHandler {
 
     public void handle(UserMessage message) {
         Long userId = message.getUserId();
-        OperateType operateType = OperateType.getEnum(message.getType());
+        OperateType operateType = OperateType.getEnum(message.getOperateType());
         UserMessage.MessageType messageType = UserMessage.MessageType.getEnum(message.getType());
 
         int flag = userService.handleUserMessage(userId, operateType, messageType);

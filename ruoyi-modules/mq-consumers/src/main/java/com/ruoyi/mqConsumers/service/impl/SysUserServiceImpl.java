@@ -42,6 +42,9 @@ public class SysUserServiceImpl implements SysUserService {
             case FOLLOW:
                 flag = userMapper.changeFollowCnt(userId, operateType.getType());
                 break;
+            case LIKE:
+                flag = userMapper.changeLikeCnt(userId, operateType.getType());
+                break;
             default:
                 // unreachable
                 break;

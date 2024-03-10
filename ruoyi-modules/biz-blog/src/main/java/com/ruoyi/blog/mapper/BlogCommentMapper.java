@@ -22,4 +22,6 @@ public interface BlogCommentMapper {
 
 
     int putComment(BlogComment comment);
+
+    List<BlogComment> selectCommentByIds(@Param("idList") List<Long> idList);
 }

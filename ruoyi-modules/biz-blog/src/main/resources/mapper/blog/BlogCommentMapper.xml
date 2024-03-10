@@ -6,29 +6,33 @@
 <mapper namespace="com.ruoyi.blog.mapper.BlogCommentMapper">
 
     <resultMap id="BlogComment" type="com.ruoyi.blog.domain.BlogComment">
-        <id     property="id"           column="id"/>
-        <result property="blogId"       column="blog_id"/>
-        <result property="senderId"     column="sender_id"/>
-        <result property="receiverId"   column="receiver_id"/>
-        <result property="parentId"     column="parent_id"/>
-        <result property="createTime"   column="create_time"/>
-        <result property="deleted"      column="deleted"/>
-        <result property="content"      column="content"/>
-        <result property="likeCnt"      column="like_cnt"/>
+        <id property="id" column="id"/>
+        <result property="blogId" column="blog_id"/>
+        <result property="senderId" column="sender_id"/>
+        <result property="receiverId" column="receiver_id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="deleted" column="deleted"/>
+        <result property="content" column="content"/>
+        <result property="likeCnt" column="like_cnt"/>
     </resultMap>
+
+    <sql id="CommentFields">
+        id, blog_id, sender_id, receiver_id, parent_id, create_time, content, like_cnt
+    </sql>
 
 
     <insert id="putComment">
         insert into blog_comment(
-            blog_id, sender_id,
-            <if test="receiverId != null">receiver_id, </if>
-            <if test="parentId != null">parent_id, </if>
-            content
+        blog_id, sender_id,
+        <if test="receiverId != null">receiver_id,</if>
+        <if test="parentId != null">parent_id,</if>
+        content
         ) values(
-            #{blogId}, #{senderId},
-            <if test="receiverId != null">#{receiverId}, </if>
-            <if test="parentId != null">#{parentId}, </if>
-            #{content}
+        #{blogId}, #{senderId},
+        <if test="receiverId != null">#{receiverId},</if>
+        <if test="parentId != null">#{parentId},</if>
+        #{content}
         )
     </insert>
 
@@ -56,10 +60,19 @@
         select id, sender_id, receiver_id, parent_id, create_time, content, like_cnt
         from blog_comment
         where deleted = '0'
-          and blog_id = #{blogId}
-          and parent_id in
+        and blog_id = #{blogId}
+        and parent_id in
         <foreach collection="parentCommentIds" item="pId" open="(" close=")" separator=",">
             #{pId}
+        </foreach>
+    </select>
+
+    <select id="selectCommentByIds" resultMap="BlogComment">
+        select
+        <include refid="CommentFields"/>
+        from blog_comment where id in
+        <foreach collection="idList" item="commentId" open="(" separator="," close=")">
+            #{commentId}
         </foreach>
     </select>
 

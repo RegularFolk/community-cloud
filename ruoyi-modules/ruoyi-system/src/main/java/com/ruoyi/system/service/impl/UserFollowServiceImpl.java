@@ -3,6 +3,7 @@ package com.ruoyi.system.service.impl;
 import com.ruoyi.common.core.domain.IdDto;
 import com.ruoyi.common.core.domain.ListDto;
 import com.ruoyi.common.core.exception.ServiceException;
+import com.ruoyi.common.core.utils.DateUtils;
 import com.ruoyi.common.core.utils.sql.SqlUtil;
 import com.ruoyi.common.mq.callBack.DefaultCallBack;
 import com.ruoyi.common.mq.constants.MqTopicConstants;
@@ -13,6 +14,7 @@ import com.ruoyi.system.api.domain.SysUser;
 import com.ruoyi.system.domain.BizUser;
 import com.ruoyi.system.domain.dto.FollowDto;
 import com.ruoyi.system.domain.vo.BizUserVo;
+import com.ruoyi.system.domain.vo.UserBasicInfoVo;
 import com.ruoyi.system.mapper.BizUserMapper;
 import com.ruoyi.system.mapper.FollowListMapper;
 import com.ruoyi.system.mapper.SysUserMapper;
@@ -100,7 +102,7 @@ public class UserFollowServiceImpl implements UserFollowService {
     }
 
     @Override
-    public List<BizUserVo> getFollowList(ListDto dto) {
+    public List<UserBasicInfoVo> getFollowList(ListDto dto) {
         // 获取粉丝列表
         Long userId = SecurityUtils.getUserId();
         List<Long> idList = followListMapper.getFollowerIdList(
@@ -112,11 +114,11 @@ public class UserFollowServiceImpl implements UserFollowService {
             return new ArrayList<>();
         }
 
-        return packBizUserVoList(userId, idList);
+        return packUserBasicInfoVoList(userId, idList);
     }
 
     @Override
-    public List<BizUserVo> getSubList(ListDto dto) {
+    public List<UserBasicInfoVo> getSubList(ListDto dto) {
         // 获取关注列表
         Long userId = SecurityUtils.getUserId();
         List<Long> idList = followListMapper.getSubIdList(
@@ -129,12 +131,12 @@ public class UserFollowServiceImpl implements UserFollowService {
             return new ArrayList<>();
         }
 
-        return packBizUserVoList(userId, idList);
+        return packUserBasicInfoVoList(userId, idList);
 
 
     }
 
-    private List<BizUserVo> packBizUserVoList(Long userId, List<Long> idList) {
+    private List<UserBasicInfoVo> packUserBasicInfoVoList(Long userId, List<Long> idList) {
         List<SysUser> sysUsers = sysUserMapper.selectUserByIds(idList);
 
         List<BizUser> bizUserList = bizUserMapper.getByIdList(idList);
@@ -147,15 +149,19 @@ public class UserFollowServiceImpl implements UserFollowService {
         Set<Long> isFollowedSet = new HashSet<>(isFollowedList);
 
         return sysUsers.stream().map(s -> {
-            BizUserVo vo = new BizUserVo();
+            UserBasicInfoVo vo = new UserBasicInfoVo();
             BizUser bizUser = bizUserGroup.get(s.getUserId()).get(0);
-            vo.setUserId(s.getUserId());
-            vo.setUserName(s.getUserName());
+            vo.setId(s.getUserId());
+            vo.setNickName(s.getNickName());
             vo.setAvatar(s.getAvatar());
             vo.setFollowerCnt(bizUser.getFollowerCnt());
             vo.setLikeCnt(bizUser.getLikeCnt());
-            vo.setSubCnt(bizUser.getSubCnt());
+            vo.setSex(s.getSex());
+            vo.setEmail(s.getEmail());
+            vo.setPhonenumber(s.getPhonenumber());
             vo.setFollowed(isFollowedSet.contains(s.getUserId()));
+            vo.setCreateTime(DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD_HH_MM_SS, s.getCreateTime()));
+            vo.setSubCnt(bizUser.getSubCnt());
             return vo;
         }).collect(Collectors.toList());
     }

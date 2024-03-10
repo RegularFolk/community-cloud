@@ -14,8 +14,8 @@
               <div style="margin-top: 10px">用户的简介</div>
             </div>
           </div>
-          <el-button v-if="contactor.followed" style="padding: 10px" type="danger">已关注</el-button>
-          <el-button v-if="!contactor.followed" style="padding: 10px" type="primary">关注</el-button>
+          <el-button v-if="contactor.followed" style="padding: 10px" type="danger" @click="unfollow">已关注</el-button>
+          <el-button v-if="!contactor.followed" style="padding: 10px" type="success" @click="follow">关注</el-button>
         </div>
 
         <div ref="messageBox" class="msgBox" style="height: 650px;overflow-y: auto">
@@ -88,7 +88,7 @@
 
 
 <script>
-import {getUserProfileById} from "@/api/system/user";
+import {changeUserFollow, getUserProfileById} from "@/api/system/user";
 import {msgList, pullMsg, sendMSg} from "@/api/biz/message";
 
 export default {
@@ -235,6 +235,12 @@ export default {
     this.initContact()
     this.getMoreMsg()
   },
+  deactivated() {
+    this.msgPulling = true
+  },
+  activated() {
+    this.msgPulling = false
+  },
   mounted() {
     console.log('mounted');
     this.scrollToBottom()
@@ -295,6 +301,46 @@ export default {
       this.self.id = user.id
       this.self.avatar = user.avatar
       this.self.userName = user.name
+    },
+    // 关注用户
+    follow() {
+      let dto = {
+        followId: this.contactor.id,
+        operateType: 1
+      }
+      this.submitFollow(dto)
+    },
+    // 取消关注
+    unfollow() {
+      this.$confirm('确定要取消关注吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        let dto = {
+          followId: this.contactor.id,
+          operateType: 2
+        }
+        this.submitFollow(dto)
+      })
+    },
+    // 提交关注请求
+    submitFollow(dto) {
+      changeUserFollow(dto).then(resp => {
+        if (resp.code === 200) {
+          this.$message({
+            message: '操作成功！',
+            type: 'success'
+          })
+          this.contactor.followed = !this.contactor.followed
+          this.$emit('userFollowChanged', this.contactor.followed)
+        } else {
+          this.$message({
+            message: resp.msg,
+            type: 'error'
+          })
+        }
+      })
     },
     // 轮询拉取消息
     pollingMsg() {
@@ -375,6 +421,7 @@ export default {
     },
     // 跳转到用户主页
     routeToProfile() {
+      this.$emit('dialogClose')
       this.$router.push({
         path: '/user/profile',
         query: {
@@ -409,8 +456,10 @@ export default {
     },
   },
   watch: {
-    contactor: {
+    contactId: {
       handler(nVal) {
+        this.msgPulling = false
+        this.defaultDown = false
         this.initContact()
         this.getMoreMsg()
       }

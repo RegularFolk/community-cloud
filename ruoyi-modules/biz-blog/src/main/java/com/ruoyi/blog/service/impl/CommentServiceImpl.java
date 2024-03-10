@@ -19,6 +19,7 @@ import com.ruoyi.common.mq.callBack.DefaultCallBack;
 import com.ruoyi.common.mq.constants.MqTopicConstants;
 import com.ruoyi.common.mq.domain.BlogMessage;
 import com.ruoyi.common.mq.domain.CommentMessage;
+import com.ruoyi.common.mq.domain.UserMessage;
 import com.ruoyi.common.mq.enums.OperateType;
 import com.ruoyi.common.security.utils.SecurityUtils;
 import com.ruoyi.system.api.RemoteUserService;
@@ -229,6 +230,21 @@ public class CommentServiceImpl implements CommentService {
                     message,
                     String.valueOf(message.getMessageId()),
                     new DefaultCallBack<>(this.getClass(), message)
+            );
+
+            // 下游通知user点赞数更新
+            List<BlogComment> commentList = blogCommentMapper.selectCommentByIds(Collections.singletonList(dto.getCommentId()));
+            Long senderId = commentList.get(0).getSenderId();
+            UserMessage userMessage = new UserMessage();
+            userMessage.setUserId(senderId);
+            userMessage.setMessageId(senderId);
+            userMessage.setType(UserMessage.MessageType.LIKE.getType());
+            userMessage.setOperateType(typeEnum.getType());
+            rocketmqTemplate.asyncSendOrderly(
+                    MqTopicConstants.USER_TOPIC,
+                    userMessage,
+                    String.valueOf(userMessage.getMessageId()),
+                    new DefaultCallBack<>(this.getClass(), userMessage)
             );
 
         }

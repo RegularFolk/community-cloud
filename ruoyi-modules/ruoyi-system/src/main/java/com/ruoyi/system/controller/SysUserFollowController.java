@@ -8,6 +8,7 @@ import com.ruoyi.system.api.domain.SysUser;
 import com.ruoyi.system.domain.BizUser;
 import com.ruoyi.system.domain.dto.FollowDto;
 import com.ruoyi.system.domain.vo.BizUserVo;
+import com.ruoyi.system.domain.vo.UserBasicInfoVo;
 import com.ruoyi.system.service.UserFollowService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -59,7 +60,7 @@ public class SysUserFollowController {
      */
     @PostMapping("/followerList")
     public AjaxResult followerList(@RequestBody ListDto dto) {
-        List<BizUserVo> userList = userFollowService.getFollowList(dto);
+        List<UserBasicInfoVo> userList = userFollowService.getFollowList(dto);
         IdDto idDto = new IdDto();
         idDto.setId(SecurityUtils.getUserId());
         BizUser bizUser = userFollowService.getBizUser(idDto);
@@ -73,7 +74,7 @@ public class SysUserFollowController {
      */
     @PostMapping("/subList")
     public AjaxResult subList(@RequestBody ListDto dto) {
-        List<BizUserVo> userList = userFollowService.getSubList(dto);
+        List<UserBasicInfoVo> userList = userFollowService.getSubList(dto);
         IdDto idDto = new IdDto();
         idDto.setId(SecurityUtils.getUserId());
         BizUser bizUser = userFollowService.getBizUser(idDto);

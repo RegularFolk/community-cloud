@@ -169,3 +169,12 @@ export function deptTreeSelect() {
     method: 'get'
   })
 }
+
+// 查询用户基本信息
+export function getBasicInfo(data) {
+  return request({
+    url: '/system/user/profile/getBasicInfo',
+    method: 'post',
+    data: data
+  })
+}
