@@ -15,7 +15,7 @@ import com.ruoyi.system.api.RemoteFileService;
 import com.ruoyi.system.api.domain.SysFile;
 import com.ruoyi.system.api.domain.SysUser;
 import com.ruoyi.system.api.model.LoginUser;
-import com.ruoyi.system.domain.vo.UserBasicInfoVo;
+import com.ruoyi.common.core.domain.UserBasicInfoVo;
 import com.ruoyi.system.service.ISysUserService;
 import com.ruoyi.system.service.UserFollowService;
 import org.springframework.beans.factory.annotation.Autowired;

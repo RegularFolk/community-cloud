@@ -136,4 +136,14 @@ public class ArticleController extends BaseController {
         return flag > 0 ? AjaxResult.success() : AjaxResult.error("添加失败！");
     }
 
+    /**
+     * 随笔广场列表查询
+     * 随机推送
+     */
+    @PostMapping("/square/list")
+    public AjaxResult squareList(@RequestBody ArticleQueryDto dto) {
+        List<ArticleSquareVo> voList = articleService.getArticleSquareList(dto);
+        return AjaxResult.success(voList);
+    }
+
 }

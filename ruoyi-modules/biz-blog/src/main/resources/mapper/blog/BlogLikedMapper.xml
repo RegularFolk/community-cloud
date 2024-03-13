@@ -31,5 +31,14 @@
           and blog_id = #{articleId}
     </select>
 
+    <select id="selectLikedIds" resultType="java.lang.Long">
+        select blog_id
+        from blog_liked
+        where user_id = #{userId} and blog_id in
+        <foreach collection="articleIdList" item="articleId" open="(" separator="," close=")">
+            #{articleId}
+        </foreach>
+    </select>
+
 
 </mapper>

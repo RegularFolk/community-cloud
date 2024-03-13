@@ -1,4 +1,4 @@
-package com.ruoyi.system.domain.vo;
+package com.ruoyi.common.core.domain;
 
 public class UserBasicInfoVo {
 

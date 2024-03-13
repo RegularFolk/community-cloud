@@ -1,5 +1,7 @@
 package com.ruoyi.system.api;
 
+import com.ruoyi.common.core.domain.UserBasicInfoVo;
+import com.ruoyi.common.core.web.domain.AjaxResult;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -51,4 +53,9 @@ public interface RemoteUserService
      */
     @PostMapping("/user/getInfoByIds")
     public R<List<SysUser>> getInfoByIds(@RequestBody List<Long> ids, @RequestHeader(SecurityConstants.FROM_SOURCE) String source);
+
+    @PostMapping("/user/getUserBasicInfoByIds")
+    public R<List<UserBasicInfoVo>> getUserBasicInfoByIds(@RequestBody List<Long> ids, @RequestHeader(SecurityConstants.FROM_SOURCE) String source);
+
+
 }

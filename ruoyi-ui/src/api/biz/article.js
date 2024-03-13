@@ -97,3 +97,20 @@ export function getPersonArticle(data) {
   })
 }
 
+// 随笔广场列表查询
+export function squareList(data) {
+  return request({
+    url: '/blog/article/square/list',
+    method: 'post',
+    data: data
+  })
+}
+
+
+
+
+
+
+
+
+

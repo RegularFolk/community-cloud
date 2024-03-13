@@ -8,6 +8,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 
 import com.ruoyi.blog.api.RemoteBlogService;
+import com.ruoyi.common.core.domain.UserBasicInfoVo;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -121,6 +122,16 @@ public class SysUserController extends BaseController
         //TODO 没有走缓存
         List<SysUser> userList = userService.selectUserByIds(ids);
         return R.ok(userList);
+    }
+
+    /**
+     * 内部接口，根据id获取userBasicInfo
+     */
+    @InnerAuth
+    @PostMapping("/getUserBasicInfoByIds")
+    public R<List<UserBasicInfoVo>> getUserBasicInfoByIds(@RequestBody List<Long> ids) {
+        List<UserBasicInfoVo> voList = userService.getBasicInfoList(ids);
+        return R.ok(voList);
     }
 
     /**

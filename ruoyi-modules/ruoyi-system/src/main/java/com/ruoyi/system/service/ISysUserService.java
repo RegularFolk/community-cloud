@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.ruoyi.common.core.domain.IdDto;
 import com.ruoyi.system.api.domain.SysUser;
-import com.ruoyi.system.domain.vo.UserBasicInfoVo;
+import com.ruoyi.common.core.domain.UserBasicInfoVo;
 
 /**
  * 用户 业务层
@@ -210,4 +210,6 @@ public interface ISysUserService
     List<SysUser> selectUserByIds(List<Long> ids);
 
     UserBasicInfoVo getBasicInfo(IdDto dto);
+
+    List<UserBasicInfoVo> getBasicInfoList(List<Long> ids);
 }

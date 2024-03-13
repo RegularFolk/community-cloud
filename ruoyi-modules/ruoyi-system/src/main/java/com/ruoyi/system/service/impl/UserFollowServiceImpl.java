@@ -13,8 +13,7 @@ import com.ruoyi.common.security.utils.SecurityUtils;
 import com.ruoyi.system.api.domain.SysUser;
 import com.ruoyi.system.domain.BizUser;
 import com.ruoyi.system.domain.dto.FollowDto;
-import com.ruoyi.system.domain.vo.BizUserVo;
-import com.ruoyi.system.domain.vo.UserBasicInfoVo;
+import com.ruoyi.common.core.domain.UserBasicInfoVo;
 import com.ruoyi.system.mapper.BizUserMapper;
 import com.ruoyi.system.mapper.FollowListMapper;
 import com.ruoyi.system.mapper.SysUserMapper;
@@ -136,7 +135,8 @@ public class UserFollowServiceImpl implements UserFollowService {
 
     }
 
-    private List<UserBasicInfoVo> packUserBasicInfoVoList(Long userId, List<Long> idList) {
+    @Override
+    public List<UserBasicInfoVo> packUserBasicInfoVoList(Long userId, List<Long> idList) {
         List<SysUser> sysUsers = sysUserMapper.selectUserByIds(idList);
 
         List<BizUser> bizUserList = bizUserMapper.getByIdList(idList);

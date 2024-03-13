@@ -4,6 +4,7 @@ import com.ruoyi.blog.api.RemoteBlogService;
 import com.ruoyi.common.core.constant.SecurityConstants;
 import com.ruoyi.common.core.constant.UserConstants;
 import com.ruoyi.common.core.domain.IdDto;
+import com.ruoyi.common.core.domain.UserBasicInfoVo;
 import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.utils.DateUtils;
 import com.ruoyi.common.core.utils.SpringUtils;
@@ -17,7 +18,6 @@ import com.ruoyi.system.domain.BizUser;
 import com.ruoyi.system.domain.SysPost;
 import com.ruoyi.system.domain.SysUserPost;
 import com.ruoyi.system.domain.SysUserRole;
-import com.ruoyi.system.domain.vo.UserBasicInfoVo;
 import com.ruoyi.system.mapper.*;
 import com.ruoyi.system.service.ISysConfigService;
 import com.ruoyi.system.service.ISysUserService;
@@ -593,6 +593,11 @@ public class SysUserServiceImpl implements ISysUserService
         vo.setCreateTime(DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD_HH_MM_SS, sysUser.getCreateTime()));
 
         return vo;
+    }
+
+    @Override
+    public List<UserBasicInfoVo> getBasicInfoList(List<Long> ids) {
+        return userFollowService.packUserBasicInfoVoList(SecurityUtils.getUserId(), ids);
     }
 
 }

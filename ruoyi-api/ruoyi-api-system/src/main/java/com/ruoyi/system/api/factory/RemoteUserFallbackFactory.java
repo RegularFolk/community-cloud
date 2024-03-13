@@ -1,5 +1,7 @@
 package com.ruoyi.system.api.factory;
 
+import com.ruoyi.common.core.domain.UserBasicInfoVo;
+import com.ruoyi.common.core.web.domain.AjaxResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.openfeign.FallbackFactory;
@@ -42,6 +44,11 @@ public class RemoteUserFallbackFactory implements FallbackFactory<RemoteUserServ
             @Override
             public R<List<SysUser>> getInfoByIds(List<Long> ids, String source) {
                 return R.fail("获取用户列表失败:" + throwable.getMessage());
+            }
+
+            @Override
+            public R<List<UserBasicInfoVo>> getUserBasicInfoByIds(List<Long> ids, String source) {
+                return R.fail("获取用户基本信息列表失败:" + throwable.getMessage());
             }
 
 

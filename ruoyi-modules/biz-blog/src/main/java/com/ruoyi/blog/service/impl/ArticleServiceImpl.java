@@ -18,6 +18,7 @@ import com.ruoyi.blog.service.ArticleService;
 import com.ruoyi.common.core.constant.SecurityConstants;
 import com.ruoyi.common.core.domain.IdDto;
 import com.ruoyi.common.core.domain.R;
+import com.ruoyi.common.core.domain.UserBasicInfoVo;
 import com.ruoyi.common.core.exception.ServiceException;
 import com.ruoyi.common.core.utils.DateUtils;
 import com.ruoyi.common.core.utils.StringUtils;
@@ -34,10 +35,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -425,4 +423,67 @@ public class ArticleServiceImpl implements ArticleService {
 
         return blogMapper.insertPersonClassification(pc);
     }
+
+    @Override
+    public List<ArticleSquareVo> getArticleSquareList(ArticleQueryDto dto) {
+        Long pc = dto.getPersonClassification();
+        Blog blog = new Blog();
+        blog.setStatus(BlogStatusEnum.PUBLISHED.getStatus());
+        blog.setType(BlogTypeEnum.ARTICLE.getType());
+        if (pc != null && pc != 0L) {
+            blog.setArticleClassify(pc);
+        }
+
+        List<Blog> articleList = blogMapper.getArticleList(
+                blog,
+                dto.getPageSize(),
+                0,
+                BlogOrderEnum.RAND.getOrder()
+        );
+
+        // 查询作者个人信息
+        List<Long> authorIdList = articleList.stream().map(Blog::getAuthorId).collect(Collectors.toList());
+        List<UserBasicInfoVo> basicInfoList = remoteUserService
+                .getUserBasicInfoByIds(authorIdList, SecurityConstants.INNER).getData();
+        Map<Long, List<UserBasicInfoVo>> basicInfoMap = basicInfoList
+                .stream().collect(Collectors.groupingBy(UserBasicInfoVo::getId));
+
+        // 查询是否点赞、收藏信息
+        String userId = SecurityUtils.getUsername();
+        List<Long> articleIdList = articleList.stream().map(Blog::getId).collect(Collectors.toList());
+
+        List<Long> likedIds = blogLikedMapper.selectLikedIds(articleIdList, userId);
+        Set<Long> likedSet = new HashSet<>(likedIds);
+
+        List<Long> collectedIds = blogCollectedMapper.selectCollectedIds(articleIdList, userId);
+        Set<Long> collectSet = new HashSet<>(collectedIds);
+
+        // 组装数据
+        return articleList.stream().map(article -> {
+            ArticleSquareVo vo = new ArticleSquareVo();
+            UserBasicInfoVo basicInfo = basicInfoMap.get(article.getAuthorId()).get(0);
+            vo.setArticleId(article.getId());
+            vo.setArticleClassification(article.getArticleClassify().intValue());
+            vo.setAuthor(basicInfo);
+            vo.setTitle(article.getTitle());
+            vo.setPreview(article.getPreview());
+            vo.setPublishTime(article.getReleaseTime());
+            vo.setCommentCnt(article.getCommentCnt());
+            vo.setLikeCnt(article.getLikeCnt());
+            vo.setViewCnt(article.getViewCnt());
+            vo.setCollectCnt(article.getCollectCnt());
+            vo.setLiked(likedSet.contains(article.getId()));
+            vo.setCollected(collectSet.contains(article.getId()));
+
+            return vo;
+        }).collect(Collectors.toList());
+    }
+
+
+
+
+
+
+
+
 }
