@@ -2,7 +2,7 @@ package com.ruoyi.blog.domain;
 
 import com.ruoyi.blog.enums.ArticleClassificationEnum;
 import com.ruoyi.blog.enums.BlogStatusEnum;
-import com.ruoyi.blog.enums.BlogTypeEnum;
+import com.ruoyi.common.mq.enums.BlogTypeEnum;
 import com.ruoyi.common.core.web.domain.BaseEntity;
 
 /**

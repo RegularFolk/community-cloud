@@ -1,4 +1,6 @@
-package com.ruoyi.blog.enums;
+package com.ruoyi.common.mq.enums;
+
+import com.ruoyi.common.core.exception.ServiceException;
 
 public enum BlogTypeEnum {
 
@@ -9,6 +11,15 @@ public enum BlogTypeEnum {
     private final int type;
 
     private final String typeDesc;
+
+    public static BlogTypeEnum getEnum(Integer type) {
+        for (BlogTypeEnum value : values()) {
+            if (value.getType().equals(type)) {
+                return value;
+            }
+        }
+        throw new ServiceException("枚举不存在！");
+    }
 
     BlogTypeEnum(int type, String typeDesc) {
         this.type = type;

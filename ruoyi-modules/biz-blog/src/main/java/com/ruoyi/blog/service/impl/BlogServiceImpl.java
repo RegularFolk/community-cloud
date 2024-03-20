@@ -9,7 +9,7 @@ import com.ruoyi.blog.domain.vo.BlogDetailVo;
 import com.ruoyi.blog.domain.vo.IndexBlogVo;
 import com.ruoyi.blog.enums.BlogQueryModeEnum;
 import com.ruoyi.blog.enums.BlogStatusEnum;
-import com.ruoyi.blog.enums.BlogTypeEnum;
+import com.ruoyi.common.mq.enums.BlogTypeEnum;
 import com.ruoyi.blog.mapper.BlogLikedMapper;
 import com.ruoyi.blog.mapper.BlogMapper;
 import com.ruoyi.blog.service.ArticleService;
@@ -194,11 +194,17 @@ public class BlogServiceImpl implements BlogService {
                 break;
         }
 
+        Blog blog = new Blog();
+        blog.setId(blogId);
+        List<Blog> blogList = blogMapper.getArticleList(blog, null, null, null);
+        blog = blogList.get(0);
+
         if (flag > 0) {
             // 通知下游改变blog点赞计数
             BlogMessage message = new BlogMessage();
             message.setMessageId(blogId);
             message.setBlogId(blogId);
+            message.setBlogType(blog.getType());
             message.setOperateType(typeEnum.getType());
             message.setType(BlogMessage.MessageType.LIKE.getType());
             rocketMQTemplate.asyncSendOrderly(
@@ -209,10 +215,7 @@ public class BlogServiceImpl implements BlogService {
             );
 
             // 通知下游改变用户点赞计数
-            Blog blog = new Blog();
-            blog.setId(blogId);
-            List<Blog> blogList = blogMapper.getArticleList(blog, null, null, null);
-            Long authorId = blogList.get(0).getAuthorId();
+            Long authorId = blog.getAuthorId();
             UserMessage userMessage = new UserMessage();
             userMessage.setUserId(authorId);
             userMessage.setMessageId(authorId);
@@ -267,6 +270,7 @@ public class BlogServiceImpl implements BlogService {
         BlogMessage message = new BlogMessage();
         message.setMessageId(blogId);
         message.setBlogId(blogId);
+        message.setBlogType(blog.getType());
         message.setOperateType(OperateType.ADD.getType());
         message.setType(BlogMessage.MessageType.VIEW.getType());
         rocketMQTemplate.asyncSendOrderly(

@@ -35,4 +35,7 @@ public interface ArticleService {
     int addPersonClass(Long userId, String className);
 
     List<ArticleSquareVo> getArticleSquareList(ArticleQueryDto dto);
+
+    List<BlogRankVo> getViewRank();
+
 }

@@ -9,7 +9,6 @@ import com.ruoyi.blog.domain.dto.*;
 import com.ruoyi.blog.domain.vo.*;
 import com.ruoyi.blog.enums.BlogOrderEnum;
 import com.ruoyi.blog.enums.BlogStatusEnum;
-import com.ruoyi.blog.enums.BlogTypeEnum;
 import com.ruoyi.blog.enums.DeletePersonClassTypeEnum;
 import com.ruoyi.blog.mapper.BlogCollectedMapper;
 import com.ruoyi.blog.mapper.BlogLikedMapper;
@@ -26,16 +25,21 @@ import com.ruoyi.common.core.utils.sql.SqlUtil;
 import com.ruoyi.common.mq.callBack.DefaultCallBack;
 import com.ruoyi.common.mq.constants.MqTopicConstants;
 import com.ruoyi.common.mq.domain.BlogMessage;
+import com.ruoyi.common.mq.enums.BlogTypeEnum;
 import com.ruoyi.common.mq.enums.OperateType;
+import com.ruoyi.common.redis.constants.RankConfig;
+import com.ruoyi.common.redis.constants.RedisPrefix;
 import com.ruoyi.common.security.utils.SecurityUtils;
 import com.ruoyi.system.api.RemoteUserService;
 import com.ruoyi.system.api.domain.SysUser;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -55,6 +59,9 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Resource
     private RocketMQTemplate rocketmqTemplate;
+
+    @Resource
+    private RedisTemplate<String, Long> redisTemplate;
 
     @Override
     public Long postArticle(PostArticleDto dto) {
@@ -266,6 +273,7 @@ public class ArticleServiceImpl implements ArticleService {
         BlogMessage message = new BlogMessage();
         message.setMessageId(articleId);
         message.setBlogId(articleId);
+        message.setBlogType(blog.getType());
         message.setType(BlogMessage.MessageType.VIEW.getType());
         message.setOperateType(OperateType.ADD.getType());
         rocketmqTemplate.asyncSendOrderly(
@@ -315,6 +323,7 @@ public class ArticleServiceImpl implements ArticleService {
             BlogMessage message = new BlogMessage();
             message.setMessageId(dto.getId());
             message.setBlogId(dto.getId());
+            message.setBlogType(BlogTypeEnum.ARTICLE.getType());
             message.setOperateType(OperateType.ADD.getType());
             message.setType(BlogMessage.MessageType.COLLECT.getType());
             rocketmqTemplate.asyncSendOrderly(
@@ -363,6 +372,7 @@ public class ArticleServiceImpl implements ArticleService {
             BlogMessage message = new BlogMessage();
             message.setMessageId(dto.getId());
             message.setBlogId(dto.getId());
+            message.setBlogType(BlogTypeEnum.ARTICLE.getType());
             message.setOperateType(OperateType.CANCEL.getType());
             message.setType(BlogMessage.MessageType.COLLECT.getType());
             rocketmqTemplate.asyncSendOrderly(
@@ -426,7 +436,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public List<ArticleSquareVo> getArticleSquareList(ArticleQueryDto dto) {
-        Long pc = dto.getPersonClassification();
+        Long pc = dto.getArticleClassification();
         Blog blog = new Blog();
         blog.setStatus(BlogStatusEnum.PUBLISHED.getStatus());
         blog.setType(BlogTypeEnum.ARTICLE.getType());
@@ -479,11 +489,57 @@ public class ArticleServiceImpl implements ArticleService {
         }).collect(Collectors.toList());
     }
 
+    //TODO 此处存在bug，没有排除掉作者设置隐藏的博客
+    @Override
+    public List<BlogRankVo> getViewRank() {
+        String redisKey = RedisPrefix.ARTICLE_VIEW_RANK + BlogTypeEnum.ARTICLE.getType() + "_" + DateUtils.dateTime();
+        List<Long> idList = new ArrayList<>();
+        if (!Boolean.TRUE.equals(redisTemplate.hasKey(redisKey))) {
+            // 如果不存在该key，制作排行榜
+            buildViewRank();
+        }
+        Set<Long> set = redisTemplate
+                .opsForZSet().range(redisKey, RankConfig.ARTICLE_RANK_START, RankConfig.ARTICLE_RANK_END);
 
+        if (!CollectionUtils.isEmpty(set)) {
+            idList = new ArrayList<>(set);
+        }
 
+        if (CollectionUtils.isEmpty(idList)) {
+            return new ArrayList<>();
+        }
 
+        List<Blog> blogList = blogMapper.getBlogByIds(idList);
+        return blogList.stream().map(b -> {
+            BlogRankVo vo = new BlogRankVo();
+            vo.setBlogId(b.getId());
+            vo.setTitle(b.getTitle());
+            return vo;
+        }).collect(Collectors.toList());
+    }
 
-
+    /**
+     * 制作前七天的排行榜
+     */
+    private void buildViewRank() {
+        String destKey = RedisPrefix.ARTICLE_VIEW_RANK + BlogTypeEnum.ARTICLE.getType() + "_" + DateUtils.dateTime();
+        String key = "";
+        List<String> recKeyList = new ArrayList<>();
+        for (int i = 1; i <= 7; i++) {
+            StringBuilder sb = new StringBuilder();
+            String dateStr = DateUtils.parseDateToStr("yyyyMMdd", DateUtils.addDays(new Date(), -1 * i));
+            sb.append(RedisPrefix.ARTICLE_VIEW_RANK)
+                    .append(BlogTypeEnum.ARTICLE.getType())
+                    .append("_").append(dateStr);
+            if (i == 1) {
+                key = sb.toString();
+            } else {
+                recKeyList.add(sb.toString());
+            }
+        }
+        redisTemplate.opsForZSet().unionAndStore(key, recKeyList, destKey);
+        redisTemplate.expire(destKey, 1, TimeUnit.DAYS);
+    }
 
 
 }

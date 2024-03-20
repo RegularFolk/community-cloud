@@ -1,8 +1,8 @@
 <template>
 
-  <div>
+  <div v-loading="cardLoading" style="margin: 20px;width: 1500px">
     <!-- 随笔列表 -->
-    <el-card v-for="article in articleList" :key="article.id" :loading="cardLoading" shadow="hover"
+    <el-card v-for="article in articleList" :key="article.id" shadow="hover"
              style="margin: 20px;width: 1500px">
       <div slot="header">
         <el-link type="primary" @click="routeToArticle(article.articleId)">
@@ -15,7 +15,9 @@
           placement="right"
           trigger="hover"
           width="400">
-          <div slot="reference" style="cursor: pointer" @click="routeToProfile(article.author.id)">
+          <div slot="reference"
+               style="cursor: pointer;display: flex;justify-content: center;margin-right: 15px"
+               @click="routeToProfile(article.author.id)">
             <el-avatar :src="article.author.avatar"/>
           </div>
 
@@ -23,30 +25,36 @@
         </el-popover>
 
         <div>
-          {{ article.preview }}
+          {{ article.preview }}......
         </div>
 
       </div>
 
-      <div style="display: flex">
-        <div>{{ article.author.nickName }}</div>
-        <div>{{ article.publishTime }}</div>
+      <div style="display: flex;margin-top: 20px;justify-content: space-between">
+        <div style="display: flex">
+          <div class="card-bottom">{{ article.author.nickName }}</div>
+          <div class="card-bottom">{{ article.publishTime }}</div>
 
-        <div>
-          <i class="el-icon-chat-line-square">{{ article.commentCnt }}</i>
+          <div class="card-bottom">
+            <i class="el-icon-chat-line-square">{{ article.commentCnt }}</i>
+          </div>
+
+          <div class="card-bottom">
+            <i class="el-icon-thumb">{{ article.likeCnt }}</i>
+          </div>
+
+          <div class="card-bottom">
+            <i class="el-icon-star-on">{{ article.collectCnt }}</i>
+          </div>
+
+          <div class="card-bottom">
+            <i class="el-icon-view">{{ article.viewCnt }}</i>
+          </div>
         </div>
 
-        <div>
-          <i class="el-icon-thumb">{{ article.likeCnt }}</i>
-        </div>
-
-        <div>
-          <i class="el-icon-star-on">{{ article.collectCnt }}</i>
-        </div>
-
-        <div>
-          <i class="el-icon-view">{{ article.viewCnt }}</i>
-        </div>
+        <template>
+          <dict-tag :options="dict.type.blog_article_classification" :value="article.articleClassification"/>
+        </template>
       </div>
 
     </el-card>
@@ -65,9 +73,12 @@ import UserBasicInfo from "@/views/system/user/profile/userBasicInfo";
 export default {
   name: 'ArticleCard',
   components: {UserBasicInfo},
+  dicts: [
+    'blog_article_classification'
+  ],
   props: {
     articleClassification: {
-      type: Number,
+      type: String,
       default: 0
     }
   },
@@ -120,11 +131,29 @@ export default {
         }
       }).finally(() => {
         this.cardLoading = false
+        this.$emit('listReloadFinish')
       })
     }
   },
-  watch: {}
+  watch: {
+    articleClassification: {
+      handler(nVal) {
+        this.getSquareList()
+      }
+    }
+  }
 }
 
 
 </script>
+
+<style>
+.card-bottom {
+  margin-right: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+</style>

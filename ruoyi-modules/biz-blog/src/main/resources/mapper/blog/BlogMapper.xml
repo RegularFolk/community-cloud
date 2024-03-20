@@ -239,5 +239,13 @@
         where blog_id = #{articleId}
     </select>
 
+    <select id="getBlogByIds" resultType="com.ruoyi.blog.domain.Blog">
+        select <include refid="blogColumns"/>
+        from blog where id in
+        <foreach collection="idList" item="blogId" open="(" separator="," close=")">
+            #{blogId}
+        </foreach>
+    </select>
+
 
 </mapper>

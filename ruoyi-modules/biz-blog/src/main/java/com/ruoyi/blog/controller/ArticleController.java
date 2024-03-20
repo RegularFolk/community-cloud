@@ -146,4 +146,13 @@ public class ArticleController extends BaseController {
         return AjaxResult.success(voList);
     }
 
+    /**
+     * 查询浏览量排行榜
+     */
+    @PostMapping("/viewRank")
+    public AjaxResult viewRank() {
+        List<BlogRankVo> rank = articleService.getViewRank();
+        return AjaxResult.success(rank);
+    }
+
 }

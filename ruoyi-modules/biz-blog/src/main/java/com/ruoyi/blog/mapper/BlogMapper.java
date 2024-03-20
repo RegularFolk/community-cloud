@@ -39,6 +39,11 @@ public interface BlogMapper {
                               @Param("offset") Integer offset,
                               @Param("order") Integer order);
 
+    /**
+     * ids查询通用方法
+     */
+    List<Blog> getBlogByIds(@Param("idList") List<Long> idList);
+
     List<PersonalClassification> getPersonClassByIds(@Param("idList") List<Long> idList);
 
     int deleteBlogByIds(@Param("idList") List<Long> idList);

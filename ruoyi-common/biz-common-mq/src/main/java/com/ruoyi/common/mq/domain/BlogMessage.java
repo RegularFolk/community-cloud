@@ -1,6 +1,7 @@
 package com.ruoyi.common.mq.domain;
 
 import com.ruoyi.common.core.exception.ServiceException;
+import com.ruoyi.common.mq.enums.BlogTypeEnum;
 
 public class BlogMessage extends BaseMessage {
 
@@ -10,6 +11,11 @@ public class BlogMessage extends BaseMessage {
      * {@link com.ruoyi.common.mq.enums.OperateType}
      */
     private Integer operateType;
+
+    /**
+     * {@link BlogTypeEnum}
+     */
+    private Integer blogType;
 
     /**
      * {@link MessageType}
@@ -65,6 +71,14 @@ public class BlogMessage extends BaseMessage {
         this.operateType = operateType;
     }
 
+    public Integer getBlogType() {
+        return blogType;
+    }
+
+    public void setBlogType(Integer blogType) {
+        this.blogType = blogType;
+    }
+
     public Integer getType() {
         return type;
     }
@@ -78,6 +92,7 @@ public class BlogMessage extends BaseMessage {
         return "BlogMessage{" +
                 "blogId=" + blogId +
                 ", operateType=" + operateType +
+                ", blogType=" + blogType +
                 ", type=" + type +
                 "} " + super.toString();
     }

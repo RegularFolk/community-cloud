@@ -1,6 +1,7 @@
 package com.ruoyi.mqConsumers.service;
 
 import com.ruoyi.common.mq.domain.BlogMessage;
+import com.ruoyi.common.mq.enums.BlogTypeEnum;
 import com.ruoyi.common.mq.enums.OperateType;
 
 public interface BlogService {
@@ -13,6 +14,10 @@ public interface BlogService {
 
     int changeLikeCnt(Long blogId, OperateType typeEnum);
 
-    int handleBlogMessage(Long blogId, OperateType operateType, BlogMessage.MessageType messageType);
+    int handleBlogMessage(
+            Long blogId,
+            OperateType operateType,
+            BlogMessage.MessageType messageType,
+            BlogTypeEnum blogType);
 
 }

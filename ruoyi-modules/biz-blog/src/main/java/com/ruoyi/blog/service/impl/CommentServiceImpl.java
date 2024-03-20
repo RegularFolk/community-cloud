@@ -178,11 +178,15 @@ public class CommentServiceImpl implements CommentService {
         int flag = blogCommentMapper.putComment(comment);
 
         if (flag > 0) {
+            Blog blog = new Blog();
+            blog.setId(dto.getBlogId());
+            blog = blogMapper.getArticleList(blog, null, null, null).get(0);
             // 下游通知blog评论数更新
 
             BlogMessage message = new BlogMessage();
             message.setMessageId(dto.getBlogId());
             message.setBlogId(dto.getBlogId());
+            message.setBlogType(blog.getType());
             message.setOperateType(OperateType.ADD.getType());
             message.setType(BlogMessage.MessageType.COMMENT.getType());
             rocketmqTemplate.asyncSendOrderly(
