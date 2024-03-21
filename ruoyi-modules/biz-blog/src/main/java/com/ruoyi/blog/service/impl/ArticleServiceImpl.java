@@ -7,6 +7,7 @@ import com.ruoyi.blog.domain.BlogContent;
 import com.ruoyi.blog.domain.PersonalClassification;
 import com.ruoyi.blog.domain.dto.*;
 import com.ruoyi.blog.domain.vo.*;
+import com.ruoyi.blog.enums.ArticleRankEnum;
 import com.ruoyi.blog.enums.BlogOrderEnum;
 import com.ruoyi.blog.enums.BlogStatusEnum;
 import com.ruoyi.blog.enums.DeletePersonClassTypeEnum;
@@ -34,6 +35,7 @@ import com.ruoyi.system.api.RemoteUserService;
 import com.ruoyi.system.api.domain.SysUser;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -489,54 +491,93 @@ public class ArticleServiceImpl implements ArticleService {
         }).collect(Collectors.toList());
     }
 
-    //TODO 此处存在bug，没有排除掉作者设置隐藏的博客
+    //TODO 此处存在bug，没有排除掉作者设置隐藏的博客（一个解决方案：查多轮，直到凑出10条未隐藏博客）
     @Override
-    public List<BlogRankVo> getViewRank() {
-        String redisKey = RedisPrefix.ARTICLE_VIEW_RANK + BlogTypeEnum.ARTICLE.getType() + "_" + DateUtils.dateTime();
-        List<Long> idList = new ArrayList<>();
+    public List<BlogRankVo> getRank(ArticleRankEnum type) {
+        String rankPrefix = "";
+        String recPrefix = "";
+
+        switch (type) {
+            case VIEW:
+                rankPrefix = RedisPrefix.ARTICLE_VIEW_RANK;
+                recPrefix = RedisPrefix.ARTICLE_VIEW;
+                break;
+            case LIKE:
+                rankPrefix = RedisPrefix.ARTICLE_LIKE_RANK;
+                recPrefix = RedisPrefix.ARTICLE_LIKE;
+                break;
+            case COLLECT:
+                rankPrefix = RedisPrefix.ARTICLE_COLLECT_RANK;
+                recPrefix = RedisPrefix.ARTICLE_COLLECT;
+                break;
+            default:
+                // unreachable
+                break;
+        }
+
+        String redisKey = rankPrefix + BlogTypeEnum.ARTICLE.getType() + ":" + DateUtils.dateTime();
+        List<Long> idList;
         if (!Boolean.TRUE.equals(redisTemplate.hasKey(redisKey))) {
             // 如果不存在该key，制作排行榜
-            buildViewRank();
+            buildRank(rankPrefix, recPrefix);
         }
-        Set<Long> set = redisTemplate
-                .opsForZSet().range(redisKey, RankConfig.ARTICLE_RANK_START, RankConfig.ARTICLE_RANK_END);
+        Set<ZSetOperations.TypedTuple<Long>> typedTuples = redisTemplate
+                .opsForZSet().rangeWithScores(redisKey, RankConfig.ARTICLE_RANK_START, RankConfig.ARTICLE_RANK_END);
 
-        if (!CollectionUtils.isEmpty(set)) {
-            idList = new ArrayList<>(set);
-        }
-
-        if (CollectionUtils.isEmpty(idList)) {
+        if (CollectionUtils.isEmpty(typedTuples)) {
             return new ArrayList<>();
         }
 
-        List<Blog> blogList = blogMapper.getBlogByIds(idList);
-        return blogList.stream().map(b -> {
+        idList = typedTuples.stream().filter(t-> !Long.valueOf(0L).equals(t.getValue())).sorted((a, b) -> {
+            Double aScore = a.getScore();
+            Double bScore = b.getScore();
+            if (aScore == null && bScore == null) {
+                return 0;
+            } else if (aScore== null || bScore == null) {
+                return aScore == null ? 1 : -1;
+            } else {
+                return bScore.compareTo(aScore);
+            }
+        }).map(ZSetOperations.TypedTuple::getValue).collect(Collectors.toList());
+
+        Map<Long, List<Blog>> blogMap = blogMapper.getBlogByIds(idList)
+                .stream().collect(Collectors.groupingBy(Blog::getId));
+
+        return idList.stream().map(id -> {
             BlogRankVo vo = new BlogRankVo();
-            vo.setBlogId(b.getId());
-            vo.setTitle(b.getTitle());
+            vo.setBlogId(id);
+            vo.setTitle(blogMap.get(id).get(0).getTitle());
             return vo;
         }).collect(Collectors.toList());
     }
 
     /**
      * 制作前七天的排行榜
+     *
+     * @param rankPrefix
+     * @param recPrefix
      */
-    private void buildViewRank() {
-        String destKey = RedisPrefix.ARTICLE_VIEW_RANK + BlogTypeEnum.ARTICLE.getType() + "_" + DateUtils.dateTime();
+    private void buildRank(String rankPrefix, String recPrefix) {
+        String destKey = rankPrefix + BlogTypeEnum.ARTICLE.getType() + ":" + DateUtils.dateTime();
         String key = "";
         List<String> recKeyList = new ArrayList<>();
-        for (int i = 1; i <= 7; i++) {
+        for (int i = 0; i <= 7; i++) {
             StringBuilder sb = new StringBuilder();
             String dateStr = DateUtils.parseDateToStr("yyyyMMdd", DateUtils.addDays(new Date(), -1 * i));
-            sb.append(RedisPrefix.ARTICLE_VIEW_RANK)
+            sb.append(recPrefix)
                     .append(BlogTypeEnum.ARTICLE.getType())
-                    .append("_").append(dateStr);
-            if (i == 1) {
+                    .append(":").append(dateStr);
+            if (i == 0) {
                 key = sb.toString();
             } else {
                 recKeyList.add(sb.toString());
             }
         }
+        // 开头的key不能为空
+        if (!Boolean.TRUE.equals(redisTemplate.hasKey(key))) {
+            redisTemplate.opsForZSet().add(key, 0L, 0);
+        }
+
         redisTemplate.opsForZSet().unionAndStore(key, recKeyList, destKey);
         redisTemplate.expire(destKey, 1, TimeUnit.DAYS);
     }

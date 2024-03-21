@@ -2,6 +2,7 @@ package com.ruoyi.blog.service;
 
 import com.ruoyi.blog.domain.dto.*;
 import com.ruoyi.blog.domain.vo.*;
+import com.ruoyi.blog.enums.ArticleRankEnum;
 import com.ruoyi.common.core.domain.IdDto;
 
 import java.util.List;
@@ -36,6 +37,6 @@ public interface ArticleService {
 
     List<ArticleSquareVo> getArticleSquareList(ArticleQueryDto dto);
 
-    List<BlogRankVo> getViewRank();
+    List<BlogRankVo> getRank(ArticleRankEnum type);
 
 }

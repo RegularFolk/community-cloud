@@ -2,6 +2,7 @@ package com.ruoyi.blog.controller;
 
 import com.ruoyi.blog.domain.dto.*;
 import com.ruoyi.blog.domain.vo.*;
+import com.ruoyi.blog.enums.ArticleRankEnum;
 import com.ruoyi.blog.service.ArticleService;
 import com.ruoyi.common.core.domain.IdDto;
 import com.ruoyi.common.core.domain.R;
@@ -151,8 +152,27 @@ public class ArticleController extends BaseController {
      */
     @PostMapping("/viewRank")
     public AjaxResult viewRank() {
-        List<BlogRankVo> rank = articleService.getViewRank();
+        List<BlogRankVo> rank = articleService.getRank(ArticleRankEnum.VIEW);
         return AjaxResult.success(rank);
     }
+
+    /**
+     * 查询收藏量排行榜
+     */
+    @PostMapping("/collectRank")
+    public AjaxResult collectRank() {
+        List<BlogRankVo> rank = articleService.getRank(ArticleRankEnum.COLLECT);
+        return AjaxResult.success(rank);
+    }
+
+    /**
+     * 查询点赞量排行榜
+     */
+    @PostMapping("/likeRank")
+    public AjaxResult likeRank() {
+        List<BlogRankVo> rank = articleService.getRank(ArticleRankEnum.LIKE);
+        return AjaxResult.success(rank);
+    }
+
 
 }

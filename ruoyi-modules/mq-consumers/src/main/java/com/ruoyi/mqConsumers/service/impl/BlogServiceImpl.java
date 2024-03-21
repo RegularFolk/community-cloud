@@ -118,7 +118,7 @@ public class BlogServiceImpl implements BlogService {
      * @param blogType
      */
     private void addCollectRank(Long blogId, BlogTypeEnum blogType) {
-        String redisKey = RedisPrefix.ARTICLE_COLLECT + blogType.getType() + "_" + DateUtils.dateTime();
+        String redisKey = RedisPrefix.ARTICLE_COLLECT + blogType.getType() + ":" + DateUtils.dateTime();
         expireKey(redisKey);
         redisTemplate.opsForZSet().incrementScore(redisKey, blogId, 1D);
     }
@@ -130,7 +130,7 @@ public class BlogServiceImpl implements BlogService {
      * @param blogType
      */
     private void addViewRank(Long blogId, BlogTypeEnum blogType) {
-        String redisKey = RedisPrefix.ARTICLE_VIEW + blogType.getType() + "_" + DateUtils.dateTime();
+        String redisKey = RedisPrefix.ARTICLE_VIEW + blogType.getType() + ":" + DateUtils.dateTime();
         expireKey(redisKey);
         redisTemplate.opsForZSet().incrementScore(redisKey, blogId, 1D);
     }
@@ -142,14 +142,14 @@ public class BlogServiceImpl implements BlogService {
      * @param blogType
      */
     private void addLikeRank(Long blogId, BlogTypeEnum blogType) {
-        String redisKey = RedisPrefix.ARTICLE_LIKE + blogType.getType() + "_" + DateUtils.dateTime();
+        String redisKey = RedisPrefix.ARTICLE_LIKE + blogType.getType() + ":" + DateUtils.dateTime();
         expireKey(redisKey);
         redisTemplate.opsForZSet().incrementScore(redisKey, blogId, 1D);
     }
 
     private void expireKey(String redisKey) {
         if (!Boolean.TRUE.equals(redisTemplate.hasKey(redisKey))) {
-            redisTemplate.opsForZSet().add(redisKey, 0, 0D);
+            redisTemplate.opsForZSet().add(redisKey, 0L, 0D);
             redisTemplate.expire(redisKey, 10, TimeUnit.DAYS);
         }
     }

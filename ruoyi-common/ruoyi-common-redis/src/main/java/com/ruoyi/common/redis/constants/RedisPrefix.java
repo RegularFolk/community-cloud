@@ -4,7 +4,7 @@ public class RedisPrefix {
 
     /*
     * Redis 排行榜Key格式：
-    *   prefix_博客类型_dateTime
+    *   prefix_博客类型:dateTime
     * */
     public static final String ARTICLE_VIEW_RANK = "avr_";
 

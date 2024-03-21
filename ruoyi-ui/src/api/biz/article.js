@@ -106,6 +106,32 @@ export function squareList(data) {
   })
 }
 
+// 查询阅读排行榜
+export function getArticleViewRank() {
+  return request({
+    url: '/blog/article/viewRank',
+    method: 'post'
+  })
+}
+
+// 查询点赞排行榜
+export function getArticleLikeRank() {
+  return request({
+    url: '/blog/article/likeRank',
+    method: 'post'
+  })
+}
+
+// 查询收藏排行榜
+export function getArticleCollectRank() {
+  return request({
+    url: '/blog/article/collectRank',
+    method: 'post'
+  })
+}
+
+
+
 
 
 

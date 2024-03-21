@@ -26,22 +26,25 @@
         </div>
       </div>
 
-      <el-card style="margin-bottom: 20px">
+      <el-card style="margin-bottom: 20px" v-loading="viewRankLoading">
         <div slot="header">
           七天阅读排行
         </div>
+        <article-rank :rank-list="viewRank"/>
       </el-card>
 
       <el-card style="margin-bottom: 20px">
         <div slot="header">
-          七天评论排行
+          七天收藏排行
         </div>
+        <article-rank :rank-list="collectRank"/>
       </el-card>
 
       <el-card style="margin-bottom: 20px">
         <div slot="header">
           七天点赞排行
         </div>
+        <article-rank :rank-list="likeRank"/>
       </el-card>
 
 
@@ -55,22 +58,87 @@
 <script>
 
 import ArticleCard from "@/components/ArticleCard";
+import {getArticleCollectRank, getArticleLikeRank, getArticleViewRank} from "@/api/biz/article";
+import ArticleRank from "@/views/biz/article/articleRank";
 
 export default {
   name: 'ArticleSquare',
   dicts: [
     'blog_article_classification'
   ],
-  components: {ArticleCard},
+  components: {ArticleRank, ArticleCard},
   data() {
     return {
       articleClass: null,
-      btnLoading: false
+      btnLoading: false,
+      viewRank: [],
+      viewRankLoading: false,
+      likeRank: [],
+      likeRankLoading: false,
+      collectRank: [],
+      collectRankLoading: false,
     }
   },
   created() {
+    this.initRank()
   },
   methods: {
+    // 初始化排行榜
+    initRank() {
+      // 初始化阅读排行榜
+      this.getViewRank()
+
+      // 初始化收藏排行榜
+      this.getCollectRank()
+
+      // 初始化点赞排行榜
+      this.getLikeRank()
+    },
+    getLikeRank() {
+      this.likeRankLoading = true
+      getArticleLikeRank().then(resp =>{
+        if (resp.code === 200) {
+          this.likeRank = resp.data
+        } else {
+          this.$message({
+            message: resp.msg,
+            type: 'error'
+          })
+        }
+      }).finally(() => {
+        this.likeRankLoading = false
+      })
+    },
+    getCollectRank() {
+      this.collectRankLoading = true
+      getArticleCollectRank().then(resp => {
+        if (resp.code === 200) {
+          this.collectRank = resp.data
+        } else {
+          this.$message({
+            message: resp.msg,
+            type: 'error'
+          })
+        }
+      }).finally(() => {
+        this.collectRankLoading = false
+      })
+    },
+    getViewRank() {
+      this.viewRankLoading = true
+      getArticleViewRank().then(resp => {
+        if (resp.code === 200) {
+          this.viewRank = resp.data
+        } else {
+          this.$message({
+            message: resp.msg,
+            type: 'error'
+          })
+        }
+      }).finally(() => {
+        this.viewRankLoading = false
+      })
+    },
     // 选中文章分类
     articleClassChange(val) {
       this.btnLoading = true
