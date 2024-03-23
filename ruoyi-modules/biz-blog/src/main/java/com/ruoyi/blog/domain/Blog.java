@@ -51,6 +51,8 @@ public class Blog extends BaseEntity {
 
     private String picUrls;
 
+    private Long qtnPId;
+
     public Long getId() {
         return id;
     }
@@ -171,6 +173,15 @@ public class Blog extends BaseEntity {
         this.picUrls = picUrls;
     }
 
+    public Long getQtnPId() {
+        return qtnPId;
+    }
+
+    public void setQtnPId(Long qtnPId) {
+        this.qtnPId = qtnPId;
+    }
+
+
     @Override
     public String toString() {
         return "Blog{" +
@@ -189,6 +200,7 @@ public class Blog extends BaseEntity {
                 ", personClassify=" + personClassify +
                 ", type=" + type +
                 ", picUrls='" + picUrls + '\'' +
+                ", qtnPId=" + qtnPId +
                 "} " + super.toString();
     }
 }

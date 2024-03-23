@@ -4,6 +4,7 @@ import com.ruoyi.blog.domain.dto.*;
 import com.ruoyi.blog.domain.vo.*;
 import com.ruoyi.blog.enums.ArticleRankEnum;
 import com.ruoyi.common.core.domain.IdDto;
+import com.ruoyi.common.mq.enums.BlogTypeEnum;
 
 import java.util.List;
 
@@ -25,7 +26,7 @@ public interface ArticleService {
 
     ArticleVo getArticle(Long articleId);
 
-    int collect(IdDto dto);
+    int collect(IdDto dto, BlogTypeEnum typeEnum);
 
     ArticleCollectQueryVo collectList(ArticleCollectQueryDto dto);
 

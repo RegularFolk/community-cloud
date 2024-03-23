@@ -8,6 +8,7 @@ import com.ruoyi.blog.domain.PersonalClassification;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 public interface BlogMapper {
 
@@ -64,4 +65,6 @@ public interface BlogMapper {
     int updateBlogById(Blog blog);
 
     int updateBlogContent(BlogContent blogContent);
+
+    List<Map<String, String>> getAnsCntByIds(@Param("qtnIdList") List<Long> qtnIdList);
 }

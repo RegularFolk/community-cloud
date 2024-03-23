@@ -311,7 +311,7 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public int collect(IdDto dto) {
+    public int collect(IdDto dto, BlogTypeEnum typeEnum) {
         Long articleId = dto.getId();
         Long userId = SecurityUtils.getUserId();
         BlogCollected blogCollected = new BlogCollected();
@@ -325,7 +325,7 @@ public class ArticleServiceImpl implements ArticleService {
             BlogMessage message = new BlogMessage();
             message.setMessageId(dto.getId());
             message.setBlogId(dto.getId());
-            message.setBlogType(BlogTypeEnum.ARTICLE.getType());
+            message.setBlogType(typeEnum.getType());
             message.setOperateType(OperateType.ADD.getType());
             message.setType(BlogMessage.MessageType.COLLECT.getType());
             rocketmqTemplate.asyncSendOrderly(
@@ -561,7 +561,7 @@ public class ArticleServiceImpl implements ArticleService {
         String destKey = rankPrefix + BlogTypeEnum.ARTICLE.getType() + ":" + DateUtils.dateTime();
         String key = "";
         List<String> recKeyList = new ArrayList<>();
-        for (int i = 0; i <= 7; i++) {
+        for (int i = 1; i <= 7; i++) {
             StringBuilder sb = new StringBuilder();
             String dateStr = DateUtils.parseDateToStr("yyyyMMdd", DateUtils.addDays(new Date(), -1 * i));
             sb.append(recPrefix)

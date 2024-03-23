@@ -9,6 +9,7 @@ import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.web.controller.BaseController;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import com.ruoyi.common.core.web.page.TableDataInfo;
+import com.ruoyi.common.mq.enums.BlogTypeEnum;
 import com.ruoyi.common.security.annotation.InnerAuth;
 import com.ruoyi.common.security.utils.SecurityUtils;
 import org.springframework.web.bind.annotation.*;
@@ -95,7 +96,7 @@ public class ArticleController extends BaseController {
      */
     @PostMapping("/collect")
     public R<Void> collect(@RequestBody IdDto dto) {
-        int flag = articleService.collect(dto);
+        int flag = articleService.collect(dto, BlogTypeEnum.ARTICLE);
         return flag > 0 ? R.ok() : R.fail("收藏失败！请稍后重试或者联系管理员！");
     }
 

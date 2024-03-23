@@ -4,9 +4,13 @@ import com.ruoyi.common.core.exception.ServiceException;
 
 public enum BlogTypeEnum {
 
-    TWEET(1, "推文类型"),
+    TWEET(1, "想法"),
 
-    ARTICLE(2, "文章类型");
+    ARTICLE(2, "随笔"),
+
+    QUESTION(3, "提问"),
+
+    ANSWER(4, "回答");
 
     private final int type;
 

@@ -22,6 +22,7 @@
         <result property="personClassify" column="person_classify"/>
         <result property="type" column="type"/>
         <result property="picUrls" column="pic_urls"/>
+        <result property="qtnPId" column="qtn_p_id"/>
     </resultMap>
 
     <resultMap id="BlogContent" type="com.ruoyi.blog.domain.BlogContent">
@@ -51,6 +52,7 @@
         <if test="personClassify != null and personClassify != 0">person_classify,</if>
         <if test="type != null and type != 0">type,</if>
         <if test="picUrls != null and picUrls != ''">pic_urls,</if>
+        <if test="qtnPId != null and qtnPId != 0">qtn_p_id,</if>
         author_id
         ) values(
         <if test="title != null and title != ''">#{title},</if>
@@ -64,13 +66,14 @@
         <if test="personClassify != null and personClassify != 0">#{personClassify},</if>
         <if test="type != null and type != 0">#{type},</if>
         <if test="picUrls != null and picUrls != ''">#{picUrls},</if>
+        <if test="qtnQId != null and qtnPId != 0">#{qtnPId},</if>
         #{authorId}
         )
     </insert>
 
     <sql id="blogColumns">
         id
-        , author_id, title, preview, status, release_time, create_time, like_cnt, view_cnt, comment_cnt, collect_cnt, article_classify, person_classify, type, pic_urls
+        , author_id, title, preview, status, release_time, create_time, like_cnt, view_cnt, comment_cnt, collect_cnt, article_classify, person_classify, type, pic_urls, qtn_p_id
     </sql>
 
 
@@ -191,6 +194,7 @@
             #{blog.personClassify}
         </if>
         <if test="blog.type != null and blog.type != 0">and type = #{blog.type}</if>
+        <if test="blog.qtnPId != null and blog.qtnPId != 0">and qtn_p_id = #{blog.qtnPId}</if>
         <if test="order != null and order != 0">
             order by
             <if test="order == 1">create_time asc</if>
@@ -240,11 +244,20 @@
     </select>
 
     <select id="getBlogByIds" resultType="com.ruoyi.blog.domain.Blog">
-        select <include refid="blogColumns"/>
+        select
+        <include refid="blogColumns"/>
         from blog where id in
         <foreach collection="idList" item="blogId" open="(" separator="," close=")">
             #{blogId}
         </foreach>
+    </select>
+
+    <!-- 自关联 -->
+    <select id="getAnsCntByIds" resultType="java.util.Map">
+        select qtn_p_id as q_id, count(id) as ans_cnt
+        from blog where qtn_p_id in
+        <foreach collection="qtnIdList" item="qtnId" open="(" separator="," close=")">#{qtnId}</foreach>
+        group by q_id
     </select>
 
 
