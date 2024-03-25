@@ -66,7 +66,7 @@
         <if test="personClassify != null and personClassify != 0">#{personClassify},</if>
         <if test="type != null and type != 0">#{type},</if>
         <if test="picUrls != null and picUrls != ''">#{picUrls},</if>
-        <if test="qtnQId != null and qtnPId != 0">#{qtnPId},</if>
+        <if test="qtnPId != null and qtnPId != 0">#{qtnPId},</if>
         #{authorId}
         )
     </insert>
@@ -156,6 +156,7 @@
         <if test="viewCnt != null and viewCnt != 0">view_cnt = #{viewCnt},</if>
         <if test="articleClassify != null and articleClassify != 0">article_classify = #{articleClassify},</if>
         <if test="personClassify != null and personClassify != 0">person_classify = #{personClassify},</if>
+        <if test="qtnPId != null and qtnPId != 0">qtn_p_id = #{qtnPId},</if>
         type = type
         where id = #{id}
     </update>
@@ -166,6 +167,13 @@
             content_formatting = #{contentFormatting},
             content_html       = #{contentHtml}
         where blog_id = #{blogId}
+    </update>
+
+    <update id="acceptAns">
+        update blog
+        set status = 3 and qtn_p_id = #{qtnId}
+        where id = #{ansId}
+          and author_id = #{userId}
     </update>
 
 
@@ -202,6 +210,7 @@
             <if test="order == 3">like_cnt desc</if>
             <if test="order == 4">RAND()</if>
             <if test="order == 5">release_time desc</if>
+            <if test="order == 6">like_cnt desc, collect_cnt desc, view_cnt desc, create_time desc</if>
         </if>
         <if test="offset != null and pageSize != null and pageSize != 0">
             limit #{pageSize} offset #{offset}
@@ -235,6 +244,7 @@
         <if test="articleClassify != null and articleClassify != 0">and article_classify = #{articleClassify}</if>
         <if test="personClassify != null and personClassify != 0">and person_classify = #{personClassify}</if>
         <if test="type != null and type != 0">and type = #{type}</if>
+        <if test="qtnPId != null and qtnPId != 0">and qtn_p_id = #{qtnPId}</if>
     </select>
 
     <select id="getArticleContent" resultMap="BlogContent">
@@ -252,12 +262,27 @@
         </foreach>
     </select>
 
-    <!-- 自关联 -->
     <select id="getAnsCntByIds" resultType="java.util.Map">
         select qtn_p_id as q_id, count(id) as ans_cnt
         from blog where qtn_p_id in
         <foreach collection="qtnIdList" item="qtnId" open="(" separator="," close=")">#{qtnId}</foreach>
         group by q_id
+    </select>
+
+    <select id="getContentByIds" resultMap="BlogContent">
+        select blog_id, content, content_formatting, content_html
+        from blog_content
+        where blog_id in
+        <foreach collection="idList" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="getAcptAnsCnt" resultType="java.lang.Integer">
+        select count(id)
+        from blog
+        where qtn_p_id = #{qtnId}
+          and status = 3
     </select>
 
 

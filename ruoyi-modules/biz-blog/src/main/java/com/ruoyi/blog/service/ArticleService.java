@@ -38,6 +38,6 @@ public interface ArticleService {
 
     List<ArticleSquareVo> getArticleSquareList(ArticleQueryDto dto);
 
-    List<BlogRankVo> getRank(ArticleRankEnum type);
+    List<BlogRankVo> getRank(ArticleRankEnum rankEnum);
 
 }

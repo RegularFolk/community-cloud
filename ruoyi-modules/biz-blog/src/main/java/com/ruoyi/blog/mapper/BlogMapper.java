@@ -67,4 +67,10 @@ public interface BlogMapper {
     int updateBlogContent(BlogContent blogContent);
 
     List<Map<String, String>> getAnsCntByIds(@Param("qtnIdList") List<Long> qtnIdList);
+
+    List<BlogContent> getContentByIds(@Param("idList") List<Long> idList);
+
+    int acceptAns(@Param("ansId") Long ansId, @Param("qtnId") Long qtnId, @Param("userId") Long userId);
+
+    int getAcptAnsCnt(@Param("qtnId") Long qtnId);
 }

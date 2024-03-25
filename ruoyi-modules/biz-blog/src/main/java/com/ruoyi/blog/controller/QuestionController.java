@@ -1,8 +1,11 @@
 package com.ruoyi.blog.controller;
 
 import com.ruoyi.blog.domain.dto.PostQtnDto;
+import com.ruoyi.blog.domain.dto.QtnAnsAcptDto;
+import com.ruoyi.blog.domain.dto.QtnAnsListDto;
 import com.ruoyi.blog.domain.dto.QtnSquareDto;
 import com.ruoyi.blog.domain.vo.ArticleVo;
+import com.ruoyi.blog.domain.vo.QtnAnsVo;
 import com.ruoyi.blog.domain.vo.QtnSquareVo;
 import com.ruoyi.blog.service.QtnService;
 import com.ruoyi.common.core.domain.IdDto;
@@ -64,9 +67,9 @@ public class QuestionController extends BaseController {
      * 回答列表查询
      */
     @PostMapping("/ansList")
-    public AjaxResult ansList() {
-
-        return AjaxResult.success();
+    public AjaxResult ansList(@RequestBody QtnAnsListDto dto) {
+        QtnAnsVo vo = qtnService.ansList(dto);
+        return AjaxResult.success(vo);
     }
 
     /**
@@ -76,5 +79,14 @@ public class QuestionController extends BaseController {
     public AjaxResult collect(@RequestBody IdDto dto) {
         int flag = qtnService.collect(dto, BlogTypeEnum.QUESTION);
         return flag > 0 ? AjaxResult.success() : AjaxResult.error("操作失败！请稍后重试或联系管理员");
+    }
+
+    /**
+     * 采纳回答
+     */
+    @PostMapping("/accept")
+    public AjaxResult accept(@RequestBody QtnAnsAcptDto dto) {
+        int flag = qtnService.accept(dto);
+        return flag > 0 ? AjaxResult.success() : AjaxResult.error("同一问题下不可采纳多个回答！");
     }
 }

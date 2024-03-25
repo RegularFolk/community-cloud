@@ -493,11 +493,11 @@ public class ArticleServiceImpl implements ArticleService {
 
     //TODO 此处存在bug，没有排除掉作者设置隐藏的博客（一个解决方案：查多轮，直到凑出10条未隐藏博客）
     @Override
-    public List<BlogRankVo> getRank(ArticleRankEnum type) {
+    public List<BlogRankVo> getRank(ArticleRankEnum rankEnum) {
         String rankPrefix = "";
         String recPrefix = "";
 
-        switch (type) {
+        switch (rankEnum) {
             case VIEW:
                 rankPrefix = RedisPrefix.ARTICLE_VIEW_RANK;
                 recPrefix = RedisPrefix.ARTICLE_VIEW;
