@@ -1,5 +1,7 @@
 package com.ruoyi.blog.domain.vo;
 
+import com.ruoyi.common.core.domain.UserBasicInfoVo;
+
 public class ArticleVo {
 
     private Long articleId;
@@ -33,6 +35,10 @@ public class ArticleVo {
     private Integer status;
 
     private Boolean isLiked;
+
+    private Boolean accepted;
+
+    private UserBasicInfoVo userBasicInfo;
 
     public Long getArticleId() {
         return articleId;
@@ -162,6 +168,22 @@ public class ArticleVo {
         isLiked = liked;
     }
 
+    public Boolean getAccepted() {
+        return accepted;
+    }
+
+    public void setAccepted(Boolean accepted) {
+        this.accepted = accepted;
+    }
+
+    public UserBasicInfoVo getUserBasicInfo() {
+        return userBasicInfo;
+    }
+
+    public void setUserBasicInfo(UserBasicInfoVo userBasicInfo) {
+        this.userBasicInfo = userBasicInfo;
+    }
+
     @Override
     public String toString() {
         return "ArticleVo{" +
@@ -181,6 +203,8 @@ public class ArticleVo {
                 ", collected=" + collected +
                 ", status=" + status +
                 ", isLiked=" + isLiked +
+                ", accepted=" + accepted +
+                ", userBasicInfo=" + userBasicInfo +
                 '}';
     }
 }

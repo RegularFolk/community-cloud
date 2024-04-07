@@ -24,7 +24,7 @@ public interface ArticleService {
 
     long getTotalArticle(ArticleQueryDto dto);
 
-    ArticleVo getArticle(Long articleId);
+    ArticleVo getArticle(Long articleId, BlogTypeEnum blogTypeEnum);
 
     int collect(IdDto dto, BlogTypeEnum typeEnum);
 

@@ -101,9 +101,10 @@ export default {
     }
   },
   created() {
-    this.initLoginUser()
     if (this.userInjected) {
       this.user = this.userInjected
+    } else {
+      this.initLoginUser()
     }
   },
   methods: {

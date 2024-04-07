@@ -6,7 +6,8 @@ public enum ArticleClassificationEnum {
     XIN_WEN_ZI_XUN(2, "新闻资讯"),
     QV_WEN_TU_CAO(3, "趣闻吐槽"),
     XIN_DE_ZONG_JIE(4, "心得总结"),
-    SUI_SUI_NIAN(5, "碎碎念");
+    SUI_SUI_NIAN(5, "碎碎念"),
+    QUESTION(6, "问题");
 
     private final int classification;
 

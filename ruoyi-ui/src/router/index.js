@@ -29,6 +29,21 @@ Vue.use(Router)
 
 // 公共路由
 export const constantRoutes = [
+  // 查看问题跳转路由
+  {
+    path: '/question',
+    hidden: true,
+    component: Layout,
+    redirect: 'noredirect',
+    children: [
+      {
+        path: 'browse',
+        component: () => import('@/views/biz/question/qtnDetail'),
+        name: 'QtnDetail',
+        meta: {title: '查看问题'}
+      }
+    ]
+  },
   // 查看文章跳转路由
   {
     path: '/article',

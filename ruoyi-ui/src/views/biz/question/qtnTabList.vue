@@ -17,7 +17,7 @@
           <!-- 右侧区域 -->
           <div style="width: 90%;">
             <div style="margin-bottom: 15px">
-              <div class="btn-wrap-text" type="text">
+              <div class="btn-wrap-text" type="text" @click="routeToQtn(qtn.qtnId)">
                 {{ qtn.title }}
               </div>
             </div>
@@ -52,7 +52,7 @@
     </div>
 
     <!-- 加载更多评论按钮,三种状态:加载更多，加载中，已经到底 -->
-    <div style="display: flex;justify-content: center">
+    <div style="display: flex;justify-content: center;margin-top: 20px">
       <el-button
         v-if="loadStatus === 1"
         :loading="true"
@@ -110,13 +110,21 @@ export default {
     this.handleQuery()
   },
   activated() {
-    this.refresh()
+    // this.refresh()
   },
   methods: {
     refresh() {
       this.queryParam.pageNum = 1
       this.questionList = []
       this.handleQuery()
+    },
+    routeToQtn(qId) {
+      this.$router.push({
+        path: '/question/browse',
+        query: {
+          qId: qId
+        }
+      })
     },
     routeToProfile(userId) {
       this.$router.push({

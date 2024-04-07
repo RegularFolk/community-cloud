@@ -33,7 +33,7 @@ public class QuestionController extends BaseController {
     @PostMapping("/postQtn")
     public AjaxResult postQtn(@RequestBody PostQtnDto dto) {
         Long flag = qtnService.postQtn(dto);
-        return flag > 0 ? AjaxResult.success(flag) : AjaxResult.error("问题操作失败！请稍后重试或联系管理员");
+        return flag > 0 ? AjaxResult.success(flag) : AjaxResult.error("不可以重复回复哦！");
     }
 
     /**

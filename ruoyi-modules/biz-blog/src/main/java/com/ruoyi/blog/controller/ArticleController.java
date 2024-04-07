@@ -87,7 +87,7 @@ public class ArticleController extends BaseController {
      */
     @GetMapping("/getArticle/{articleId}")
     public R<ArticleVo> getArticle(@PathVariable("articleId") Long articleId) {
-        ArticleVo vo = articleService.getArticle(articleId);
+        ArticleVo vo = articleService.getArticle(articleId, BlogTypeEnum.ARTICLE);
         return R.ok(vo);
     }
 

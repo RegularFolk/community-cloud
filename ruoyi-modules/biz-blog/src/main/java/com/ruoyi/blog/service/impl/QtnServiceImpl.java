@@ -10,6 +10,7 @@ import com.ruoyi.blog.domain.dto.QtnSquareDto;
 import com.ruoyi.blog.domain.vo.ArticleVo;
 import com.ruoyi.blog.domain.vo.QtnAnsVo;
 import com.ruoyi.blog.domain.vo.QtnSquareVo;
+import com.ruoyi.blog.enums.ArticleClassificationEnum;
 import com.ruoyi.blog.enums.BlogOrderEnum;
 import com.ruoyi.blog.enums.BlogStatusEnum;
 import com.ruoyi.blog.mapper.BlogCollectedMapper;
@@ -19,6 +20,7 @@ import com.ruoyi.blog.service.ArticleService;
 import com.ruoyi.blog.service.QtnService;
 import com.ruoyi.common.core.constant.SecurityConstants;
 import com.ruoyi.common.core.domain.IdDto;
+import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.domain.UserBasicInfoVo;
 import com.ruoyi.common.core.utils.DateUtils;
 import com.ruoyi.common.core.utils.sql.SqlUtil;
@@ -78,6 +80,18 @@ public class QtnServiceImpl implements QtnService {
             if (ansFlag) {
                 blog.setQtnPId(qtnPId);
                 blog.setType(BlogTypeEnum.ANSWER.getType());
+                // 不可以重复回答问题
+                Blog tempBlog = new Blog();
+                tempBlog.setQtnPId(qtnPId);
+                tempBlog.setAuthorId(userId);
+                long existCnt = blogMapper.getArticleCnt(tempBlog);
+                // 测试代码，允许重复回复
+//                if (existCnt > 0) {
+//                    return 0L;
+//                }
+            }
+            if (!ansFlag) {
+                blog.setArticleClassify((long) ArticleClassificationEnum.QUESTION.getClassification());
             }
             blog.setReleaseTime(DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD_HH_MM_SS, new Date()));
             blog.setStatus(BlogStatusEnum.PUBLISHED.getStatus());
@@ -139,7 +153,7 @@ public class QtnServiceImpl implements QtnService {
 
         Map<Long, Long> ansCntMap = new HashMap<>();
 
-        ansCnt.forEach(e -> ansCntMap.put(Long.valueOf(e.get("q_id")), Long.valueOf(e.get("ans_cnt"))));
+        ansCnt.forEach(e -> ansCntMap.put(SqlUtil.cast2Long(e.get("q_id")), SqlUtil.cast2Long(e.get("ans_cnt"))));
 
         List<Long> likedIds = blogLikedMapper.selectLikedIds(qtnIdList, userId);
         Set<Long> likedSet = new HashSet<>(likedIds);
@@ -173,7 +187,7 @@ public class QtnServiceImpl implements QtnService {
 
     @Override
     public ArticleVo detail(IdDto dto) {
-        return articleService.getArticle(dto.getId());
+        return articleService.getArticle(dto.getId(), BlogTypeEnum.QUESTION);
     }
 
     @Override
@@ -206,8 +220,18 @@ public class QtnServiceImpl implements QtnService {
 
         Map<Long, List<SysUser>> userMap = userList.stream().collect(Collectors.groupingBy(SysUser::getUserId));
 
-        List<Long> likedIds = blogLikedMapper.selectLikedIds(ansIdList, SecurityUtils.getUserId().toString());
+        String userId = SecurityUtils.getUserId().toString();
+        List<Long> likedIds = blogLikedMapper.selectLikedIds(ansIdList, userId);
         Set<Long> likedSet = new HashSet<>(likedIds);
+
+        List<Long> collectIds = blogCollectedMapper.selectCollectedIds(ansIdList, userId);
+        Set<Long> collectSet = new HashSet<>(collectIds);
+
+        // 查询用户基本信息
+        R<List<UserBasicInfoVo>> resp = remoteUserService.getUserBasicInfoByIds(authorIdList, SecurityConstants.INNER);
+        List<UserBasicInfoVo> userInfoList = resp.getData();
+        Map<Long, List<UserBasicInfoVo>> userInfoMap = userInfoList
+                .stream().collect(Collectors.groupingBy(UserBasicInfoVo::getId));
 
         long total = blogMapper.getArticleCnt(blog);
 
@@ -215,6 +239,7 @@ public class QtnServiceImpl implements QtnService {
             ArticleVo articleVo = new ArticleVo();
             BlogContent blogContent = contentMap.get(a.getId()).get(0);
             SysUser sysUser = userMap.get(a.getAuthorId()).get(0);
+            UserBasicInfoVo basicInfo = userInfoMap.get(a.getAuthorId()).get(0);
             articleVo.setArticleId(a.getId());
             articleVo.setAuthorId(a.getAuthorId());
             articleVo.setTitle(a.getTitle());
@@ -228,6 +253,9 @@ public class QtnServiceImpl implements QtnService {
             articleVo.setCollectCnt(a.getCollectCnt());
             articleVo.setLiked(likedSet.contains(a.getId()));
             articleVo.setStatus(a.getStatus());
+            articleVo.setUserBasicInfo(basicInfo);
+            articleVo.setCollected(collectSet.contains(a.getId()));
+            articleVo.setAccepted(a.getStatus().equals(BlogStatusEnum.ACCEPTED.getStatus()));
             return articleVo;
         }).collect(Collectors.toList());
 
@@ -241,7 +269,7 @@ public class QtnServiceImpl implements QtnService {
         // 判断是否已存在采纳回答
         Long userId = SecurityUtils.getUserId();
         int cnt = blogMapper.getAcptAnsCnt(dto.getQtnId());
-        if (cnt == 0) {
+        if (cnt > 0) {
             return 0;
         }
 

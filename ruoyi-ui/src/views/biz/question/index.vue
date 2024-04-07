@@ -1,10 +1,12 @@
 <template>
 
-  <div class="app-container" style="display: flex;justify-content: space-between">
+  <div id="qtn" class="app-container" style="display: flex;justify-content: space-between">
 
-    <div style="width: 1500px">
-      <qtn-list/>
-    </div>
+    <keep-alive>
+      <div style="width: 1500px">
+        <qtn-list/>
+      </div>
+    </keep-alive>
 
     <div>
       <el-button type="danger" @click="drawerVisible = true">我要提问</el-button>
@@ -49,7 +51,7 @@
             <h3>当前字数：{{ this.curInputCnt }} / {{ this.editorLimit }}</h3>
           </div>
 
-          <Editor ref="input" v-model="questionInput.content" :enable-limit="enableEditorLimit" :height="520"
+          <Editor ref="input" v-model="questionInput.content" :enable-limit="enableEditorLimit" :height="820"
                   :limit-count="editorLimit" :place-holder="editorPlaceHolder" @on-text-change="valueChanged"/>
 
         </div>
@@ -75,7 +77,7 @@ import QtnList from "@/views/biz/question/qtnList";
 import {postQtn} from "@/api/biz/qtn";
 
 export default {
-  name: 'Question',
+  name: 'Qtn',
   components: {QtnList, ArticleRank},
   data() {
     return {

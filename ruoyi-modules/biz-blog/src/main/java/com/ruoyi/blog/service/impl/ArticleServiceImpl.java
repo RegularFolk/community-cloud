@@ -252,11 +252,11 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public ArticleVo getArticle(Long articleId) {
+    public ArticleVo getArticle(Long articleId, BlogTypeEnum blogTypeEnum) {
         ArticleVo vo = new ArticleVo();
         Blog blog = new Blog();
         Long userId = SecurityUtils.getUserId();
-        blog.setType(BlogTypeEnum.ARTICLE.getType());
+        blog.setType(blogTypeEnum.getType());
         blog.setId(articleId);
         List<Blog> articleList = blogMapper.getArticleList(blog, null, null, null);
         if (CollectionUtils.isEmpty(articleList)) {
@@ -288,6 +288,10 @@ public class ArticleServiceImpl implements ArticleService {
         // 判断该随笔是否被收藏
         int collectFlag = blogCollectedMapper.isCollected(articleId, userId);
 
+        // 查询用户基本信息
+        R<List<UserBasicInfoVo>> resp = remoteUserService.getUserBasicInfoByIds(Collections.singletonList(blog.getAuthorId()), SecurityConstants.INNER);
+        UserBasicInfoVo basicInfoVo = resp.getData().get(0);
+
         vo.setArticleId(articleId);
         vo.setAuthorId(blog.getAuthorId());
         vo.setTitle(blog.getTitle());
@@ -306,6 +310,7 @@ public class ArticleServiceImpl implements ArticleService {
         vo.setPersonClassify(blog.getPersonClassify());
         vo.setArticleClassify(blog.getArticleClassify());
         vo.setLiked(likedFlag > 0);
+        vo.setUserBasicInfo(basicInfoVo);
 
         return vo;
     }
@@ -539,6 +544,10 @@ public class ArticleServiceImpl implements ArticleService {
                 return bScore.compareTo(aScore);
             }
         }).map(ZSetOperations.TypedTuple::getValue).collect(Collectors.toList());
+
+        if (CollectionUtils.isEmpty(idList)) {
+            return new ArrayList<>();
+        }
 
         Map<Long, List<Blog>> blogMap = blogMapper.getBlogByIds(idList)
                 .stream().collect(Collectors.groupingBy(Blog::getId));

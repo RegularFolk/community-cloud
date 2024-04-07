@@ -29,7 +29,13 @@
 
     <insert id="insertBlogCollected" useGeneratedKeys="true" keyProperty="id">
         insert into blog_collected(user_id, blog_id)
-        values (#{userId}, #{blogId})
+        select #{userId}, #{blogId}
+        from dual
+        where not exists (
+            select 1
+            from blog_collected
+            where user_id = #{userId} and blog_id = #{blogId}
+            )
     </insert>
 
     <delete id="deleteCollect">

@@ -72,4 +72,11 @@ public class SqlUtil
     public static int getOffset(int pageNum, int pageSize) {
         return (pageNum - 1) * pageSize;
     }
+
+    /**
+     * 转换为Long（myBatis存在类型问题）
+     */
+    public static Long cast2Long(Object num) {
+        return Long.valueOf(String.valueOf(num));
+    }
 }
