@@ -46,7 +46,39 @@
             <groupId>com.aliyun.vod</groupId>
             <artifactId>upload</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.opentracing</groupId>
+            <artifactId>opentracing-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.opentracing</groupId>
+            <artifactId>opentracing-util</artifactId>
+        </dependency>
 
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>tea-console</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>tea-util</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>darabonba-env</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>vod20170321</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>tea-openapi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>tea</artifactId>
+        </dependency>
     	
     	<!-- SpringCloud Alibaba Nacos -->
         <dependency>

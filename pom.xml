@@ -88,6 +88,49 @@
                 <scope>system</scope>
                 <systemPath>E:/WorkProject/RuoYi-Cloud/lib/aliyun-java-vod-upload-1.4.15.jar</systemPath>
             </dependency>
+            <!-- https://mvnrepository.com/artifact/io.opentracing/opentracing-api -->
+            <dependency>
+                <groupId>io.opentracing</groupId>
+                <artifactId>opentracing-api</artifactId>
+                <version>0.31.0</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/io.opentracing/opentracing-util -->
+            <dependency>
+                <groupId>io.opentracing</groupId>
+                <artifactId>opentracing-util</artifactId>
+                <version>0.33.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.aliyun</groupId>
+                <artifactId>tea-console</artifactId>
+                <version>0.0.1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.aliyun</groupId>
+                <artifactId>tea-util</artifactId>
+                <version>0.2.10</version>
+            </dependency>
+            <dependency>
+                <groupId>com.aliyun</groupId>
+                <artifactId>darabonba-env</artifactId>
+                <version>0.1.1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.aliyun</groupId>
+                <artifactId>vod20170321</artifactId>
+                <version>2.0.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.aliyun</groupId>
+                <artifactId>tea-openapi</artifactId>
+                <version>0.0.8</version>
+            </dependency>
+            <dependency>
+                <groupId>com.aliyun</groupId>
+                <artifactId>tea</artifactId>
+                <version>[1.0.3, 2.0.0)</version>
+            </dependency>
 
 
             <!-- RocketMq -->

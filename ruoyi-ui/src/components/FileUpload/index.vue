@@ -2,7 +2,7 @@
   <div class="upload-file">
     <el-upload
       multiple
-      :action="uploadFileUrl"
+      :action="getUploadUrl"
       :before-upload="handleBeforeUpload"
       :file-list="fileList"
       :limit="limit"
@@ -19,8 +19,15 @@
       <!-- 上传提示 -->
       <div class="el-upload__tip" slot="tip" v-if="showTip">
         请上传
-        <template v-if="fileSize"> 大小不超过 <b style="color: #f56c6c">{{ fileSize }}MB</b> </template>
-        <template v-if="fileType"> 格式为 <b style="color: #f56c6c">{{ fileType.join("/") }}</b> </template>
+        <template v-if="fileSize"> 大小不超过 <b style="color: #f56c6c">{{ fileSize }}MB</b></template>
+
+        <div v-if="uploadType === 'pic'">
+          <template v-if="fileType"> 格式为 <b style="color: #f56c6c">{{ fileType.join("/") }}</b></template>
+        </div>
+
+        <div v-if="uploadType === 'vod'">
+          <template v-if="vodType"> 格式为 <b style="color: #f56c6c">{{ vodType.join("/") }}</b></template>
+        </div>
         的文件
       </div>
     </el-upload>
@@ -40,7 +47,7 @@
 </template>
 
 <script>
-import { getToken } from "@/utils/auth";
+import {getToken} from "@/utils/auth";
 
 export default {
   name: "FileUpload",
@@ -66,6 +73,16 @@ export default {
     isShowTip: {
       type: Boolean,
       default: true
+    },
+    // 上传类型，图片还是视频
+    uploadType: {
+      type: String,
+      default: 'pic'
+    },
+    // 视频类型，暂时只支持mp4
+    vodType: {
+      type: Array,
+      default: () => ['mp4']
     }
   },
   data() {
@@ -73,6 +90,7 @@ export default {
       number: 0,
       uploadList: [],
       uploadFileUrl: process.env.VUE_APP_BASE_API + "/file/upload", // 上传文件服务器地址
+      vodUploadUrl: process.env.VUE_APP_BASE_API + "/file/vodUpload", // 上传视频服务地址
       headers: {
         Authorization: "Bearer " + getToken(),
       },
@@ -106,19 +124,35 @@ export default {
   computed: {
     // 是否显示提示
     showTip() {
-      return this.isShowTip && (this.fileType || this.fileSize);
+      return this.isShowTip && (this.getType() || this.fileSize);
+    },
+    getUploadUrl() {
+      if (this.uploadType === 'pic') {
+        return this.uploadFileUrl
+      } else if (this.uploadType === 'vod') {
+        return this.vodUploadUrl
+      }
     },
   },
   methods: {
+    // 根据上传类型获取上传格式
+    getType() {
+      if (this.uploadType === 'pic') {
+        return this.fileType
+      } else if (this.uploadType === 'vod') {
+        return this.vodType
+      }
+    },
     // 上传前校检格式和大小
     handleBeforeUpload(file) {
       // 校检文件类型
-      if (this.fileType) {
+      let fileType = this.getType()
+      if (fileType) {
         const fileName = file.name.split('.');
         const fileExt = fileName[fileName.length - 1];
-        const isTypeOk = this.fileType.indexOf(fileExt) >= 0;
+        const isTypeOk = fileType.indexOf(fileExt) >= 0;
         if (!isTypeOk) {
-          this.$modal.msgError(`文件格式不正确, 请上传${this.fileType.join("/")}格式文件!`);
+          this.$modal.msgError(`文件格式不正确, 请上传${fileType.join("/")}格式文件!`);
           return false;
         }
       }
@@ -146,8 +180,13 @@ export default {
     // 上传成功回调
     handleUploadSuccess(res, file) {
       if (res.code === 200) {
-        this.uploadList.push({ name: res.data.url, url: res.data.url });
-        this.uploadedSuccessfully();
+        if (this.uploadType === 'pic') {
+          this.uploadList.push({name: res.data.url, url: res.data.url});
+          this.uploadedSuccessfully();
+        } else if (this.uploadType === 'vod') {
+          this.$emit('vodUploadSuccess', res.msg)
+          this.$modal.closeLoading();
+        }
       } else {
         this.number--;
         this.$modal.closeLoading();
