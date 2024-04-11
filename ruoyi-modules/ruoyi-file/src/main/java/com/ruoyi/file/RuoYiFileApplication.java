@@ -1,5 +1,6 @@
 package com.ruoyi.file;
 
+import com.ruoyi.common.security.annotation.EnableRyFeignClients;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -11,6 +12,7 @@ import com.ruoyi.common.swagger.annotation.EnableCustomSwagger2;
  * @author ruoyi
  */
 @EnableCustomSwagger2
+@EnableRyFeignClients
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class })
 public class RuoYiFileApplication
 {

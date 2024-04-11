@@ -10,7 +10,9 @@ public enum BlogTypeEnum {
 
     QUESTION(3, "提问"),
 
-    ANSWER(4, "回答");
+    ANSWER(4, "回答"),
+
+    VIDEO(5, "课程");
 
     private final int type;
 

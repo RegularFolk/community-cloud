@@ -134,7 +134,7 @@ public class ArticleServiceImpl implements ArticleService {
         int cnt = 0;
         if (DeletePersonClassTypeEnum.DELETE_ALL.getType() == dto.getDeleteType()) {
             // 删除所有分类下的文章
-            cnt = blogMapper.deleteBlogByIds(idList);
+            cnt = blogMapper.deleteBlogByIds(idList, userId);
             blogMapper.deleteContentByIds(idList);
         } else if (DeletePersonClassTypeEnum.MOVE_TO_DEFAULT.getType() == dto.getDeleteType()) {
 

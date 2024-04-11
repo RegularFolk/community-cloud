@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--suppress ALL -->
+<mapper namespace="com.ruoyi.blog.mapper.CourseMapper">
+
+    <resultMap id="Course" type="com.ruoyi.blog.domain.Course">
+        <id property="courseId" column="course_id"/>
+        <result property="authorId" column="author_id"/>
+        <result property="title" column="title"/>
+        <result property="coverPic" column="cover_pic"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <resultMap id="CourseChapter" type="com.ruoyi.blog.domain.CourseChapter">
+        <id property="chapterId" column="chapter_id"/>
+        <result property="courseId" column="course_id"/>
+        <result property="chapterOrder" column="chapter_order"/>
+        <result property="title" column="title"/>
+        <result property="desc" column="desc"/>
+    </resultMap>
+
+    <insert id="insertCourse" useGeneratedKeys="true" keyProperty="courseId">
+        insert into course(
+            <if test="coverPic != null and coverPic != ''">cover_pic,</if>
+            title,
+            author_id = #{authorId}
+        ) values (
+            <if test="title != null and title != ''">#{title},</if>
+            #{coverPic},
+            authorId
+        )
+    </insert>
+
+    <insert id="insertChapter" useGeneratedKeys="true" keyProperty="chapterId">
+        insert into course_chapter(
+            <if test="desc != null and desc != ''">desc,</if>
+            course_id, chapter_order, title
+        ) values (
+            <if test="desc != null and desc !=''">#{desc},</if>
+            #{courseId}, #{chapterOrder}, #{title}
+        )
+    </insert>
+
+    <insert id="insertVideo" useGeneratedKeys="true" keyProperty="id">
+        insert into blog
+        (author_id, title, preview, status, release_time, type, course_id, video_id, chapter_id, chapter_order)
+        values
+        (#{authorId}, #{title}, #{preview}, #{status}, #{releaseTime}, #{type}, #{courseId}, #{videoId}, #{chapterId}, #{chapterOrder})
+    </insert>
+
+    <update id="updateCourse">
+        update course set
+        <if test="title != null and title != ''">title = #{title},</if>
+        <if test="coverPic != null and coverPic != ''">cover_pic = #{coverPic},</if>
+        authorId = #{authorId}
+        where course_id = #{courseId}
+    </update>
+
+    <update id="updateChapter">
+        update course_chapter set
+        <if test="courseId != null and courseId > 0">course_id = #{courseId},</if>
+        <if test="chapterOrder != null and chapterOrder > 0">chapter_order = #{chapterOrder},</if>
+        <if test="title != null and title != ''">title = #{title},</if>
+        <if test="desc != null and desc != ''">desc = #{desc},</if>
+        chapter_id = #{chapterId}
+        where chapter_id = #{chapterId}
+    </update>
+
+    <update id="updateVideo">
+        update blog set
+        <if test="title != null and title != ''">title = #{title},</if>
+        <if test="preview != null and preview != ''">preview = #{preview},</if>
+        <if test="videoId != null and videoId != ''">video_id = #{videoId},</if>
+        <if test="chapterOrder != null and chapterOrder != 0">chapter_order = #{chapterOrder},</if>
+        id = #{id}
+        where id = #{id}
+    </update>
+
+    <delete id="delChapterByIds">
+        delete from blog
+        where author_id = #{userId} and id in
+        <foreach collection="chapterIds" item="chapterId" open="(" separator="," close=")">
+            #{chapterId}
+        </foreach>
+    </delete>
+
+    <delete id="delCourse">
+        delete from course
+        where course_id = #{courseId} and author_id = #{userId}
+    </delete>
+
+    <select id="selectChapterByIds" resultMap="CourseChapter">
+        select chapter_id, course_id, chapter_order, title, desc
+        from course_chapter where chapter_id in 
+        <foreach collection="chapterIds" item="chapterId" open="(" separator="," close=")">
+            #{chapterId}
+        </foreach>
+    </select>
+
+    <select id="selectCourseById" resultMap="Course">
+        select * from course
+        where course_id = #{id} and author_id = #{userId}
+    </select>
+
+    <select id="selectChapterByCourseId" resultMap="CourseChapter">
+        select * from course_chapter
+        where course_id = #{courseId}
+    </select>
+
+
+</mapper>

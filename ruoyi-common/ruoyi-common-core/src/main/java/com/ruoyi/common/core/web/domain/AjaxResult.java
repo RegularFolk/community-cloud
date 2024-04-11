@@ -23,6 +23,9 @@ public class AjaxResult extends HashMap<String, Object>
     /** 数据对象 */
     public static final String DATA_TAG = "data";
 
+    /** 默认错误信息 */
+    public static final String DEFAULT_ERROR_MSG = "操作失败！请稍后重试或联系管理员！";
+
     /**
      * 初始化一个新创建的 AjaxResult 对象，使其表示一个空消息。
      */

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 
 /**
- * 文件服务
+ * blog服务
  *
  * @author ruoyi
  */

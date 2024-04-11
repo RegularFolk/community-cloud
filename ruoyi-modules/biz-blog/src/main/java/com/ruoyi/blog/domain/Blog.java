@@ -53,6 +53,14 @@ public class Blog extends BaseEntity {
 
     private Long qtnPId;
 
+    private Long courseId;
+
+    private String videoId;
+
+    private Long chapterId;
+
+    private Integer chapterOrder;
+
     public Long getId() {
         return id;
     }
@@ -181,6 +189,37 @@ public class Blog extends BaseEntity {
         this.qtnPId = qtnPId;
     }
 
+    public Long getCourseId() {
+        return courseId;
+    }
+
+    public void setCourseId(Long courseId) {
+        this.courseId = courseId;
+    }
+
+    public String getVideoId() {
+        return videoId;
+    }
+
+    public void setVideoId(String videoId) {
+        this.videoId = videoId;
+    }
+
+    public Long getChapterId() {
+        return chapterId;
+    }
+
+    public void setChapterId(Long chapterId) {
+        this.chapterId = chapterId;
+    }
+
+    public Integer getChapterOrder() {
+        return chapterOrder;
+    }
+
+    public void setChapterOrder(Integer chapterOrder) {
+        this.chapterOrder = chapterOrder;
+    }
 
     @Override
     public String toString() {
@@ -201,6 +240,10 @@ public class Blog extends BaseEntity {
                 ", type=" + type +
                 ", picUrls='" + picUrls + '\'' +
                 ", qtnPId=" + qtnPId +
+                ", courseId=" + courseId +
+                ", videoId='" + videoId + '\'' +
+                ", chapterId=" + chapterId +
+                ", chapterOrder=" + chapterOrder +
                 "} " + super.toString();
     }
 }

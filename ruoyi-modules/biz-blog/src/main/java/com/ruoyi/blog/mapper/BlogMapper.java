@@ -20,7 +20,7 @@ public interface BlogMapper {
     List<Blog> getTempBlogList();
 
 
-    void insertBlog(Blog blog);
+    int insertBlog(Blog blog);
 
     void insertBlogContent(BlogContent blogContent);
 
@@ -47,7 +47,7 @@ public interface BlogMapper {
 
     List<PersonalClassification> getPersonClassByIds(@Param("idList") List<Long> idList);
 
-    int deleteBlogByIds(@Param("idList") List<Long> idList);
+    int deleteBlogByIds(@Param("idList") List<Long> idList, @Param("userId") Long userId);
 
     void deleteContentByIds(@Param("idList") List<Long> idList);
 
@@ -73,4 +73,6 @@ public interface BlogMapper {
     int acceptAns(@Param("ansId") Long ansId, @Param("qtnId") Long qtnId, @Param("userId") Long userId);
 
     int getAcptAnsCnt(@Param("qtnId") Long qtnId);
+
+    List<Blog> getVideoByChapterIds(@Param("chapterIds") List<Long> chapterIds, @Param("userId") Long userId);
 }

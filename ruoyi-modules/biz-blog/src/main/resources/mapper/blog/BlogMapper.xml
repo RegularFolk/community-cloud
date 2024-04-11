@@ -23,6 +23,10 @@
         <result property="type" column="type"/>
         <result property="picUrls" column="pic_urls"/>
         <result property="qtnPId" column="qtn_p_id"/>
+        <result property="courseId" column="course_id"/>
+        <result property="videoId" column="video_id"/>
+        <result property="chapterId" column="chapter_id"/>
+        <result property="chapterOrder" column="chapter_order"/>
     </resultMap>
 
     <resultMap id="BlogContent" type="com.ruoyi.blog.domain.BlogContent">
@@ -53,6 +57,10 @@
         <if test="type != null and type != 0">type,</if>
         <if test="picUrls != null and picUrls != ''">pic_urls,</if>
         <if test="qtnPId != null and qtnPId != 0">qtn_p_id,</if>
+        <if test="courseId != null and courseId != 0">course_id,</if>
+        <if test="videoId != null and videoId != 0">video_id,</if>
+        <if test="chapterId != null and chapterId != 0">chapter_id,</if>
+        <if test="chapterOrder != null and chapterOrder != 0">chapter_order,</if>
         author_id
         ) values(
         <if test="title != null and title != ''">#{title},</if>
@@ -67,13 +75,35 @@
         <if test="type != null and type != 0">#{type},</if>
         <if test="picUrls != null and picUrls != ''">#{picUrls},</if>
         <if test="qtnPId != null and qtnPId != 0">#{qtnPId},</if>
+        <if test="courseId != null and courseId != 0">#{courseId},</if>
+        <if test="videoId != null and videoId != 0">#{videoId},</if>
+        <if test="chapterId != null and chapterId != 0">#{chapterId},</if>
+        <if test="chapterOrder != null and chapterOrder != 0">#{chapterOrder},</if>
         #{authorId}
         )
     </insert>
 
     <sql id="blogColumns">
-        id
-        , author_id, title, preview, status, release_time, create_time, like_cnt, view_cnt, comment_cnt, collect_cnt, article_classify, person_classify, type, pic_urls, qtn_p_id
+        id,
+        author_id,
+        title,
+        preview,
+        status,
+        release_time,
+        create_time,
+        like_cnt,
+        view_cnt,
+        comment_cnt,
+        collect_cnt,
+        article_classify,
+        person_classify,
+        type,
+        pic_urls,
+        qtn_p_id,
+        course_id,
+        video_id,
+        chapter_id,
+        chapter_order
     </sql>
 
 
@@ -107,7 +137,7 @@
     </delete>
 
     <delete id="deleteBlogByIds">
-        update blog set deleted = 1 where type = 2 and id in
+        update blog set deleted = 1 where type = 2 and author_id = #{userId} and id in
         <foreach collection="idList" item="id" separator="," open="(" close=")">
             #{id}
         </foreach>
@@ -157,6 +187,10 @@
         <if test="articleClassify != null and articleClassify != 0">article_classify = #{articleClassify},</if>
         <if test="personClassify != null and personClassify != 0">person_classify = #{personClassify},</if>
         <if test="qtnPId != null and qtnPId != 0">qtn_p_id = #{qtnPId},</if>
+        <if test="courseId != null and courseId != 0">course_id = #{courseId},</if>
+        <if test="videoId != null and videoId != 0">video_id = #{videoId},</if>
+        <if test="chapterId != null and chapterId != 0">chapter_id = #{chapterId},</if>
+        <if test="chapterOrder != null and chapterOrder != 0">chapter_order = #{chapterOrder},</if>
         type = type
         where id = #{id}
     </update>
@@ -283,6 +317,14 @@
         from blog
         where qtn_p_id = #{qtnId}
           and status = 3
+    </select>
+
+    <select id="getVideoByChapterIds" resultMap="Blog">
+        select <include refid="blogColumns"/>
+        from blog where author_id = #{userId} and chapter_id in
+        <foreach collection="chapterIds" item="chapterId" open="(" separator="," close=")">
+            #{chapterId}
+        </foreach>
     </select>
 
 
