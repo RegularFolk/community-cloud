@@ -11,6 +11,8 @@ public class PostCourseDto {
 
     private String coverPic;
 
+    private String desc;
+
     public Long getCourseId() {
         return courseId;
     }
@@ -35,12 +37,21 @@ public class PostCourseDto {
         this.coverPic = coverPic;
     }
 
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
+
     @Override
     public String toString() {
         return "PostCourseDto{" +
                 "courseId=" + courseId +
                 ", title='" + title + '\'' +
                 ", coverPic='" + coverPic + '\'' +
+                ", desc='" + desc + '\'' +
                 '}';
     }
 }

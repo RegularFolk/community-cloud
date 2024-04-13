@@ -32,6 +32,7 @@ import org.springframework.util.CollectionUtils;
 import javax.annotation.Resource;
 import javax.validation.Validator;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -289,6 +290,7 @@ public class SysUserServiceImpl implements ISysUserService
     @Override
     public boolean registerUser(SysUser user)
     {
+        user.setDeptId(100L);
         user.setPassword(SecurityUtils.encryptPassword("admin123"));
         int flag = userMapper.insertUser(user);
 
@@ -298,6 +300,10 @@ public class SysUserServiceImpl implements ISysUserService
             bizUser.setUserId(user.getUserId());
             flag = bizUserMapper.insertBizUser(bizUser);
             if (flag > 0) {
+                SysUserRole userRole = new SysUserRole();
+                userRole.setUserId(user.getUserId());
+                userRole.setRoleId(2L);
+                userRoleMapper.batchUserRole(Collections.singletonList(userRole));
                 remoteBlogService.addPersonClass(user.getUserId(), "默认分类", SecurityConstants.INNER);
             }
         }

@@ -31,4 +31,9 @@ public interface RemoteFileService
 
     @PostMapping("/file/delVod/{vodId}")
     public AjaxResult delVod(@PathVariable("vodId") String vodId);
+
+    @PostMapping("/file/getVodUrl/{vodId}")
+    public AjaxResult getVodUrl(@PathVariable("vodId") String vodId);
+
+
 }

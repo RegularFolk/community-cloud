@@ -36,6 +36,11 @@ public class RemoteFileFallbackFactory implements FallbackFactory<RemoteFileServ
             public AjaxResult delVod(String vodId) {
                 return AjaxResult.error("调用文件服务删除阿里云视频失败！" + throwable.getMessage());
             }
+
+            @Override
+            public AjaxResult getVodUrl(String vodId) {
+                return AjaxResult.error("调用文件服务获取阿里云视频播放地址失败！" + throwable.getMessage());
+            }
         };
     }
 }

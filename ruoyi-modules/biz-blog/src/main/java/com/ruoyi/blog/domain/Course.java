@@ -15,7 +15,9 @@ public class Course extends BaseEntity {
 
     private String title;
 
-    private String cover_pic;
+    private String coverPic;
+
+    private String desc;
 
     public Long getCourseId() {
         return courseId;
@@ -41,12 +43,20 @@ public class Course extends BaseEntity {
         this.title = title;
     }
 
-    public String getCover_pic() {
-        return cover_pic;
+    public String getCoverPic() {
+        return coverPic;
     }
 
-    public void setCover_pic(String cover_pic) {
-        this.cover_pic = cover_pic;
+    public void setCoverPic(String coverPic) {
+        this.coverPic = coverPic;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
     }
 
     @Override
@@ -55,7 +65,8 @@ public class Course extends BaseEntity {
                 "courseId=" + courseId +
                 ", authorId=" + authorId +
                 ", title='" + title + '\'' +
-                ", cover_pic='" + cover_pic + '\'' +
-                '}';
+                ", coverPic='" + coverPic + '\'' +
+                ", desc='" + desc + '\'' +
+                "} " + super.toString();
     }
 }

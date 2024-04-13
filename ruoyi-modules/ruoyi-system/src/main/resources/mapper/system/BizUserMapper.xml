@@ -13,7 +13,7 @@
 
     <insert id="insertBizUser">
         insert into biz_user(user_id)
-        values #{userId}
+        values (#{userId})
     </insert>
 
     <update id="increaseSubCnt">

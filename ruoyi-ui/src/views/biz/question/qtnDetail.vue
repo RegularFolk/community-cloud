@@ -346,10 +346,19 @@ export default {
     },
     // 提交回答
     submitAns() {
+      let content = this.$refs.ansInput.Quill.getText()
+      console.log('content', content)
+      if (!content || content.trim().length <= 0) {
+        this.$message({
+          message: '不可提交空内容！',
+          type: 'warning'
+        })
+        return
+      }
       this.submitAnsLoading = true
       let dto = {
         qtnPId: this.qId,
-        content: this.$refs.ansInput.Quill.getText(),
+        content: content,
         contentFormatting: JSON.stringify(this.$refs.ansInput.Quill.getContents()),
         contentHtml: this.ansInput.content
       }

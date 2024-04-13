@@ -237,6 +237,9 @@
         </if>
         <if test="blog.type != null and blog.type != 0">and type = #{blog.type}</if>
         <if test="blog.qtnPId != null and blog.qtnPId != 0">and qtn_p_id = #{blog.qtnPId}</if>
+        <if test="blog.courseId != null and blog.courseId != 0">and course_id = #{blog.courseId}</if>
+        <if test="blog.videoId != null and blog.videoId != ''">and video_id = #{blog.videoId}</if>
+        <if test="blog.chapterId != null and blog.chapterId != 0">and chapter_id = #{blog.chapterId}</if>
         <if test="order != null and order != 0">
             order by
             <if test="order == 1">create_time asc</if>

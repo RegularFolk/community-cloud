@@ -9,8 +9,9 @@
         <id property="courseId" column="course_id"/>
         <result property="authorId" column="author_id"/>
         <result property="title" column="title"/>
-        <result property="coverPic" column="cover_pic"/>
+        <result property="coverPic" column="coverPic"/>
         <result property="createTime" column="create_time"/>
+        <result property="desc" column="desc"/>
     </resultMap>
 
     <resultMap id="CourseChapter" type="com.ruoyi.blog.domain.CourseChapter">
@@ -21,15 +22,22 @@
         <result property="desc" column="desc"/>
     </resultMap>
 
+    <resultMap id="CntDto" type="com.ruoyi.common.core.domain.CntDto">
+        <id property="id" column="id"/>
+        <id property="cnt" column="cnt"/>
+    </resultMap>
+
     <insert id="insertCourse" useGeneratedKeys="true" keyProperty="courseId">
         insert into course(
-            <if test="coverPic != null and coverPic != ''">cover_pic,</if>
+            <if test="coverPic != null and coverPic != ''">coverPic,</if>
+            <if test="desc != null and desc != ''">desc,</if>
             title,
-            author_id = #{authorId}
+            author_id,
         ) values (
             <if test="title != null and title != ''">#{title},</if>
+            <if test="desc != null and desc != ''">#{desc},</if>
             #{coverPic},
-            authorId
+            #{authorId}
         )
     </insert>
 
@@ -53,7 +61,8 @@
     <update id="updateCourse">
         update course set
         <if test="title != null and title != ''">title = #{title},</if>
-        <if test="coverPic != null and coverPic != ''">cover_pic = #{coverPic},</if>
+        <if test="coverPic != null and coverPic != ''">coverPic = #{coverPic},</if>
+        <if test="desc != null and desc!= ''">desc = #{desc},</if>
         authorId = #{authorId}
         where course_id = #{courseId}
     </update>
@@ -107,6 +116,78 @@
     <select id="selectChapterByCourseId" resultMap="CourseChapter">
         select * from course_chapter
         where course_id = #{courseId}
+    </select>
+
+    <select id="getLikeCntList" resultMap="CntDto">
+        select id, sum(like_cnt) as cnt
+        from blog
+        where course_id in
+        <foreach collection="courseIdList" item="courseId" open="(" separator="," close=")">
+            #{courseId}
+        </foreach>
+        group by id
+    </select>
+
+    <select id="getViewCntList" resultMap="CntDto">
+        select id, sum(view_cnt) as cnt
+        from blog
+        where course_id in
+        <foreach collection="courseIdList" item="courseId" open="(" separator="," close=")">
+            #{courseId}
+        </foreach>
+        group by id
+    </select>
+
+    <select id="getCommentCntList" resultMap="CntDto">
+        select id, sum(comment_cnt) as cnt
+        from blog
+        where course_id in
+        <foreach collection="courseIdList" item="courseId" open="(" separator="," close=")">
+            #{courseId}
+        </foreach>
+        group by id
+    </select>
+
+    <select id="getCollectCntList" resultMap="CntDto">
+        select id, sum(collect_cnt) as cnt
+        from blog
+        where course_id in
+        <foreach collection="courseIdList" item="courseId" open="(" separator="," close=")">
+            #{courseId}
+        </foreach>
+        group by id
+    </select>
+
+    <select id="list" resultMap="Course">
+        select c.course_id as course_id, c.author_id as author_id, c.title as title, c.cover_pic as cover_pic, c.create_time as create_time, c.desc as desc
+        <if test="order == 6">
+            , b.view_cnt as view_cnt
+        </if>
+        from course c
+        <if test="order == 6">
+            left join (select course_id, sum(view_cnt) as view_cnt from blog group by course_id) b on b.course_id = c.course_id
+        </if>
+        where 1 = 1
+        <if test="course.courseId != null and course.courseId != 0">and c.course_id = #{course.courseId}</if>
+        <if test="course.authorId != null and course.authorId != 0">and c.author_id = #{course.authorId}</if>
+        <if test="course.title != null and course.title != ''">and c.title like concat('%', #{course.title}, '%')</if>
+        <if test="order != null and order != 0">
+            order by
+            <if test="order == 2">c.create_time desc</if>
+            <if test="order == 4">RAND()</if>
+            <if test="order == 6">b.view_cnt desc</if>
+        </if>
+        <if test="pageSize != null and pageSize != 0 and offset != null">
+            limit #{pageSize} offset #{offset}
+        </if>
+    </select>
+
+    <select id="listTotal" resultType="java.lang.Long">
+        select count(1) from course
+        where 1 = 1
+        <if test="course.courseId != null and course.courseId != 0">and course_id = #{course.courseId}</if>
+        <if test="course.authorId != null and course.authorId != 0">and author_id = #{course.authorId}</if>
+        <if test="course.title != null and course.title != ''">and title like concat('%', #{course.title}, '%')</if>
     </select>
 
 

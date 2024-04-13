@@ -1,8 +1,12 @@
 package com.ruoyi.blog.controller;
 
+import com.ruoyi.blog.domain.dto.CourseListDto;
 import com.ruoyi.blog.domain.dto.PostChapterDto;
 import com.ruoyi.blog.domain.dto.PostCourseDto;
 import com.ruoyi.blog.domain.dto.PostVideoDto;
+import com.ruoyi.blog.domain.vo.CourseDetailVo;
+import com.ruoyi.blog.domain.vo.CourseListVo;
+import com.ruoyi.blog.domain.vo.VideoDetailVo;
 import com.ruoyi.blog.service.CourseService;
 import com.ruoyi.common.core.domain.IdDto;
 import com.ruoyi.common.core.web.domain.AjaxResult;
@@ -12,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 @RestController
 @RequestMapping("/course")
@@ -78,27 +83,30 @@ public class CourseController {
      * 课程列表查询
      */
     @PostMapping("/list")
-    public AjaxResult list() {
-
-        return AjaxResult.success();
+    public AjaxResult list(@RequestBody CourseListDto dto) {
+        List<CourseListVo> list = courseService.list(dto);
+        long total = courseService.listTotal(dto);
+        AjaxResult res = AjaxResult.success(list);
+        res.put("total", total);
+        return res;
     }
 
     /**
      * 查看课程详情页
      */
     @PostMapping("/courseDetail")
-    public AjaxResult courseDetail() {
-
-        return AjaxResult.success();
+    public AjaxResult courseDetail(@RequestBody IdDto dto) {
+        CourseDetailVo vo = courseService.courseDetail(dto);
+        return AjaxResult.success(vo);
     }
 
     /**
      * 查看视频
      */
     @PostMapping("/videoDetail")
-    public AjaxResult videoDetail() {
-
-        return AjaxResult.success();
+    public AjaxResult videoDetail(@RequestBody IdDto dto) {
+        VideoDetailVo vo = courseService.videoDetail(dto);
+        return AjaxResult.success(vo);
     }
 
 

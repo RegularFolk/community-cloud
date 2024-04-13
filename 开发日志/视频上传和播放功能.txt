@@ -21,7 +21,7 @@
         course_id       课程Id
         author_id       作者Id
         title           课程标题
-        cover_pic       封面地址
+        coverPic       封面地址
 
 
     新增表course_chapter （一个课程对应多个章节，每个章节下有多个视频）
