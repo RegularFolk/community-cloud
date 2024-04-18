@@ -107,6 +107,7 @@ public class BlogServiceImpl implements BlogService {
                 break;
         }
 
+        // 组装返回值
         return packBlogVoList(blogList);
 
     }

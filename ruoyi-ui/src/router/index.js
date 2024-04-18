@@ -29,6 +29,36 @@ Vue.use(Router)
 
 // 公共路由
 export const constantRoutes = [
+  // 编辑课程跳转路由
+  {
+    path: '/courses',
+    hidden: true,
+    component: Layout,
+    redirect: 'noredirect',
+    children: [
+      {
+        path: 'edit',
+        component: () => import('@/views/biz/course/courseEdit'),
+        name: 'CourseEdit',
+        meta: {title: '编辑课程'}
+      }
+    ]
+  },
+  // 新建课程跳转路由
+  {
+    path: '/courses',
+    hidden: true,
+    component: Layout,
+    redirect: 'noredirect',
+    children: [
+      {
+        path: 'create',
+        component: () => import('@/views/biz/course/courseEdit'),
+        name: 'CourseEdit',
+        meta: {title: '新建课程'}
+      }
+    ]
+  },
   // 查看问题跳转路由
   {
     path: '/question',

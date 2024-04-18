@@ -51,24 +51,13 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public int postCourse(PostCourseDto dto) {
-        Long userId = SecurityUtils.getUserId();
-
-        Course course = new Course();
-        course.setAuthorId(userId);
-        course.setTitle(dto.getTitle());
-        course.setCoverPic(dto.getCoverPic());
-        course.setDesc(dto.getDesc());
-
-        int flag;
-
-        if (dto.getCourseId() != null && dto.getCourseId() > 0) {
-            course.setCourseId(dto.getCourseId());
-            flag = courseMapper.updateCourse(course);
-        } else {
-            flag = courseMapper.insertCourse(course);
-        }
-
-        return flag;
+        /*
+        * 针对course表修改或删除
+        * 对于chapter和video，先删除再重新插入
+        * 存在bug，会导致原先video的浏览量和点赞量等清理
+        * who cares？
+        * */
+        return 0;
     }
 
     @Override

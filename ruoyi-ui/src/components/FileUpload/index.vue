@@ -15,7 +15,7 @@
       ref="fileUpload"
     >
       <!-- 上传按钮 -->
-      <el-button size="mini" type="primary">选取文件</el-button>
+      <el-button size="mini" type="primary">选取{{ uploadType === 'pic' ? '文件' : '视频' }}</el-button>
       <!-- 上传提示 -->
       <div class="el-upload__tip" slot="tip" v-if="showTip">
         请上传
@@ -185,6 +185,11 @@ export default {
           this.uploadedSuccessfully();
         } else if (this.uploadType === 'vod') {
           this.$emit('vodUploadSuccess', res.msg)
+          console.log('file', file)
+          this.fileList.push({
+            name: file.name,
+            url: res.msg
+          })
           this.$modal.closeLoading();
         }
       } else {

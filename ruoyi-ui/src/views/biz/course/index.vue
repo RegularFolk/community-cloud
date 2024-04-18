@@ -126,7 +126,7 @@
 
         <!-- 发布课程按钮 -->
         <div style="margin-top: 15%; display: flex; justify-content: center;">
-          <el-button round type="success">发布我的课程</el-button>
+          <el-button round type="success" @click="routeToCourseEdit">发布我的课程</el-button>
         </div>
 
       </div>
@@ -166,6 +166,13 @@ export default {
 
   },
   methods: {
+    // 跳转到课程编辑页面
+    routeToCourseEdit() {
+      this.$router.push({
+        path: '/courses/create',
+        query: {}
+      })
+    },
     // 跳转到课程详情
     routeToCourse() {
 

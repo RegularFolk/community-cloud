@@ -43,7 +43,6 @@ export default {
   props: {},
   data() {
     return {
-      user: {},
       blogs: [],
       queryParam: {
         pageNum: 1,
@@ -84,7 +83,7 @@ export default {
     },
     // 提交查看更多随笔请求
     submitGetBlog() {
-      this.queryParam.userId = this.user.userId
+      this.queryParam.userId = this.$store.state.user.id
 
       getBlogList(this.queryParam).then(resp => {
         if (resp.code === 200) {

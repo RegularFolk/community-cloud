@@ -209,7 +209,6 @@ export default {
     },
     initRestCards() {
       /* 最新想法和随笔的初始化放在getUser方法内部，原因是getUser这个请求是异步的，拿出来可能还是来不及初始化 */
-      this.$refs.blogReleased.user = this.user
       this.initLatestBlog()
 
       this.$refs.articleReleased.userId = this.user.id
