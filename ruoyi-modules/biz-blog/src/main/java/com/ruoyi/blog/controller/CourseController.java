@@ -10,6 +10,7 @@ import com.ruoyi.blog.domain.vo.VideoDetailVo;
 import com.ruoyi.blog.service.CourseService;
 import com.ruoyi.common.core.domain.IdDto;
 import com.ruoyi.common.core.web.domain.AjaxResult;
+import com.ruoyi.common.mq.enums.BlogTypeEnum;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,7 +31,7 @@ public class CourseController {
      */
     @PostMapping("/postCourse")
     public AjaxResult postCourse(@RequestBody PostCourseDto dto) {
-        int flag = courseService.postCourse(dto);
+        long flag = courseService.postCourse(dto);
         return flag > 0 ? AjaxResult.success() : AjaxResult.error(AjaxResult.DEFAULT_ERROR_MSG);
     }
 
@@ -107,6 +108,15 @@ public class CourseController {
     public AjaxResult videoDetail(@RequestBody IdDto dto) {
         VideoDetailVo vo = courseService.videoDetail(dto);
         return AjaxResult.success(vo);
+    }
+
+    /**
+     * 收藏视频
+     */
+    @PostMapping("/collect")
+    public AjaxResult collect(@RequestBody IdDto dto) {
+        int flag = courseService.collect(dto, BlogTypeEnum.VIDEO);
+        return flag > 0 ? AjaxResult.success() : AjaxResult.error("操作失败！请稍后重试或联系管理员");
     }
 
 

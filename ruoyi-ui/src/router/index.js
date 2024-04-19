@@ -29,6 +29,21 @@ Vue.use(Router)
 
 // 公共路由
 export const constantRoutes = [
+  // 跳转到查看课程页面
+  {
+    path: '/courses',
+    hidden: true,
+    component: Layout,
+    redirect: 'noredirect',
+    children: [
+      {
+        path: 'play',
+        component: () => import('@/views/biz/course/courseDetail'),
+        name: 'CourseDetail',
+        meta: {title: '播放课程'}
+      }
+    ]
+  },
   // 编辑课程跳转路由
   {
     path: '/courses',

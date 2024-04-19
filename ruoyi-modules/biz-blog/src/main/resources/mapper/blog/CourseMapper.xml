@@ -9,7 +9,7 @@
         <id property="courseId" column="course_id"/>
         <result property="authorId" column="author_id"/>
         <result property="title" column="title"/>
-        <result property="coverPic" column="coverPic"/>
+        <result property="coverPic" column="cover_pic"/>
         <result property="createTime" column="create_time"/>
         <result property="desc" column="desc"/>
     </resultMap>
@@ -29,40 +29,49 @@
 
     <insert id="insertCourse" useGeneratedKeys="true" keyProperty="courseId">
         insert into course(
-            <if test="coverPic != null and coverPic != ''">coverPic,</if>
-            <if test="desc != null and desc != ''">desc,</if>
+            <if test="coverPic != null and coverPic != ''">cover_pic,</if>
+            <if test="desc != null and desc != ''">`desc`,</if>
             title,
-            author_id,
+            author_id
         ) values (
-            <if test="title != null and title != ''">#{title},</if>
+            <if test="coverPic != null and coverPic != ''">#{coverPic},</if>
             <if test="desc != null and desc != ''">#{desc},</if>
-            #{coverPic},
+            #{title},
             #{authorId}
         )
     </insert>
 
     <insert id="insertChapter" useGeneratedKeys="true" keyProperty="chapterId">
         insert into course_chapter(
-            <if test="desc != null and desc != ''">desc,</if>
-            course_id, chapter_order, title
+            <if test="desc != null and desc != ''">`desc`,</if>
+        course_id, title
         ) values (
-            <if test="desc != null and desc !=''">#{desc},</if>
-            #{courseId}, #{chapterOrder}, #{title}
+        <if test="desc != null and desc !=''">#{desc},</if>
+        #{courseId}, #{title}
         )
     </insert>
 
     <insert id="insertVideo" useGeneratedKeys="true" keyProperty="id">
         insert into blog
         (author_id, title, preview, status, release_time, type, course_id, video_id, chapter_id, chapter_order)
+        values (#{authorId}, #{title}, #{preview}, #{status}, #{releaseTime}, #{type}, #{courseId}, #{videoId},
+                #{chapterId}, #{chapterOrder})
+    </insert>
+
+    <insert id="insertVideoBatch" useGeneratedKeys="true" keyProperty="id">
+        insert into blog (author_id, title, preview, status, release_time, type, course_id, video_id, chapter_id)
         values
-        (#{authorId}, #{title}, #{preview}, #{status}, #{releaseTime}, #{type}, #{courseId}, #{videoId}, #{chapterId}, #{chapterOrder})
+        <foreach collection="vodList" item="vod" separator=",">
+            (#{vod.authorId}, #{vod.title}, #{vod.preview}, #{vod.status}, #{vod.releaseTime}, #{vod.type},
+            #{vod.courseId}, #{vod.videoId}, #{vod.chapterId})
+        </foreach>
     </insert>
 
     <update id="updateCourse">
         update course set
         <if test="title != null and title != ''">title = #{title},</if>
         <if test="coverPic != null and coverPic != ''">coverPic = #{coverPic},</if>
-        <if test="desc != null and desc!= ''">desc = #{desc},</if>
+        <if test="desc != null and desc!= ''">`desc` = #{desc},</if>
         authorId = #{authorId}
         where course_id = #{courseId}
     </update>
@@ -72,7 +81,7 @@
         <if test="courseId != null and courseId > 0">course_id = #{courseId},</if>
         <if test="chapterOrder != null and chapterOrder > 0">chapter_order = #{chapterOrder},</if>
         <if test="title != null and title != ''">title = #{title},</if>
-        <if test="desc != null and desc != ''">desc = #{desc},</if>
+        <if test="desc != null and desc != ''">`desc` = #{desc},</if>
         chapter_id = #{chapterId}
         where chapter_id = #{chapterId}
     </update>
@@ -96,13 +105,21 @@
     </delete>
 
     <delete id="delCourse">
-        delete from course
-        where course_id = #{courseId} and author_id = #{userId}
+        delete
+        from course
+        where course_id = #{courseId}
+          and author_id = #{userId}
+    </delete>
+
+    <delete id="delChapterByCourseId">
+        delete
+        from course_chapter
+        where course_id = #{courseId}
     </delete>
 
     <select id="selectChapterByIds" resultMap="CourseChapter">
-        select chapter_id, course_id, chapter_order, title, desc
-        from course_chapter where chapter_id in 
+        select chapter_id, course_id, chapter_order, title, `desc`
+        from course_chapter where chapter_id in
         <foreach collection="chapterIds" item="chapterId" open="(" separator="," close=")">
             #{chapterId}
         </foreach>
@@ -119,47 +136,47 @@
     </select>
 
     <select id="getLikeCntList" resultMap="CntDto">
-        select id, sum(like_cnt) as cnt
+        select course_id as id, sum(like_cnt) as cnt
         from blog
         where course_id in
         <foreach collection="courseIdList" item="courseId" open="(" separator="," close=")">
             #{courseId}
         </foreach>
-        group by id
+        group by course_id
     </select>
 
     <select id="getViewCntList" resultMap="CntDto">
-        select id, sum(view_cnt) as cnt
+        select course_id as id, sum(view_cnt) as cnt
         from blog
         where course_id in
         <foreach collection="courseIdList" item="courseId" open="(" separator="," close=")">
             #{courseId}
         </foreach>
-        group by id
+        group by course_id
     </select>
 
     <select id="getCommentCntList" resultMap="CntDto">
-        select id, sum(comment_cnt) as cnt
+        select course_id as id, sum(comment_cnt) as cnt
         from blog
         where course_id in
         <foreach collection="courseIdList" item="courseId" open="(" separator="," close=")">
             #{courseId}
         </foreach>
-        group by id
+        group by course_id
     </select>
 
     <select id="getCollectCntList" resultMap="CntDto">
-        select id, sum(collect_cnt) as cnt
+        select course_id as id, sum(collect_cnt) as cnt
         from blog
         where course_id in
         <foreach collection="courseIdList" item="courseId" open="(" separator="," close=")">
             #{courseId}
         </foreach>
-        group by id
+        group by course_id
     </select>
 
     <select id="list" resultMap="Course">
-        select c.course_id as course_id, c.author_id as author_id, c.title as title, c.cover_pic as cover_pic, c.create_time as create_time, c.desc as desc
+        select c.course_id as course_id, c.author_id as author_id, c.title as title, c.cover_pic as cover_pic, c.create_time as create_time, c.desc as `desc`
         <if test="order == 6">
             , b.view_cnt as view_cnt
         </if>
@@ -185,9 +202,9 @@
     <select id="listTotal" resultType="java.lang.Long">
         select count(1) from course
         where 1 = 1
-        <if test="course.courseId != null and course.courseId != 0">and course_id = #{course.courseId}</if>
-        <if test="course.authorId != null and course.authorId != 0">and author_id = #{course.authorId}</if>
-        <if test="course.title != null and course.title != ''">and title like concat('%', #{course.title}, '%')</if>
+        <if test="courseId != null and courseId != 0">and course_id = #{courseId}</if>
+        <if test="authorId != null and authorId != 0">and author_id = #{authorId}</if>
+        <if test="title != null and title != ''">and title like concat('%', #{title}, '%')</if>
     </select>
 
 

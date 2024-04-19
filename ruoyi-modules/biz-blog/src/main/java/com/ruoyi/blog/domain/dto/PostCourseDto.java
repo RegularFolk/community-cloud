@@ -11,7 +11,7 @@ public class PostCourseDto {
 
     private CourseDto course;
 
-    private ChapterDto chapterList;
+    private List<ChapterDto> chapterList;
 
     public static class CourseDto{
         private String  coverPic;
@@ -91,7 +91,7 @@ public class PostCourseDto {
         }
     }
 
-    private static class VideoDto{
+    public static class VideoDto{
         private String title;
         private String preview;
         private String videoId;
@@ -146,11 +146,11 @@ public class PostCourseDto {
         this.course = course;
     }
 
-    public ChapterDto getChapterList() {
+    public List<ChapterDto> getChapterList() {
         return chapterList;
     }
 
-    public void setChapterList(ChapterDto chapterList) {
+    public void setChapterList(List<ChapterDto> chapterList) {
         this.chapterList = chapterList;
     }
 

@@ -97,5 +97,14 @@ export function videoDetail(data) {
   })
 }
 
+// 收藏视频
+export function videoCollect(data) {
+  return request({
+    url: '/blog/course/collect',
+    method: 'post',
+    data: data
+  })
+}
+
 
 

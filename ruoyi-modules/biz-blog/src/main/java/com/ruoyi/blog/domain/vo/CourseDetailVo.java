@@ -93,6 +93,10 @@ public class CourseDetailVo {
 
         private String chapterOrder;
 
+        private Boolean liked;
+
+        private Boolean collected;
+
         public Long getId() {
             return id;
         }
@@ -173,6 +177,22 @@ public class CourseDetailVo {
             this.chapterOrder = chapterOrder;
         }
 
+        public Boolean getLiked() {
+            return liked;
+        }
+
+        public void setLiked(Boolean liked) {
+            this.liked = liked;
+        }
+
+        public Boolean getCollected() {
+            return collected;
+        }
+
+        public void setCollected(Boolean collected) {
+            this.collected = collected;
+        }
+
         @Override
         public String toString() {
             return "VideoVo{" +
@@ -186,6 +206,8 @@ public class CourseDetailVo {
                     ", collectCnt=" + collectCnt +
                     ", videoId='" + videoId + '\'' +
                     ", chapterOrder='" + chapterOrder + '\'' +
+                    ", liked=" + liked +
+                    ", collected=" + collected +
                     '}';
         }
     }

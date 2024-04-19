@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="display: flex; align-items: center;">
     <el-button type="warning" @click="showComment" :disabled="dialogVisible">查看评论</el-button>
 
     <el-dialog

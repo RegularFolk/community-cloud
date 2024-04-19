@@ -31,7 +31,7 @@
               <div style="width: 70%;">
 
                 <!-- 标题 -->
-                <div :title="course.title" class="course-title">
+                <div :title="course.title" class="course-title" @click="routeToCourse(course.courseId)">
                   {{ course.title }}
                 </div>
 
@@ -141,6 +141,7 @@
 
 import UserBasicInfo from "@/views/system/user/profile/userBasicInfo";
 import ArticleRank from "@/views/biz/article/articleRank";
+import {list} from "@/api/biz/vod";
 
 export default {
   name: 'Course',
@@ -162,7 +163,9 @@ export default {
   },
   created() {
 
-    this.testCourseListData()
+    // this.testCourseListData()
+    this.handleQuery()
+    this.initTestHotRank()
 
   },
   methods: {
@@ -174,12 +177,30 @@ export default {
       })
     },
     // 跳转到课程详情
-    routeToCourse() {
-
+    routeToCourse(courseId) {
+      this.$router.push({
+        path: '/courses/play',
+        query: {
+          courseId: courseId
+        }
+      })
     },
     // 查询
     handleQuery() {
-
+      list(this.queryParam).then(resp => {
+        if (resp.code === 200) {
+          this.courseList = resp.data
+          this.total = resp.total
+          if (resp.data.length === this.queryParam.pageSize) {
+            this.queryParam.pageNum++
+          }
+        } else {
+          this.$message({
+            message: resp.msg,
+            type: 'error'
+          })
+        }
+      })
     },
     // 测试数据
     testCourseListData() {
@@ -402,7 +423,8 @@ export default {
         },
 
       ]
-
+    },
+    initTestHotRank() {
       this.hotList = [
         {
           courseId: '1',
@@ -470,7 +492,8 @@ export default {
   margin-bottom: 5px;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis
+  text-overflow: ellipsis;
+  cursor: pointer;
 }
 
 .course-desc {

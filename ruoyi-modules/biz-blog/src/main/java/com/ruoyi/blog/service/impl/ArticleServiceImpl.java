@@ -350,6 +350,7 @@ public class ArticleServiceImpl implements ArticleService {
         ArticleCollectQueryVo vo = new ArticleCollectQueryVo();
         Long userId = SecurityUtils.getUserId();
         List<ArticleCollectQueryVoUnit> voUnitList = blogCollectedMapper.collectList(userId, dto, dto.getPageSize(), (dto.getPageNum() - 1) * dto.getPageSize());
+        // todo 存在bug，但是不管了
         long total = blogCollectedMapper.getCollectedTotal(userId);
 
         // 获取作者昵称

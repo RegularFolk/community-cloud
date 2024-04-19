@@ -15,7 +15,7 @@
 
       <!-- 左侧的el-menu章节结构 -->
       <div
-        style="width: 35%; margin-right: 5%; border-top: 1px solid #D956D7; border-right: 1px solid #D956D7; border-left: 1px solid #D956D7">
+        style="width: 35%; margin-right: 5%; border: 1px solid #D956D7;">
 
         <el-menu default-active="1">
 
@@ -26,7 +26,7 @@
                 <div style="margin-right: 30px">
                   <span style="margin-right: 15px"><el-button circle icon="el-icon-edit-outline" size="medium" @click="editDialog(item, index)"/></span>
                   <span style="margin-right: 15px"><el-button circle icon="el-icon-plus" size="medium" @click="pushVod(index)"/></span>
-                  <span><el-button circle icon="el-icon-delete" size="medium"/></span>
+                  <span><el-button circle icon="el-icon-delete" size="medium" @click="delChapter(index)"/></span>
                 </div>
               </div>
             </template>
@@ -36,7 +36,7 @@
                 <div style="display: flex; justify-content: space-between;">
                   <div><i class="el-icon-video-play"/>{{ v.title }}</div>
                   <div style="margin-right: 30px">
-                    <el-button circle icon="el-icon-delete"/>
+                    <el-button circle icon="el-icon-delete" @click="delVideo(index, vIdx)"/>
                   </div>
                 </div>
               </template>
@@ -155,6 +155,27 @@ export default {
   created() {
   },
   methods: {
+    // 删除视频
+    delVideo(index, vIdx) {
+      this.$confirm('确定要删除吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        let chapter = this.chapterList[index]
+        chapter.vodList.splice(vIdx, 1)
+      })
+    },
+    // 删除章节
+    delChapter(index) {
+      this.$confirm('确定要删除吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.chapterList.splice(index, 1)
+      })
+    },
     // 新建章节弹窗
     createDialog() {
       this.dialogType = 1

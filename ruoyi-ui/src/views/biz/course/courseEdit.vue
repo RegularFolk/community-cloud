@@ -39,6 +39,7 @@
 
 import CourseEdit1 from "@/views/biz/course/CourseEditStep1";
 import CourseEdit3 from "@/views/biz/course/CourseStep3";
+import {postCourse} from "@/api/biz/vod";
 
 export default {
   name: 'CourseEdit',
@@ -48,7 +49,7 @@ export default {
       stepActive: 1,
       courseEdit: {
         course: {},
-        chapterList: {}
+        chapterList: []
       }
     }
   },
@@ -57,6 +58,20 @@ export default {
     saveCourse() {
       this.$refs.step3.infoTransfer()
       console.log('最终提交数据打包：', this.courseEdit)
+      postCourse(this.courseEdit).then(resp => {
+        if (resp.code === 200) {
+          this.$message({
+            message: '保存课程成功！',
+            type: 'success'
+          })
+          this.$tab.closePage()
+        } else {
+          this.$message({
+            message: resp.msg,
+            type: 'error'
+          })
+        }
+      })
     },
     // 跳转到上一步
     lastStep() {

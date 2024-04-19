@@ -13,8 +13,11 @@ import com.ruoyi.blog.domain.vo.VideoDetailVo;
 import com.ruoyi.blog.enums.BlogOrderEnum;
 import com.ruoyi.blog.enums.BlogStatusEnum;
 import com.ruoyi.blog.enums.CourseListTypeEnum;
+import com.ruoyi.blog.mapper.BlogCollectedMapper;
+import com.ruoyi.blog.mapper.BlogLikedMapper;
 import com.ruoyi.blog.mapper.BlogMapper;
 import com.ruoyi.blog.mapper.CourseMapper;
+import com.ruoyi.blog.service.ArticleService;
 import com.ruoyi.blog.service.CourseService;
 import com.ruoyi.common.core.constant.SecurityConstants;
 import com.ruoyi.common.core.domain.CntDto;
@@ -23,10 +26,15 @@ import com.ruoyi.common.core.domain.UserBasicInfoVo;
 import com.ruoyi.common.core.utils.DateUtils;
 import com.ruoyi.common.core.utils.sql.SqlUtil;
 import com.ruoyi.common.core.web.domain.AjaxResult;
+import com.ruoyi.common.mq.callBack.DefaultCallBack;
+import com.ruoyi.common.mq.constants.MqTopicConstants;
+import com.ruoyi.common.mq.domain.BlogMessage;
 import com.ruoyi.common.mq.enums.BlogTypeEnum;
+import com.ruoyi.common.mq.enums.OperateType;
 import com.ruoyi.common.security.utils.SecurityUtils;
 import com.ruoyi.system.api.RemoteFileService;
 import com.ruoyi.system.api.RemoteUserService;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -44,20 +52,74 @@ public class CourseServiceImpl implements CourseService {
     private BlogMapper blogMapper;
 
     @Resource
+    private BlogCollectedMapper blogCollectedMapper;
+
+    @Resource
+    private BlogLikedMapper blogLikedMapper;
+
+    @Resource
     private RemoteFileService remoteFileService;
 
     @Resource
     private RemoteUserService remoteUserService;
 
+    @Resource
+    private ArticleService articleService;
+
+    @Resource
+    private RocketMQTemplate rocketMQTemplate;
+
     @Override
-    public int postCourse(PostCourseDto dto) {
+    public long postCourse(PostCourseDto dto) {
         /*
         * 针对course表修改或删除
         * 对于chapter和video，先删除再重新插入
         * 存在bug，会导致原先video的浏览量和点赞量等清理
         * who cares？
         * */
-        return 0;
+        Long userId = SecurityUtils.getUserId();
+        Course course = new Course();
+        course.setAuthorId(userId);
+        course.setTitle(dto.getCourse().getTitle());
+        course.setCoverPic(dto.getCourse().getCoverPic());
+        course.setDesc(dto.getCourse().getDesc());
+        if (dto.getCourseId() != null && dto.getCourseId() > 0) {
+            course.setCourseId(dto.getCourseId());
+            courseMapper.updateCourse(course);
+        } else {
+            courseMapper.insertCourse(course);
+        }
+
+        // 删除所有的chapter
+        courseMapper.delChapterByCourseId(course.getCourseId());
+
+        dto.getChapterList().forEach(c -> {
+            CourseChapter chapter = new CourseChapter();
+            chapter.setCourseId(course.getCourseId());
+            chapter.setTitle(c.getTitle());
+            chapter.setDesc(c.getTitle());
+
+            courseMapper.insertChapter(chapter);
+
+            List<Blog> vodList = c.getVodList().stream().map(v -> {
+                Blog vod = new Blog();
+                vod.setAuthorId(userId);
+                vod.setTitle(v.getTitle());
+                vod.setPreview(v.getPreview());
+                vod.setStatus(BlogStatusEnum.PUBLISHED.getStatus());
+                vod.setReleaseTime(DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD_HH_MM_SS, new Date()));
+                vod.setType(BlogTypeEnum.VIDEO.getType());
+                vod.setCourseId(course.getCourseId());
+                vod.setChapterId(chapter.getChapterId());
+                vod.setVideoId(v.getVideoId());
+
+                return vod;
+            }).collect(Collectors.toList());
+
+            courseMapper.insertVideoBatch(vodList);
+        });
+
+        return course.getCourseId();
     }
 
     @Override
@@ -232,6 +294,7 @@ public class CourseServiceImpl implements CourseService {
             return vo;
         }
 
+        Long userId = SecurityUtils.getUserId();
         Blog blog = new Blog();
         blog.setCourseId(dto.getId());
         List<Blog> videoList = blogMapper.getArticleList(blog, null, null, null);
@@ -241,12 +304,20 @@ public class CourseServiceImpl implements CourseService {
             CourseDetailVo.ChapterVo chapterVo = new CourseDetailVo.ChapterVo();
 
             chapterVo.setChapterId(c.getChapterId());
-            chapterVo.setChapterOrder(c.getChapterOrder());
             chapterVo.setTitle(c.getTitle());
             chapterVo.setDesc(c.getDesc());
 
             List<Blog> chapterVideoList = videoMap.get(c.getChapterId());
             if (!CollectionUtils.isEmpty(chapterVideoList)) {
+                List<Long> vodIdList = chapterVideoList.stream().map(Blog::getId).collect(Collectors.toList());
+
+                // 判断是否点赞或收藏过
+                List<Long> likedIds = blogLikedMapper.selectLikedIds(vodIdList, userId.toString());
+                Set<Long> likedSet = new HashSet<>(likedIds);
+
+                List<Long> collectedIds = blogCollectedMapper.selectCollectedIds(vodIdList, userId.toString());
+                Set<Long> collectSet = new HashSet<>(collectedIds);
+
                 List<CourseDetailVo.VideoVo> videoVoList = chapterVideoList.stream().map(v -> {
                     CourseDetailVo.VideoVo videoVo = new CourseDetailVo.VideoVo();
                     videoVo.setId(v.getId());
@@ -258,16 +329,32 @@ public class CourseServiceImpl implements CourseService {
                     videoVo.setViewCnt(v.getViewCnt());
                     videoVo.setCollectCnt(v.getCollectCnt());
                     videoVo.setVideoId(v.getVideoId());
-                    videoVo.setChapterOrder(v.getChapterOrder().toString());
+                    videoVo.setLiked(likedSet.contains(v.getId()));
+                    videoVo.setCollected(collectSet.contains(v.getId()));
+
+                    // 采用暴力方案，同步增加所有视频旗下的播放次数
+                    // 向下游发送通知,增加blog浏览量计数
+                    BlogMessage message = new BlogMessage();
+                    message.setMessageId(v.getId());
+                    message.setBlogId(v.getId());
+                    message.setBlogType(BlogTypeEnum.VIDEO.getType());
+                    message.setOperateType(OperateType.ADD.getType());
+                    message.setType(BlogMessage.MessageType.VIEW.getType());
+                    rocketMQTemplate.asyncSendOrderly(
+                            MqTopicConstants.BLOG_TOPIC,
+                            message,
+                            String.valueOf(message.getMessageId()),
+                            new DefaultCallBack<>(this.getClass(), message)
+                    );
 
                     return videoVo;
-                }).sorted(Comparator.comparing(CourseDetailVo.VideoVo::getChapterOrder)).collect(Collectors.toList());
+                }).collect(Collectors.toList());
 
                 chapterVo.setVideoList(videoVoList);
             }
 
             return chapterVo;
-        }).sorted(Comparator.comparing(CourseDetailVo.ChapterVo::getChapterOrder)).collect(Collectors.toList());
+        }).collect(Collectors.toList());
 
         vo.setChapterList(chapterVoList);
 
@@ -302,6 +389,11 @@ public class CourseServiceImpl implements CourseService {
         return vo;
     }
 
+    @Override
+    public int collect(IdDto dto, BlogTypeEnum typeEnum) {
+        return articleService.collect(dto, typeEnum);
+    }
+
     /**
      * 根据传入的 course 列表，分别查询：
      * 点赞、浏览、评论、收藏总数；
@@ -317,7 +409,7 @@ public class CourseServiceImpl implements CourseService {
 
         List<Long> courseIdList = courseList.stream().map(Course::getCourseId).collect(Collectors.toList());
 
-        List<Long> userIdList = courseList.stream().map(Course::getAuthorId).collect(Collectors.toList());
+        List<Long> userIdList = courseList.stream().map(Course::getAuthorId).distinct().collect(Collectors.toList());
 
         List<CntDto> likeCntList = courseMapper.getLikeCntList(courseIdList);
         Map<Long, List<CntDto>> likeCntMap = CntDto.convert2Map(likeCntList);
