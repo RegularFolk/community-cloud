@@ -4,7 +4,7 @@ import request from '@/utils/request'
 export function getVodUrl(data) {
   return request({
     url: '/file/getVodUrl/' + data,
-    method: 'get'
+    method: 'post'
   })
 }
 
@@ -12,7 +12,7 @@ export function getVodUrl(data) {
 export function delVodUrl(data) {
   return request({
     url: '/file/delVod/' + data,
-    method: 'get'
+    method: 'post'
   })
 }
 

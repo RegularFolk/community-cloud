@@ -5,9 +5,9 @@ public enum CourseListTypeEnum {
 
     AUTHOR(1, "指定用户查询"),
     RANDOM(2, "随机查询"),
-    TITLE_SEARCH(3, "标题查询"),
     HOTTEST(4, "最热门"),
-    LATEST(5, "最新发布");
+    LATEST(5, "最新发布"),
+    MINE(6, "我的课程");
 
     private final Integer type;
 

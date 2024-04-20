@@ -8,7 +8,7 @@
       </el-steps>
     </div>
 
-    <div style="display: flex; justify-content: center">
+    <div style="display: flex; justify-content: center" v-loading="editLoading">
       <course-edit1
         v-show="stepActive === 1"
         ref="step1"
@@ -39,7 +39,7 @@
 
 import CourseEdit1 from "@/views/biz/course/CourseEditStep1";
 import CourseEdit3 from "@/views/biz/course/CourseStep3";
-import {postCourse} from "@/api/biz/vod";
+import {courseDetail, postCourse} from "@/api/biz/vod";
 
 export default {
   name: 'CourseEdit',
@@ -47,13 +47,41 @@ export default {
   data() {
     return {
       stepActive: 1,
+      editLoading: false,
       courseEdit: {
+        courseId: 0,
         course: {},
         chapterList: []
       }
     }
   },
+  created() {
+    if (this.$route.query.courseId && this.$route.query.courseId > 0) {
+      // 进入页面路由包含课程id，变成编辑页面
+      this.getCourseDetail(this.$route.query.courseId)
+    }
+  },
   methods: {
+    // 课程编辑回显
+    getCourseDetail(courseId) {
+      this.editLoading = true
+      courseDetail(courseId).then(resp => {
+        if (resp.code === 200) {
+          this.courseEdit.courseId = courseId
+          this.courseEdit.chapterList = resp.data.chapterList
+
+          this.$refs.step1.injectValue(resp.data.course)
+          this.$refs.step3.injectValue(resp.data.chapterList)
+        } else {
+          this.$message({
+            message: resp.msg,
+            type: 'error'
+          })
+        }
+      }).finally(() => {
+        this.editLoading = false
+      })
+    },
     // 保存课程
     saveCourse() {
       this.$refs.step3.infoTransfer()
@@ -108,8 +136,6 @@ export default {
     step3Info(info) {
       this.courseEdit.chapterList = info
     }
-  },
-  created() {
   }
 }
 

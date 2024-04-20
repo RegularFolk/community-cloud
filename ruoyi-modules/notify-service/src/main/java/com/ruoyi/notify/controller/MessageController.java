@@ -2,6 +2,7 @@ package com.ruoyi.notify.controller;
 
 import com.ruoyi.common.core.domain.IdDto;
 import com.ruoyi.common.core.domain.ListDto;
+import com.ruoyi.common.core.domain.SysNotifyDto;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import com.ruoyi.notify.domain.TextMessage;
 import com.ruoyi.notify.domain.dto.MsgListDto;
@@ -22,6 +23,16 @@ public class MessageController {
 
     @Resource
     private MessageService messageService;
+
+    /**
+     * 批量发送系统通知消息
+     */
+    @PostMapping("/systemNotifyBatch")
+    public AjaxResult systemNotifyBatch(@RequestBody SysNotifyDto dto) {
+        long flag = messageService.systemNotifyBatch(dto);
+        return flag > 0L ? AjaxResult.success(flag) : AjaxResult.error(AjaxResult.DEFAULT_ERROR_MSG);
+    }
+
 
     /**
      * 发送消息

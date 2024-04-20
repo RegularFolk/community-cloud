@@ -16,6 +16,17 @@
     </description>
 
     <dependencies>
+
+        <!--发送邮件依赖-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>javax.mail</artifactId>
+        </dependency>
+
         <!-- RocketMq -->
         <dependency>
             <groupId>org.apache.rocketmq</groupId>

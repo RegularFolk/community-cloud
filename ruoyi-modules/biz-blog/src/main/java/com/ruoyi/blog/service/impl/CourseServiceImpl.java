@@ -19,11 +19,13 @@ import com.ruoyi.blog.mapper.BlogMapper;
 import com.ruoyi.blog.mapper.CourseMapper;
 import com.ruoyi.blog.service.ArticleService;
 import com.ruoyi.blog.service.CourseService;
+import com.ruoyi.blog.service.MailService;
 import com.ruoyi.common.core.constant.SecurityConstants;
 import com.ruoyi.common.core.domain.CntDto;
 import com.ruoyi.common.core.domain.IdDto;
 import com.ruoyi.common.core.domain.UserBasicInfoVo;
 import com.ruoyi.common.core.utils.DateUtils;
+import com.ruoyi.common.core.utils.StringUtils;
 import com.ruoyi.common.core.utils.sql.SqlUtil;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import com.ruoyi.common.mq.callBack.DefaultCallBack;
@@ -67,6 +69,9 @@ public class CourseServiceImpl implements CourseService {
     private ArticleService articleService;
 
     @Resource
+    private MailService mailService;
+
+    @Resource
     private RocketMQTemplate rocketMQTemplate;
 
     @Override
@@ -88,10 +93,22 @@ public class CourseServiceImpl implements CourseService {
             courseMapper.updateCourse(course);
         } else {
             courseMapper.insertCourse(course);
+
+            // 向关注者发送系统通知
+            String nickName = remoteUserService.
+                    getUserBasicInfoByIds(Collections.singletonList(userId), SecurityConstants.INNER)
+                    .getData().get(0).getNickName();
+            mailService.systemNotifyToFollowers(
+                    "您关注的用户发布了一个新的课程！",
+                    "您关注的用户 " + nickName + " 发布了新的课程：" + course.getTitle() + " ，赶快上线学习吧！"
+            );
+
         }
 
-        // 删除所有的chapter
+        // 删除所有的chapter和vod
         courseMapper.delChapterByCourseId(course.getCourseId());
+        courseMapper.delVodByCourseId(course.getCourseId());
+
 
         dto.getChapterList().forEach(c -> {
             CourseChapter chapter = new CourseChapter();
@@ -218,6 +235,13 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public List<CourseListVo> list(CourseListDto dto) {
+
+        // 测试代码，测试发送一个邮件
+//        mailService.sendSimpleMail(
+//                "z1980817350@gmail.com",
+//                "邮件发送测试标题",
+//                "邮件发送测试内容");
+
         Course course = getListCourseDto(dto);
         Integer order = getListOrder(dto);
         List<Course> courseList = courseMapper.list(
@@ -242,6 +266,7 @@ public class CourseServiceImpl implements CourseService {
             case HOTTEST:
                 return BlogOrderEnum.HOT_RANK.getOrder();
             case LATEST:
+            case MINE:
                 return BlogOrderEnum.TIME_DESC.getOrder();
             default:
                 break;
@@ -256,8 +281,8 @@ public class CourseServiceImpl implements CourseService {
             case AUTHOR:
                 course.setAuthorId(dto.getUserId());
                 break;
-            case TITLE_SEARCH:
-                course.setTitle(dto.getTitle());
+            case MINE:
+                course.setAuthorId(SecurityUtils.getUserId());
                 break;
             case RANDOM:
             case HOTTEST:
@@ -267,6 +292,11 @@ public class CourseServiceImpl implements CourseService {
                 // unreachable
                 throw new RuntimeException("枚举值不存在");
         }
+
+        if (StringUtils.isNotEmpty(dto.getTitle())) {
+            course.setTitle(dto.getTitle());
+        }
+
         return course;
     }
 
@@ -429,10 +459,14 @@ public class CourseServiceImpl implements CourseService {
                 userBasicInfoList.stream().collect(Collectors.groupingBy(UserBasicInfoVo::getId));
 
         return courseList.stream().map(c -> {
-            Long likeCnt = likeCntMap.get(c.getCourseId()).get(0).getCnt();
-            Long viewCnt = viewCntMap.get(c.getCourseId()).get(0).getCnt();
-            Long commentCnt = commentCntMap.get(c.getCourseId()).get(0).getCnt();
-            Long collectCnt = collectCntMap.get(c.getCourseId()).get(0).getCnt();
+            List<CntDto> likeCnts = likeCntMap.get(c.getCourseId());
+            Long likeCnt = CollectionUtils.isEmpty(likeCnts) ? 0 : likeCnts.get(0).getCnt();
+            List<CntDto> viewCnts = viewCntMap.get(c.getCourseId());
+            Long viewCnt = CollectionUtils.isEmpty(viewCnts) ? 0 : viewCnts.get(0).getCnt();
+            List<CntDto> commentCnts = commentCntMap.get(c.getCourseId());
+            Long commentCnt = CollectionUtils.isEmpty(commentCnts)? 0 : commentCnts.get(0).getCnt();
+            List<CntDto> collectCnts = collectCntMap.get(c.getCourseId());
+            Long collectCnt = CollectionUtils.isEmpty(collectCnts)? 0 : collectCnts.get(0).getCnt();
             UserBasicInfoVo userInfo = userIdMap.get(c.getAuthorId()).get(0);
 
             CourseListVo vo = new CourseListVo();
@@ -483,14 +517,14 @@ public class CourseServiceImpl implements CourseService {
             return 0;
         }
 
-        String videoIds = blogs.stream().map(Blog::getVideoId).collect(Collectors.joining("[,]"));
+        String videoIds = blogs.stream().map(Blog::getVideoId).filter(StringUtils::isNotEmpty).collect(Collectors.joining("[,]"));
 
-        AjaxResult ajaxResult = remoteFileService.delVod(videoIds);
-
-        if (ajaxResult.isError()) {
-            return 0;
+        if (StringUtils.isNotEmpty(videoIds)) {
+            AjaxResult ajaxResult = remoteFileService.delVod(videoIds);
+            if (ajaxResult.isError()) {
+                return 0;
+            }
         }
-
         return blogMapper.deleteBlogByIds(blogIds, SecurityUtils.getUserId());
     }
 

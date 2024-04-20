@@ -3,6 +3,8 @@ package com.ruoyi.notify.service.impl;
 import com.ruoyi.common.core.constant.SecurityConstants;
 import com.ruoyi.common.core.domain.IdDto;
 import com.ruoyi.common.core.domain.ListDto;
+import com.ruoyi.common.core.domain.SysNotifyDto;
+import com.ruoyi.common.core.utils.StringUtils;
 import com.ruoyi.common.core.utils.sql.SqlUtil;
 import com.ruoyi.common.security.utils.SecurityUtils;
 import com.ruoyi.notify.constants.MessageConfigConstants;
@@ -39,17 +41,21 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public long send(SendDto dto) {
         Long senderId = SecurityUtils.getUserId();
+        return doSend(dto.getContent(), senderId, dto.getReceiverId());
+    }
+
+    private Long doSend(String content, Long senderId, Long receiverId) {
         TextMessage message = new TextMessage();
         message.setSenderId(senderId);
-        message.setReceiverId(dto.getReceiverId());
-        message.setContent(dto.getContent());
+        message.setReceiverId(receiverId);
+        message.setContent(content);
 
         int flag = textMessageMapper.insertMessage(message);
 
         if (flag > 0) {
-            flag = getAndUpdateContact(dto.getReceiverId(), senderId, dto.getContent());
+            flag = getAndUpdateContact(receiverId, senderId, content);
             if (flag > 0) {
-                getAndUpdateContact(senderId, dto.getReceiverId(), dto.getContent());
+                getAndUpdateContact(senderId, receiverId, content);
             }
         }
 
@@ -168,6 +174,19 @@ public class MessageServiceImpl implements MessageService {
         textMessageMapper.updateHasReadMsg(userId, contactId);
 
         return msgList;
+    }
+
+    @Override
+    public long systemNotifyBatch(SysNotifyDto dto) {
+        List<Long> userIds = dto.getUserIds();
+        String content = dto.getContent();
+        if (StringUtils.isEmpty(content) || CollectionUtils.isEmpty(userIds)) {
+            return 0;
+        }
+
+        userIds.forEach(receiverId -> doSend(content, 1L, receiverId));
+
+        return 1;
     }
 
 

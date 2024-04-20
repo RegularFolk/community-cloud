@@ -1,5 +1,6 @@
 package com.ruoyi.system.api;
 
+import com.ruoyi.common.core.domain.ListDto;
 import com.ruoyi.common.core.domain.UserBasicInfoVo;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -56,6 +57,9 @@ public interface RemoteUserService
 
     @PostMapping("/user/getUserBasicInfoByIds")
     public R<List<UserBasicInfoVo>> getUserBasicInfoByIds(@RequestBody List<Long> ids, @RequestHeader(SecurityConstants.FROM_SOURCE) String source);
+
+    @PostMapping("/follow/followerList")
+    public AjaxResult getUserFollowerList(@RequestBody ListDto dto);
 
 
 }

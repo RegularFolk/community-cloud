@@ -9,6 +9,9 @@ import com.ruoyi.blog.domain.vo.BlogDetailVo;
 import com.ruoyi.blog.domain.vo.IndexBlogVo;
 import com.ruoyi.blog.enums.BlogQueryModeEnum;
 import com.ruoyi.blog.enums.BlogStatusEnum;
+import com.ruoyi.blog.service.MailService;
+import com.ruoyi.common.core.domain.ListDto;
+import com.ruoyi.common.core.domain.UserBasicInfoVo;
 import com.ruoyi.common.mq.enums.BlogTypeEnum;
 import com.ruoyi.blog.mapper.BlogLikedMapper;
 import com.ruoyi.blog.mapper.BlogMapper;
@@ -48,6 +51,9 @@ public class BlogServiceImpl implements BlogService {
 
     @Resource
     private ArticleService articleService;
+
+    @Resource
+    private MailService mailService;
 
     @Resource
     private RemoteUserService remoteUserService;
@@ -246,6 +252,17 @@ public class BlogServiceImpl implements BlogService {
         blog.setType(BlogTypeEnum.TWEET.getType());
         blog.setPicUrls(dto.getPicUrls());
         blogMapper.insertBlog(blog);
+
+
+        String nickName = remoteUserService.
+                getUserBasicInfoByIds(Collections.singletonList(userId), SecurityConstants.INNER)
+                .getData().get(0).getNickName();
+
+        mailService.systemNotifyToFollowers(
+                "您关注的用户发布了新的想法！",
+                "您关注的用户 " + nickName + " 发布了新的想法：" + dto.getContent()
+        );
+
         return blog.getId();
     }
 

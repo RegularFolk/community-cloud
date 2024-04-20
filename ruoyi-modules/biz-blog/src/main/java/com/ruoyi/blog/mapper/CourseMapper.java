@@ -58,4 +58,6 @@ public interface CourseMapper {
     int delChapterByCourseId(Long courseId);
 
     int insertVideoBatch(@Param("vodList") List<Blog> vodList);
+
+    int delVodByCourseId(Long courseId);
 }

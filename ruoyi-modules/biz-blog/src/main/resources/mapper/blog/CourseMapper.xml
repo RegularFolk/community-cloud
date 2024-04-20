@@ -70,9 +70,9 @@
     <update id="updateCourse">
         update course set
         <if test="title != null and title != ''">title = #{title},</if>
-        <if test="coverPic != null and coverPic != ''">coverPic = #{coverPic},</if>
+        <if test="coverPic != null and coverPic != ''">cover_pic = #{coverPic},</if>
         <if test="desc != null and desc!= ''">`desc` = #{desc},</if>
-        authorId = #{authorId}
+        author_id = #{authorId}
         where course_id = #{courseId}
     </update>
 
@@ -115,6 +115,13 @@
         delete
         from course_chapter
         where course_id = #{courseId}
+    </delete>
+
+    <delete id="delVodByCourseId">
+        delete
+        from blog
+        where course_id = #{courseId}
+        and type = 5
     </delete>
 
     <select id="selectChapterByIds" resultMap="CourseChapter">

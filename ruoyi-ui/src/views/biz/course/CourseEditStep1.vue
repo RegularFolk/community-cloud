@@ -23,6 +23,7 @@
       <el-form-item label="课程封面" prop="coverPic">
         <file-upload
           :file-type="fileType"
+          ref="fileUpload"
           :limit="1"
           style="border: 1px solid #c0c0c0; padding-left: 10px"
           @input="picUploadSuccess"
@@ -72,6 +73,10 @@ export default {
     },
     infoTransfer() {
       this.$emit('infoOutput', this.courseInfo)
+    },
+    injectValue(value) {
+      this.courseInfo = value
+      this.$refs.fileUpload.fileList = [{name: value.coverPic, url: value.coverPic}]
     }
   }
 }

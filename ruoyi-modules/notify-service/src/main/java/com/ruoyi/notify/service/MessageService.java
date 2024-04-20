@@ -2,6 +2,7 @@ package com.ruoyi.notify.service;
 
 import com.ruoyi.common.core.domain.IdDto;
 import com.ruoyi.common.core.domain.ListDto;
+import com.ruoyi.common.core.domain.SysNotifyDto;
 import com.ruoyi.notify.domain.TextMessage;
 import com.ruoyi.notify.domain.dto.MsgListDto;
 import com.ruoyi.notify.domain.dto.SendDto;
@@ -19,4 +20,6 @@ public interface MessageService {
     List<TextMessage> msgList(MsgListDto dto);
 
     List<TextMessage> pullMsg(IdDto dto);
+
+    long systemNotifyBatch(SysNotifyDto dto);
 }

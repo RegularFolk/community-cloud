@@ -12,6 +12,7 @@ import com.ruoyi.blog.mapper.BlogCommentMapper;
 import com.ruoyi.blog.mapper.BlogMapper;
 import com.ruoyi.blog.mapper.CommentLikedMapper;
 import com.ruoyi.blog.service.CommentService;
+import com.ruoyi.blog.service.MailService;
 import com.ruoyi.common.core.constant.SecurityConstants;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.exception.ServiceException;
@@ -48,6 +49,9 @@ public class CommentServiceImpl implements CommentService {
 
     @Resource
     RemoteUserService remoteUserService;
+
+    @Resource
+    MailService mailService;
 
     @Resource
     private RocketMQTemplate rocketmqTemplate;
@@ -195,6 +199,16 @@ public class CommentServiceImpl implements CommentService {
                     String.valueOf(message.getBlogId()),
                     new DefaultCallBack<>(this.getClass(), message)
             );
+
+            // 发送系统通知，如果receiverId为空，则被回复者为作者，反之被回复者为父评论
+            Long receiver = dto.getReceiverId() == null ? blog.getAuthorId() : dto.getReceiverId();
+
+            String senderNickName = remoteUserService
+                    .getUserBasicInfoByIds(Collections.singletonList(senderId), SecurityConstants.INNER)
+                    .getData().get(0).getNickName();
+
+            mailService.systemNotify(Collections.singletonList(receiver), "您收到了一条最新评论！", "用户 " + senderNickName + " 回复了您：" + dto.getContent());
+
         }
 
         return flag > 0;

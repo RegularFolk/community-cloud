@@ -6,7 +6,11 @@
 
       <!-- 左侧章节菜单 -->
       <div
-        style="height: 100%; width: 25%; margin-right: 5%; border: 1px solid #D956D7;">
+        style="height: 100%; width: 25%; margin-right: 5%; border: 1px solid #D956D7;" v-loading="chapterLoading">
+
+        <h1 v-if="!chapterList || chapterList.length === 0">
+          当前课程暂无内容！
+        </h1>
 
         <el-menu default-active="1">
 
@@ -40,6 +44,11 @@
 
       <!-- 右侧视频播放区域 -->
       <div v-loading="playLoading" style="width: 70%">
+
+        <div v-if="playingVod.id && (!playingVod.videoId || playingVod.videoId.trim().length === 0)">
+          <h1>抱歉，该节内容不包含视频！</h1>
+        </div>
+
         <div id="dplayer" style="height: 90%; width: 100%; margin-bottom: 20px"/>
 
         <!-- 视频下方信息区域 -->
@@ -86,7 +95,7 @@
           </div>
 
           <div style="margin-left: 30px">
-            <comment-btn-dialog :content-id="playingVod.id" style="height: 100%"/>
+            <comment-btn-dialog :content-id="'' + playingVod.id" style="height: 100%"/>
           </div>
 
           <div style="margin-left: 30px; display: flex; align-items: center;">
@@ -157,6 +166,7 @@ export default {
     return {
       btnLoading: false,
       playLoading: false,
+      chapterLoading: false,
       dp: undefined,
       course: {
         courseId: 0,
@@ -197,12 +207,20 @@ export default {
       }
     }
   },
+  activated() {
+    // 处理页面跳转不刷新的问题
+    if (this.course.courseId
+      && this.course.courseId !== this.$route.query.courseId) {
+      this.initCourseDetail()
+    }
+  },
   created() {
     this.initCourseDetail()
   },
   methods: {
     // 初始化
     initCourseDetail() {
+      this.chapterLoading = true
       let courseId = this.$route.query.courseId
       courseDetail(courseId).then(resp => {
         if (resp.code === 200) {
@@ -215,6 +233,8 @@ export default {
             type: 'error'
           })
         }
+      }).finally(() => {
+        this.chapterLoading = false
       })
     },
     // 改变收藏状态
@@ -318,6 +338,8 @@ export default {
 
       } else if (this.dp) {
         this.dp.destroy()
+        this.playLoading = false
+      } else {
         this.playLoading = false
       }
     }

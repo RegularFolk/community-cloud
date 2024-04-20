@@ -1,5 +1,6 @@
 package com.ruoyi.system.api.factory;
 
+import com.ruoyi.common.core.domain.ListDto;
 import com.ruoyi.common.core.domain.UserBasicInfoVo;
 import com.ruoyi.common.core.web.domain.AjaxResult;
 import org.slf4j.Logger;
@@ -49,6 +50,11 @@ public class RemoteUserFallbackFactory implements FallbackFactory<RemoteUserServ
             @Override
             public R<List<UserBasicInfoVo>> getUserBasicInfoByIds(List<Long> ids, String source) {
                 return R.fail("获取用户基本信息列表失败:" + throwable.getMessage());
+            }
+
+            @Override
+            public AjaxResult getUserFollowerList(ListDto dto) {
+                return AjaxResult.error(AjaxResult.DEFAULT_ERROR_MSG);
             }
 
 

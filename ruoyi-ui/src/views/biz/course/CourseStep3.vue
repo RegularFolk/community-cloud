@@ -228,6 +228,29 @@ export default {
     infoTransfer() {
       this.$emit('infoOutput', this.chapterList)
     },
+    // 编辑课程父组件往子组件注入
+    injectValue(value) {
+      if (value && value.length > 0) {
+        value.forEach(item => {
+          let vodList = []
+          if (item.videoList && item.videoList.length > 0) {
+            item.videoList.forEach(vItem => {
+              vodList.push({
+                title: vItem.title,
+                preview: vItem.preview,
+                videoId: vItem.videoId
+              })
+            })
+          }
+
+          this.chapterList.push({
+            title: item.title,
+            desc: item.desc,
+            vodList: vodList
+          })
+        })
+      }
+    },
     // 编辑视频
     editVod(index, vIdx) {
       this.video = this.chapterList[index].vodList[vIdx]

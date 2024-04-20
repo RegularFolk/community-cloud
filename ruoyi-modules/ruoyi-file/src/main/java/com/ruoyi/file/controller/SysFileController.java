@@ -68,7 +68,7 @@ public class SysFileController {
      * @param vodId
      * @return
      */
-    @GetMapping("getVodUrl/{vodId}")
+    @PostMapping("getVodUrl/{vodId}")
     public AjaxResult getVodUrl(@PathVariable("vodId") String vodId) {
         String url = vodService.getVodUrl(vodId);
         return StringUtils.isNotEmpty(url) ? AjaxResult.success(url) : AjaxResult.error("获取视频失败！");
@@ -80,7 +80,7 @@ public class SysFileController {
      * @param vodId
      * @return
      */
-    @GetMapping("/delVod/{vodId}")
+    @PostMapping("/delVod/{vodId}")
     public AjaxResult delVod(@PathVariable("vodId") String vodId) {
         int flag = vodService.delVod(vodId);
         return flag > 0 ? AjaxResult.success() : AjaxResult.error("删除失败！请稍后再试或者联系管理员！");

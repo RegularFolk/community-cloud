@@ -1,5 +1,6 @@
 package com.ruoyi.blog.service.impl;
 
+import com.alibaba.fastjson2.JSON;
 import com.ruoyi.blog.config.BlogConstants;
 import com.ruoyi.blog.domain.Blog;
 import com.ruoyi.blog.domain.BlogContent;
@@ -17,15 +18,19 @@ import com.ruoyi.blog.mapper.BlogCollectedMapper;
 import com.ruoyi.blog.mapper.BlogLikedMapper;
 import com.ruoyi.blog.mapper.BlogMapper;
 import com.ruoyi.blog.service.ArticleService;
+import com.ruoyi.blog.service.MailService;
 import com.ruoyi.blog.service.QtnService;
 import com.ruoyi.common.core.constant.SecurityConstants;
 import com.ruoyi.common.core.domain.IdDto;
+import com.ruoyi.common.core.domain.ListDto;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.domain.UserBasicInfoVo;
 import com.ruoyi.common.core.utils.DateUtils;
 import com.ruoyi.common.core.utils.sql.SqlUtil;
+import com.ruoyi.common.core.web.domain.AjaxResult;
 import com.ruoyi.common.mq.enums.BlogTypeEnum;
 import com.ruoyi.common.security.utils.SecurityUtils;
+import com.ruoyi.system.api.RemoteNotifyService;
 import com.ruoyi.system.api.RemoteUserService;
 import com.ruoyi.system.api.domain.SysUser;
 import org.springframework.stereotype.Service;
@@ -46,6 +51,9 @@ public class QtnServiceImpl implements QtnService {
 
     @Resource
     private RemoteUserService remoteUserService;
+
+    @Resource
+    private MailService mailService;
 
     @Resource
     private BlogLikedMapper blogLikedMapper;
@@ -77,6 +85,7 @@ public class QtnServiceImpl implements QtnService {
             blog.setId(articleId);
             blogMapper.updateBlogById(blog);
         } else {
+            String receiverName = remoteUserService.getUserBasicInfoByIds(Collections.singletonList(userId), SecurityConstants.INNER).getData().get(0).getNickName();
             if (ansFlag) {
                 blog.setQtnPId(qtnPId);
                 blog.setType(BlogTypeEnum.ANSWER.getType());
@@ -89,9 +98,24 @@ public class QtnServiceImpl implements QtnService {
 //                if (existCnt > 0) {
 //                    return 0L;
 //                }
+
+                Blog qtn = blogMapper.getBlogByIds(Collections.singletonList(qtnPId)).get(0);
+
+                // 进行系统通知，通知问题的发布者
+                mailService.systemNotify(
+                        Collections.singletonList(qtn.getAuthorId()),
+                        "有人回答了您的提问！",
+                        "您好！用户 " + receiverName + " 刚刚回答了您的问题：" + qtn.getTitle() + " \n赶快上线看看吧！");
+
             }
             if (!ansFlag) {
                 blog.setArticleClassify((long) ArticleClassificationEnum.QUESTION.getClassification());
+                // 进行系统通知，新增问题，通知关注者
+                mailService.systemNotifyToFollowers(
+                        "您的关注者发布了一个新的问题！",
+                        "您关注的用户：" + receiverName + " 刚刚发布了新的问题：" + blog.getTitle()
+                );
+
             }
             blog.setReleaseTime(DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD_HH_MM_SS, new Date()));
             blog.setStatus(BlogStatusEnum.PUBLISHED.getStatus());

@@ -15,6 +15,7 @@ import com.ruoyi.blog.mapper.BlogCollectedMapper;
 import com.ruoyi.blog.mapper.BlogLikedMapper;
 import com.ruoyi.blog.mapper.BlogMapper;
 import com.ruoyi.blog.service.ArticleService;
+import com.ruoyi.blog.service.MailService;
 import com.ruoyi.common.core.constant.SecurityConstants;
 import com.ruoyi.common.core.domain.IdDto;
 import com.ruoyi.common.core.domain.R;
@@ -60,6 +61,9 @@ public class ArticleServiceImpl implements ArticleService {
     private RemoteUserService remoteUserService;
 
     @Resource
+    private MailService mailService;
+
+    @Resource
     private RocketMQTemplate rocketmqTemplate;
 
     @Resource
@@ -95,6 +99,18 @@ public class ArticleServiceImpl implements ArticleService {
             blogMapper.updateBlogById(blog);
         } else {
             blogMapper.insertBlog(blog);
+
+            // 发布通知，通知所有关注者
+            String nickName = remoteUserService.
+                    getUserBasicInfoByIds(Collections.singletonList(userId), SecurityConstants.INNER)
+                    .getData().get(0).getNickName();
+
+            mailService.systemNotifyToFollowers(
+                    "您关注的用户发布了一篇新的随笔！",
+                    "您关注的用户：" + nickName + " 发布了一篇新的随笔：《" + blog.getTitle() + "》，快上线看看吧！"
+            );
+
+
         }
 
         BlogContent blogContent = new BlogContent();

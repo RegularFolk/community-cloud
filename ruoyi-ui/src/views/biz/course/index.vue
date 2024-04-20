@@ -6,78 +6,91 @@
 
       <!-- 左侧面包屑、卡片列表、分页 -->
       <div style="width: 70%; margin-right: 100px;">
-        <el-tabs v-model="queryParam.listType">
+        <el-tabs v-model="queryParam.listType" :before-leave="changeTab">
           <el-tab-pane :name="'2'" label="猜你喜欢"/>
           <el-tab-pane :name="'4'" label="最新发布"/>
           <el-tab-pane :name="'5'" label="热门课程"/>
+          <el-tab-pane :name="'6'" label="我的课程"/>
         </el-tabs>
 
         <!-- 课程卡片列表 -->
-        <div style="display: flex; flex-wrap: wrap; margin-top: 20px">
+        <div v-loading="courseLoading" style="display: flex; flex-wrap: wrap; margin-top: 20px">
 
-          <el-card
-            v-for="course in courseList"
+          <el-popover
             :key="course.courseId"
-            shadow="hover"
-            style="width: 30%; margin-right: 3%; height: 280px; margin-bottom: 3%"
-          >
+            placement="top"
+            trigger="hover"
+            v-for="course in courseList"
+            width="200"
+            :disabled="queryParam.listType !== '6'"
+            style="width: 30%; margin-right: 3%; height: 280px; margin-bottom: 3%">
+            <el-card
+              slot="reference"
+              shadow="hover"
+            >
+              <div style="display: flex; width: 100%">
 
-            <div style="display: flex; width: 100%">
+                <!-- 课程封面 -->
+                <image-preview :height="250" :src="course.coverPic" style="width: 30%; margin-right: 10px;"/>
 
-              <!-- 课程封面 -->
-              <image-preview :height="250" :src="course.coverPic" style="width: 30%; margin-right: 10px;"/>
+                <!-- 右侧课程信息 -->
+                <div style="width: 70%;">
 
-              <!-- 右侧课程信息 -->
-              <div style="width: 70%;">
-
-                <!-- 标题 -->
-                <div :title="course.title" class="course-title" @click="routeToCourse(course.courseId)">
-                  {{ course.title }}
-                </div>
-
-                <div style="display: flex; margin-bottom: 5px">
-                  <div class="course-cnt-info">
-                    {{ course.viewCnt + '人已学习' }}
-                  </div>
-                  <div class="course-cnt-info">
-                    {{ course.collectCnt + '人 收藏' }}
-                  </div>
-                  <div class="course-cnt-info">
-                    {{ course.likeCnt + '人 点赞' }}
+                  <!-- 标题 -->
+                  <div :title="course.title" class="course-title" @click="routeToCourse(course.courseId)">
+                    {{ course.title }}
                   </div>
 
-                </div>
+                  <div style="display: flex; margin-bottom: 5px">
+                    <div class="course-cnt-info">
+                      {{ course.viewCnt + '人已学习' }}
+                    </div>
+                    <div class="course-cnt-info">
+                      {{ course.collectCnt + '人 收藏' }}
+                    </div>
+                    <div class="course-cnt-info">
+                      {{ course.likeCnt + '人 点赞' }}
+                    </div>
 
-                <!-- 字数上限150 -->
-                <div :title="course.title" class="course-desc">
-                  {{ course.desc }}
-                </div>
-
-                <!-- 底部作者信息 -->
-                <div style="display: flex; justify-content: right; margin-top: 10px">
-
-                  <div style="display: flex; align-items: center; margin-right: 15px; font-size: 14px">
-                    {{ course.createTime }}
                   </div>
 
-                  <div style="display: flex; align-items: center; margin-right: 15px; font-size: 14px">
-                    {{ course.userBasicInfo.nickName }}
+                  <!-- 字数上限150 -->
+                  <div :title="course.title" class="course-desc">
+                    {{ course.desc }}
                   </div>
 
-                  <el-popover
-                    placement="right"
-                    trigger="hover"
-                    width="400">
-                    <el-avatar slot="reference" :src="course.userBasicInfo.avatar" shape="circle"/>
-                    <UserBasicInfo :hover-show="true" :user-injected="course.userBasicInfo"/>
-                  </el-popover>
+                  <!-- 底部作者信息 -->
+                  <div style="display: flex; justify-content: right; margin-top: 10px">
+
+                    <div style="display: flex; align-items: center; margin-right: 15px; font-size: 14px">
+                      {{ course.createTime }}
+                    </div>
+
+                    <div style="display: flex; align-items: center; margin-right: 15px; font-size: 14px">
+                      {{ course.userBasicInfo.nickName }}
+                    </div>
+
+                    <el-popover
+                      placement="right"
+                      trigger="hover"
+                      width="400">
+                      <el-avatar slot="reference" :src="course.userBasicInfo.avatar" shape="circle"/>
+                      <UserBasicInfo :hover-show="true" :user-injected="course.userBasicInfo"/>
+                    </el-popover>
+                  </div>
+
                 </div>
 
               </div>
 
+            </el-card>
+
+            <div style="display: flex; justify-content: space-between">
+              <span><el-button type="primary" @click="editCourse(course.courseId)">编辑</el-button></span>
+              <span><el-button type="danger" @click="delCourse(course.courseId)">删除</el-button></span>
             </div>
 
-          </el-card>
+          </el-popover>
 
         </div>
 
@@ -99,7 +112,7 @@
             v-model="queryParam.title"/>
           </div>
           <div style="margin-left: 20px">
-            <el-button type="warning">搜索</el-button>
+            <el-button type="warning" @click="titleSearch">搜索</el-button>
           </div>
         </div>
 
@@ -141,13 +154,14 @@
 
 import UserBasicInfo from "@/views/system/user/profile/userBasicInfo";
 import ArticleRank from "@/views/biz/article/articleRank";
-import {list} from "@/api/biz/vod";
+import {delCourse, list} from "@/api/biz/vod";
 
 export default {
   name: 'Course',
   components: {ArticleRank, UserBasicInfo},
   data() {
     return {
+      courseLoading: false,
       queryParam: {
         pageSize: 10,
         pageNum: 1,
@@ -169,6 +183,17 @@ export default {
 
   },
   methods: {
+    changeTab(nName, oldName) {
+    },
+    // 进入编辑课程页面
+    editCourse(courseId) {
+      this.$router.push({
+        path: '/courses/edit',
+        query: {
+          courseId: courseId
+        }
+      })
+    },
     // 跳转到课程编辑页面
     routeToCourseEdit() {
       this.$router.push({
@@ -185,8 +210,37 @@ export default {
         }
       })
     },
+    // 删除课程
+    delCourse(courseId) {
+      this.$confirm('确定要删除吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        delCourse({id: courseId}).then(resp => {
+          if (resp.code === 200) {
+            this.$message({
+              message: '删除成功！',
+              type: 'success'
+            })
+            this.handleQuery()
+          } else {
+            this.$message({
+              message: resp.msg,
+              type: 'error'
+            })
+          }
+        })
+      })
+    },
+    // 标题搜索
+    titleSearch() {
+      this.queryParam.pageNum = 1
+      this.handleQuery()
+    },
     // 查询
     handleQuery() {
+      this.courseLoading = true
       list(this.queryParam).then(resp => {
         if (resp.code === 200) {
           this.courseList = resp.data
@@ -200,6 +254,8 @@ export default {
             type: 'error'
           })
         }
+      }).finally(() => {
+        this.courseLoading = false
       })
     },
     // 测试数据
@@ -468,6 +524,14 @@ export default {
         },
 
       ]
+    }
+  },
+  watch: {
+    'queryParam.listType': {
+      handler(nVal) {
+        this.queryParam.pageNum = 1
+        this.handleQuery()
+      }
     }
   }
 }

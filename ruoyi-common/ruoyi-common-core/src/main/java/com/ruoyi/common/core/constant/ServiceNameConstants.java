@@ -27,4 +27,9 @@ public class ServiceNameConstants
      */
     public static final String BLOG_SERVICE = "biz-blog";
 
+    /**
+     * notify服务的serviceid
+     */
+    public static final String NOTIFY_SERVICE = "notify-service";
+
 }
