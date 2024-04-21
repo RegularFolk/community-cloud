@@ -236,12 +236,6 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public List<CourseListVo> list(CourseListDto dto) {
 
-        // 测试代码，测试发送一个邮件
-//        mailService.sendSimpleMail(
-//                "z1980817350@gmail.com",
-//                "邮件发送测试标题",
-//                "邮件发送测试内容");
-
         Course course = getListCourseDto(dto);
         Integer order = getListOrder(dto);
         List<Course> courseList = courseMapper.list(
