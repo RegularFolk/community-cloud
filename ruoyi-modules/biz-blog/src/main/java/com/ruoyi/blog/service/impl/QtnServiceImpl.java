@@ -95,9 +95,9 @@ public class QtnServiceImpl implements QtnService {
                 tempBlog.setAuthorId(userId);
                 long existCnt = blogMapper.getArticleCnt(tempBlog);
                 // 测试代码，允许重复回复
-//                if (existCnt > 0) {
-//                    return 0L;
-//                }
+                if (existCnt > 0) {
+                    return 0L;
+                }
 
                 Blog qtn = blogMapper.getBlogByIds(Collections.singletonList(qtnPId)).get(0);
 
@@ -216,6 +216,7 @@ public class QtnServiceImpl implements QtnService {
 
     @Override
     public QtnAnsVo ansList(QtnAnsListDto dto) {
+        // todo 置顶已采纳回答（需要修改的代码比较多）
         QtnAnsVo vo = new QtnAnsVo();
         Blog blog = new Blog();
         blog.setType(BlogTypeEnum.ANSWER.getType());
@@ -298,6 +299,23 @@ public class QtnServiceImpl implements QtnService {
         }
 
         return blogMapper.acceptAns(dto.getAnsId(), dto.getQtnId(), userId);
+    }
+
+    @Override
+    public boolean hasAnswered(IdDto dto) {
+        Blog blog = new Blog();
+        blog.setAuthorId(SecurityUtils.getUserId());
+        blog.setQtnPId(dto.getId());
+        long ansCnt = blogMapper.getArticleCnt(blog);
+        return ansCnt > 0;
+    }
+
+    @Override public boolean hasAccepted(IdDto dto) {
+        Blog blog = new Blog();
+        blog.setStatus(BlogStatusEnum.ACCEPTED.getStatus());
+        blog.setQtnPId(dto.getId());
+        long acceptCnt = blogMapper.getArticleCnt(blog);
+        return acceptCnt > 0;
     }
 }
 

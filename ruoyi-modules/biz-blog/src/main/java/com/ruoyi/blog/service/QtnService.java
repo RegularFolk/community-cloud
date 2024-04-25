@@ -26,4 +26,8 @@ public interface QtnService {
     QtnAnsVo ansList(QtnAnsListDto dto);
 
     int accept(QtnAnsAcptDto dto);
+
+    boolean hasAnswered(IdDto dto);
+
+    boolean hasAccepted(IdDto dto);
 }

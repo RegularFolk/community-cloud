@@ -60,7 +60,12 @@ public class QuestionController extends BaseController {
     @PostMapping("/detail")
     public AjaxResult detail(@RequestBody IdDto dto) {
         ArticleVo vo = qtnService.detail(dto);
-        return AjaxResult.success(vo);
+        boolean hasAnswered = qtnService.hasAnswered(dto);
+        boolean hasAccepted = qtnService.hasAccepted(dto);
+        AjaxResult res = AjaxResult.success(vo);
+        res.put("hasAnswered", hasAnswered);
+        res.put("hasAccepted", hasAccepted);
+        return res;
     }
 
     /**

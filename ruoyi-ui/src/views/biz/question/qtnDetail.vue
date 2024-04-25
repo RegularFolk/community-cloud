@@ -88,7 +88,7 @@
 
               <div v-loading="acptLoading" style="margin-top: 15px; cursor: pointer">
 
-                <el-tag v-if="!ans.accepted && isSelfQtn" effect="dark" label="采纳问题" type="danger"
+                <el-tag v-if="!qtnHasAccepted && !ans.accepted && isSelfQtn" effect="dark" label="采纳问题" type="danger"
                         @click="acptAns(ans.articleId)">
                   <i class="el-icon-s-check">采纳问题</i>
                 </el-tag>
@@ -174,13 +174,27 @@
         请输入您的回答吧！
       </div>
 
-      <Editor ref="ansInput" v-model="ansInput.content" :enable-limit="true" :height="820" :limit-count="editorLimit"
-              :place-holder="editorPlaceHolder"/>
+      <Editor
+        ref="ansInput"
+        v-model="ansInput.content"
+        :enable-limit="true"
+        :height="820"
+        :limit-count="editorLimit"
+        :place-holder="editorPlaceHolder"
+      />
 
       <div style="display: flex;justify-content: center;margin-top: 10px">
-        <el-button v-loading="submitAnsLoading || qtnLoading || ansLoading" round type="primary" @click="submitAns">
-          提交回答
-        </el-button>
+        <el-tooltip effect="dark" content="您已经回答过该问题！" :disabled="!qtnHasAnswered" placement="left">
+          <el-button
+            :disabled="qtnHasAnswered"
+            v-loading="submitAnsLoading || qtnLoading || ansLoading"
+            round
+            type="primary"
+            @click="submitAns"
+          >
+            提交回答
+          </el-button>
+        </el-tooltip>
       </div>
 
     </div>
@@ -204,6 +218,8 @@ export default {
   data() {
     return {
       isSelfQtn: false,
+      qtnHasAnswered: false,
+      qtnHasAccepted: false,
       qtnLoading: false,
       ansLoading: false,
       acptLoading: false,
@@ -255,6 +271,10 @@ export default {
           this.qtn = resp.data
 
           this.isSelfQtn = (this.qtn.authorId == this.$store.state.user.id)
+          this.qtnHasAnswered = resp.hasAnswered
+          this.qtnHasAccepted = resp.hasAccepted
+
+          this.$refs.ansInput.Quill.enable(!this.qtnHasAnswered)
 
           this.$refs.editor.Quill.setContents(JSON.parse(this.qtn.contentFormatting))
         } else {

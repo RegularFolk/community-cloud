@@ -210,7 +210,7 @@ export default {
   activated() {
     // 处理页面跳转不刷新的问题
     if (this.course.courseId
-      && this.course.courseId !== this.$route.query.courseId) {
+      && this.course.courseId != this.$route.query.courseId) {
       this.initCourseDetail()
     }
   },
