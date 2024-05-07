@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--suppress ALL -->
+<mapper namespace="com.ruoyi.blog.mapper.BlogAccessMapper">
+
+    <resultMap id="BlogAccess" type="com.ruoyi.blog.domain.BlogAccess">
+        <id column="phone_number" property="phoneNumber"/>
+        <result column="access_key_id" property="accessKeyId"/>
+        <result column="access_key_secret" property="accessKeySecret"/>
+        <result column="status" property="status"/>
+        <result column="last_use_time" property="lastUseTime"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <insert id="insertAccess">
+        insert into blog_access(phone_number, access_key_id, access_key_secret, last_use_time)
+        values (#{phone}, #{keyId}, #{keySecret}, #{lastUseTime})
+    </insert>
+
+    <update id="enable">
+        update blog_access
+        set status = 1
+        where phone_number = #{phoneNumber}
+    </update>
+
+    <update id="disable">
+        update blog_access
+        set status = 2
+        where phone_number = #{phoneNumber}
+    </update>
+
+    <delete id="delete">
+        delete
+        from blog_access
+        where phone_number = #{phoneNumber}
+    </delete>
+
+    <select id="getAccessByPhone" resultType="java.lang.Integer">
+        select count(1)
+        from blog_access
+        where phone_number = #{phone}
+    </select>
+
+    <select id="list" resultMap="BlogAccess">
+        select *
+        from blog_access
+        where 1 = 1
+        <if test="access.phoneNumber != null and access.poneNumber != ''">and phone_number = #{access.phoneNumber}</if>
+        <if test="access.status != null and access.status != 0">and status = #{access.status}</if>
+        order by create_time desc
+            limit #{pageSize}
+        offset #{offset}
+    </select>
+
+    <select id="getTotal" resultType="java.lang.Integer">
+        select count(1)
+        from blog_access
+        where 1 = 1
+        <if test="access.phoneNumber != null and access.poneNumber != ''">and phone_number = #{access.phoneNumber}</if>
+        <if test="access.status != null and access.status != 0">and status = #{access.status}</if>
+    </select>
+
+
+</mapper>

@@ -8,8 +8,8 @@
       <div style="width: 70%; margin-right: 100px;">
         <el-tabs v-model="queryParam.listType" :before-leave="changeTab">
           <el-tab-pane :name="'2'" label="猜你喜欢"/>
-          <el-tab-pane :name="'4'" label="最新发布"/>
-          <el-tab-pane :name="'5'" label="热门课程"/>
+          <el-tab-pane :name="'5'" label="最新发布"/>
+          <el-tab-pane :name="'4'" label="热门课程"/>
           <el-tab-pane :name="'6'" label="我的课程"/>
         </el-tabs>
 
@@ -95,7 +95,13 @@
         </div>
 
         <!-- 分页组件 -->
-        <pagination :limit="queryParam.pageSize" :page="queryParam.pageNum" :total="total" @pagination="handleQuery"/>
+        <pagination
+          :limit="queryParam.pageSize"
+          :page="queryParam.pageNum"
+          :total="total"
+          @pagination="handleQueryPagination"
+          :page-sizes="[9]"
+        />
 
 
       </div>
@@ -163,7 +169,7 @@ export default {
     return {
       courseLoading: false,
       queryParam: {
-        pageSize: 10,
+        pageSize: 9,
         pageNum: 1,
         listType: '2',
         title: ''
@@ -238,6 +244,11 @@ export default {
       this.queryParam.pageNum = 1
       this.handleQuery()
     },
+    handleQueryPagination(args) {
+      this.queryParam.pageNum = args.page
+      this.queryParam.pageSize = args.limit
+      this.handleQuery()
+    },
     // 查询
     handleQuery() {
       this.courseLoading = true
@@ -245,9 +256,6 @@ export default {
         if (resp.code === 200) {
           this.courseList = resp.data
           this.total = resp.total
-          if (resp.data.length === this.queryParam.pageSize) {
-            this.queryParam.pageNum++
-          }
         } else {
           this.$message({
             message: resp.msg,
@@ -260,225 +268,6 @@ export default {
     },
     // 测试数据
     testCourseListData() {
-      this.courseList = [
-        {
-          courseId: '1',
-          title: '课程1超长超长课程1超长超长课程1超长超长课程1超长超长课程1超长超长课程1超长超长课程1超长超长课程1超长超长',
-          coverPic: 'http://121.43.39.16:8082/ruoyi-test/2024/02/02/2b_20240202165949A006.jpg',
-          createTime: '2024年4月13日21:22:03',
-          viewCnt: '123',
-          collectCnt: '456',
-          likeCnt: '789',
-          commentCnt: '101112',
-          desc: '1课程描述1课程描述1课程描述1课程描述1课程描述1课程描述1描述1课程描述1课程描述1课程描述1课程描述1描述1课程描述1课程描述1课程描述1课程描述1描述1课程描述1课程描述1课程描述1课程描述1描述1课程描述1课程描述1课程描述1课程描述1课程描述1课程描述1课程描述1课程描述1课程描述1课程描',
-          userBasicInfo: {
-            id: 1,
-            avatar: "http://121.43.39.16:8082/ruoyi-test/2024/02/02/2b_20240202165949A006.jpg",
-            nickName: "超级管理员",
-            phonenumber: "15888888888",
-            sex: "1",
-            email: "ry@163.com",
-            followerCnt: 1,
-            subCnt: 2,
-            likeCnt: 118,
-            createTime: "2024-02-01 14:08:50",
-            followed: false
-          }
-        },
-        {
-          courseId: '12',
-          title: '课程12',
-          coverPic: 'http://121.43.39.16:8082/ruoyi-test/2024/02/02/2b_20240202165949A006.jpg',
-          createTime: '2024年4月13日21:22:03',
-          viewCnt: '123',
-          collectCnt: '456',
-          likeCnt: '789',
-          commentCnt: '101112',
-          desc: '课程描述12',
-          userBasicInfo: {
-            id: 1,
-            avatar: "http://121.43.39.16:8082/ruoyi-test/2024/02/02/2b_20240202165949A006.jpg",
-            nickName: "超级管理员",
-            phonenumber: "15888888888",
-            sex: "1",
-            email: "ry@163.com",
-            followerCnt: 1,
-            subCnt: 2,
-            likeCnt: 118,
-            createTime: "2024-02-01 14:08:50",
-            followed: false
-          }
-        },
-        {
-          courseId: '13',
-          title: '课程13',
-          coverPic: 'http://121.43.39.16:8082/ruoyi-test/2024/02/02/2b_20240202165949A006.jpg',
-          createTime: '2024年4月13日21:22:03',
-          viewCnt: '123',
-          collectCnt: '456',
-          likeCnt: '789',
-          commentCnt: '101112',
-          desc: '课程描述13',
-          userBasicInfo: {
-            id: 1,
-            avatar: "http://121.43.39.16:8082/ruoyi-test/2024/02/02/2b_20240202165949A006.jpg",
-            nickName: "超级管理员",
-            phonenumber: "15888888888",
-            sex: "1",
-            email: "ry@163.com",
-            followerCnt: 1,
-            subCnt: 2,
-            likeCnt: 118,
-            createTime: "2024-02-01 14:08:50",
-            followed: false
-          }
-        },
-        {
-          courseId: '14',
-          title: '课程14',
-          coverPic: 'http://121.43.39.16:8082/ruoyi-test/2024/02/02/2b_20240202165949A006.jpg',
-          createTime: '2024年4月13日21:22:03',
-          viewCnt: '123',
-          collectCnt: '456',
-          likeCnt: '789',
-          commentCnt: '101112',
-          desc: '课程描述14',
-          userBasicInfo: {
-            id: 1,
-            avatar: "http://121.43.39.16:8082/ruoyi-test/2024/02/02/2b_20240202165949A006.jpg",
-            nickName: "超级管理员",
-            phonenumber: "15888888888",
-            sex: "1",
-            email: "ry@163.com",
-            followerCnt: 1,
-            subCnt: 2,
-            likeCnt: 118,
-            createTime: "2024-02-01 14:08:50",
-            followed: false
-          }
-        },
-        {
-          courseId: '15',
-          title: '课程15',
-          coverPic: 'http://121.43.39.16:8082/ruoyi-test/2024/02/02/2b_20240202165949A006.jpg',
-          createTime: '2024年4月13日21:22:03',
-          viewCnt: '123',
-          collectCnt: '456',
-          likeCnt: '789',
-          commentCnt: '101112',
-          desc: '课程描述15',
-          userBasicInfo: {
-            id: 1,
-            avatar: "http://121.43.39.16:8082/ruoyi-test/2024/02/02/2b_20240202165949A006.jpg",
-            nickName: "超级管理员",
-            phonenumber: "15888888888",
-            sex: "1",
-            email: "ry@163.com",
-            followerCnt: 1,
-            subCnt: 2,
-            likeCnt: 118,
-            createTime: "2024-02-01 14:08:50",
-            followed: false
-          }
-        },
-        {
-          courseId: '16',
-          title: '课程16',
-          coverPic: 'http://121.43.39.16:8082/ruoyi-test/2024/02/02/2b_20240202165949A006.jpg',
-          createTime: '2024年4月13日21:22:03',
-          viewCnt: '123',
-          collectCnt: '456',
-          likeCnt: '789',
-          commentCnt: '101112',
-          desc: '课程描述16',
-          userBasicInfo: {
-            id: 1,
-            avatar: "http://121.43.39.16:8082/ruoyi-test/2024/02/02/2b_20240202165949A006.jpg",
-            nickName: "超级管理员",
-            phonenumber: "15888888888",
-            sex: "1",
-            email: "ry@163.com",
-            followerCnt: 1,
-            subCnt: 2,
-            likeCnt: 118,
-            createTime: "2024-02-01 14:08:50",
-            followed: false
-          }
-        },
-        {
-          courseId: '17',
-          title: '课程17',
-          coverPic: 'http://121.43.39.16:8082/ruoyi-test/2024/02/02/2b_20240202165949A006.jpg',
-          createTime: '2024年4月13日21:22:03',
-          viewCnt: '123',
-          collectCnt: '456',
-          likeCnt: '789',
-          commentCnt: '101112',
-          desc: '课程描述17',
-          userBasicInfo: {
-            id: 1,
-            avatar: "http://121.43.39.16:8082/ruoyi-test/2024/02/02/2b_20240202165949A006.jpg",
-            nickName: "超级管理员",
-            phonenumber: "15888888888",
-            sex: "1",
-            email: "ry@163.com",
-            followerCnt: 1,
-            subCnt: 2,
-            likeCnt: 118,
-            createTime: "2024-02-01 14:08:50",
-            followed: false
-          }
-        },
-        {
-          courseId: '18',
-          title: '课程18',
-          coverPic: 'http://121.43.39.16:8082/ruoyi-test/2024/02/02/2b_20240202165949A006.jpg',
-          createTime: '2024年4月13日21:22:03',
-          viewCnt: '123',
-          collectCnt: '456',
-          likeCnt: '789',
-          commentCnt: '101112',
-          desc: '课程描述18',
-          userBasicInfo: {
-            id: 1,
-            avatar: "http://121.43.39.16:8082/ruoyi-test/2024/02/02/2b_20240202165949A006.jpg",
-            nickName: "超级管理员",
-            phonenumber: "15888888888",
-            sex: "1",
-            email: "ry@163.com",
-            followerCnt: 1,
-            subCnt: 2,
-            likeCnt: 118,
-            createTime: "2024-02-01 14:08:50",
-            followed: false
-          }
-        },
-        {
-          courseId: '19',
-          title: '课程19',
-          coverPic: 'http://121.43.39.16:8082/ruoyi-test/2024/02/02/2b_20240202165949A006.jpg',
-          createTime: '2024年4月13日21:22:03',
-          viewCnt: '123',
-          collectCnt: '456',
-          likeCnt: '789',
-          commentCnt: '101112',
-          desc: '课程描述19',
-          userBasicInfo: {
-            id: 1,
-            avatar: "http://121.43.39.16:8082/ruoyi-test/2024/02/02/2b_20240202165949A006.jpg",
-            nickName: "超级管理员",
-            phonenumber: "15888888888",
-            sex: "1",
-            email: "ry@163.com",
-            followerCnt: 1,
-            subCnt: 2,
-            likeCnt: 118,
-            createTime: "2024-02-01 14:08:50",
-            followed: false
-          }
-        },
-
-      ]
     },
     initTestHotRank() {
       this.hotList = [
